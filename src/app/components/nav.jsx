@@ -41,18 +41,17 @@ export default function Navbar() {
             Login/Signup
           </Link>
           <Button
-      variant="ghost"
-      size="icon"
-      onClick={toggleDarkMode}
-      className={`rounded-full transition-colors ${
-        isDarkMode
-          ? "bg-secondary text-secondary-foreground hover:bg-secondary/90"
-          : "bg-background text-muted-foreground hover:bg-muted"
-      }`}
-    >
-      {isDarkMode ? <MoonIcon className="h-5 w-5" /> : <SunIcon className="h-5 w-5" />}
-      <span className="sr-only">Toggle dark mode</span>
-    </Button>
+            variant="ghost"
+            size="icon"
+            onClick={toggleDarkMode}
+            className={`rounded-full transition-colors ${isDarkMode
+              ? "bg-secondary text-secondary-foreground hover:bg-secondary/90"
+              : "bg-background text-muted-foreground hover:bg-muted"
+              }`}
+          >
+            {isDarkMode ? <MoonIcon className="h-5 w-5" /> : <SunIcon className="h-5 w-5" />}
+            <span className="sr-only">Toggle dark mode</span>
+          </Button>
         </nav>
         <Sheet>
           <SheetTrigger asChild>
@@ -63,18 +62,24 @@ export default function Navbar() {
           </SheetTrigger>
           <SheetContent side="top" className="md:hidden">
             <nav className="grid gap-4 py-6">
-              <Link href="#" className="flex w-full items-center py-2 text-lg font-semibold" prefetch={false}>
-                Home
-              </Link>
-              <Link href="#" className="flex w-full items-center py-2 text-lg font-semibold" prefetch={false}>
-                About
-              </Link>
-              <Link href="#" className="flex w-full items-center py-2 text-lg font-semibold" prefetch={false}>
-                Services
-              </Link>
-              <Link href="#" className="flex w-full items-center py-2 text-lg font-semibold" prefetch={false}>
-                Contact
-              </Link>
+          <Link href="../../Listings" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
+            Listings
+          </Link>
+          <Link href="../Pricing" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
+            Pricing
+          </Link>
+          <Link href="../Requests" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
+            Requests
+          </Link>
+          <Link href="../create" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
+            Create
+          </Link>
+          <Link href="../Profiles" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
+            Profiles
+          </Link>
+          <Link href="../Login" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
+            Login/Signup
+          </Link>
             </nav>
           </SheetContent>
         </Sheet>
