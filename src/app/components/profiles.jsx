@@ -37,7 +37,7 @@ export default function Component() {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
         <div className="relative overflow-hidden rounded-lg shadow-lg transition-transform duration-300 ease-in-out hover:-translate-y-2 hover:shadow-xl">
           <Link href="./Profile/penguins" className="absolute inset-0 z-10" prefetch={false}>
             <span className="sr-only">View Creator</span>
@@ -46,11 +46,10 @@ export default function Component() {
             <Image
               src={cuphead}
               alt="Creator Avatar"
-              width={250} // 150
-              height={350} // 150
+              width={155} // 150
+              height={155} // 150
               className="rounded-full"
-              style={{  objectFit: "cover" }}
-              //style={{  aspectRatio: "150/150",objectFit: "cover" }}
+              style={{  aspectRatio: "150/150",objectFit: "cover" }}
             />
           </div>
           <div className="p-4">

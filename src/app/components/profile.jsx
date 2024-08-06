@@ -8,188 +8,173 @@
 import Image from "next/image"
 import cuphead from "../../../public/headcup.jpg"
 import { useState } from "react"
+
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import Link from "next/link"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Input } from "@/components/ui/input"
 
 export default function Component() {
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-  const [description, setDescription] = useState(
-    "Hi, I'm a passionate content creator who loves to share my knowledge and experiences with the world. I'm always eager to learn new things and connect with like-minded individuals.",
-  )
-  const [profilePicture, setProfilePicture] = useState("/placeholder-user.jpg")
-  const handleEditProfile = () => {
-    setIsEditModalOpen(true)
-  }
-  const handleSaveChanges = () => {
-    setIsEditModalOpen(false)
-  }
-  const handleCancelChanges = () => {
-    setIsEditModalOpen(false)
-  }
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 py-12 md:px-6 lg:py-16">
-      <div className="grid md:grid-cols-2 gap-8">
-        <div className="flex flex-col items-center gap-6">
-          <Avatar className="w-32 h-32">
-            <AvatarImage src="/placeholder-user.jpg" alt="@shadcn" />
-            <AvatarFallback>JD</AvatarFallback>
-          </Avatar>
-          <div className="text-center space-y-2">
-            <h1 className="text-3xl font-bold">John Doe</h1>
-            <p className="text-muted-foreground">{description}</p>
-            <Button onClick={handleEditProfile}>Edit Profile</Button>
+    <div className="grid grid-cols-1 md:grid-cols-[400px_1fr] gap-8 max-w-7xl mx-auto p-4 md:p-8">
+      <div className="bg-background rounded-lg shadow-lg p-6 flex flex-col items-center gap-4">
+        <Avatar className="w-24 h-24 border-4 border-primary">
+          <AvatarImage src="/placeholder-user.jpg" alt="@shadcn" />
+          {/* <Image src={cuphead}/>*/}
+          <AvatarFallback>JD</AvatarFallback>
+        </Avatar>
+        <div className="text-center">
+          <h2 className="text-2xl font-bold">John Doe</h2>
+          <p className="text-muted-foreground">Creative Director, Acme Inc.</p>
+        </div>
+        <div className="grid grid-cols-2 gap-4 w-full">
+          <div className="bg-muted rounded-lg p-4 text-center">
+            <div className="text-4xl font-bold counter">10K</div>
+            <div className="text-sm text-muted-foreground">Subscribers</div>
+          </div>
+          <div className="bg-muted rounded-lg p-4 text-center">
+            <div className="text-4xl font-bold counter">1.2M</div>
+            <div className="text-sm text-muted-foreground">Average Views</div>
           </div>
         </div>
-        <div className="grid gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>User Stats</CardTitle>
-            </CardHeader>
-            <CardContent className="grid md:grid-cols-2 gap-6">
-              <div className="flex flex-col items-center gap-2">
-                <div className="text-4xl font-bold">4.8</div>
-                <div className="text-muted-foreground">Trustworthiness</div>
-              </div>
-              <div className="flex flex-col items-center gap-2">
-                <div className="text-4xl font-bold">12.3K</div>
-                <div className="text-muted-foreground">Subscribers</div>
-              </div>
-              <div className="flex flex-col items-center gap-2">
-                <div className="text-4xl font-bold">2 years</div>
-                <div className="text-muted-foreground">Join Date</div>
-              </div>
-              <div className="flex flex-col items-center gap-2">
-                <div className="text-4xl font-bold">45.2K</div>
-                <div className="text-muted-foreground">Average Views</div>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="text-sm text-muted-foreground">Joined on June 15, 2021</div>
+        <Link href="../settings" prefetch={false}>
+          <Button variant="outline" className="w-full">
+            Edit Profile
+          </Button>
+        </Link>
+        <div className="flex items-center gap-2">
+          <StarIcon className="w-5 h-5 fill-primary" />
+          <StarIcon className="w-5 h-5 fill-primary" />
+          <StarIcon className="w-5 h-5 fill-primary" />
+          <StarIcon className="w-5 h-5 fill-muted stroke-muted-foreground" />
+          <StarIcon className="w-5 h-5 fill-muted stroke-muted-foreground" />
         </div>
       </div>
-      <div className="mt-12">
-        <h2 className="text-2xl font-bold mb-6">Recent Posts</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div className="relative flex flex-col gap-2 group">
-            <Link href="#" className="absolute inset-0" prefetch={false}>
-              <span className="sr-only">View Post</span>
+      <div className="grid gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="bg-background rounded-lg shadow-lg overflow-hidden group">
+            <Link href="#" prefetch={false}>
+              <Image
+                src={cuphead}
+                alt="Post Thumbnail"
+                width={400}
+                height={225}
+                className="object-cover w-full aspect-video group-hover:opacity-80 transition-opacity"
+              />
+              <div className="p-4 group-hover:bg-muted transition-colors">
+                <h3 className="text-lg font-semibold">Mastering Tailwind CSS: A Comprehensive Guide</h3>
+                <div className="text-sm text-muted-foreground">
+                  <span>120K views</span>
+                </div>
+              </div>
             </Link>
-            <Image
-              src={cuphead}
-              alt="Post Thumbnail"
-              width={600}
-              height={400}
-              className="object-cover rounded-lg aspect-[4/3]"
-            />
-            <div className="font-medium line-clamp-2">Introducing the Frontend Cloud: Vercels Next-Gen Platform</div>
           </div>
-          <div className="relative flex flex-col gap-2 group">
-            <Link href="#" className="absolute inset-0" prefetch={false}>
-              <span className="sr-only">View Post</span>
+          <div className="bg-background rounded-lg shadow-lg overflow-hidden group">
+            <Link href="#" prefetch={false}>
+              <Image
+                src={cuphead}
+                alt="Post Thumbnail"
+                width={400}
+                height={225}
+                className="object-cover w-full aspect-video group-hover:opacity-80 transition-opacity"
+              />
+              <div className="p-4 group-hover:bg-muted transition-colors">
+                <h3 className="text-lg font-semibold">Building a Responsive React App with Shadcn UI</h3>
+                <div className="text-sm text-muted-foreground">
+                  <span>80K views</span>
+                </div>
+              </div>
             </Link>
-            <Image
-              src={cuphead}
-              alt="Post Thumbnail"
-              width={600}
-              height={400}
-              className="object-cover rounded-lg aspect-[4/3]"
-            />
-            <div className="font-medium line-clamp-2">Mastering Serverless Functions with Vercel</div>
           </div>
-          <div className="relative flex flex-col gap-2 group">
-            <Link href="#" className="absolute inset-0" prefetch={false}>
-              <span className="sr-only">View Post</span>
+          <div className="bg-background rounded-lg shadow-lg overflow-hidden group">
+            <Link href="#" prefetch={false}>
+              <Image
+                src={cuphead}
+                alt="Post Thumbnail"
+                width={400}
+                height={225}
+                className="object-cover w-full aspect-video group-hover:opacity-80 transition-opacity"
+              />
+              <div className="p-4 group-hover:bg-muted transition-colors">
+                <h3 className="text-lg font-semibold">Optimizing Your Next.js Application for Performance</h3>
+                <div className="text-sm text-muted-foreground">
+                  <span>150K views</span>
+                </div>
+              </div>
             </Link>
-            <Image
-              src={cuphead}
-              alt="Post Thumbnail"
-              width={600}
-              height={400}
-              className="object-cover rounded-lg aspect-[4/3]"
-            />
-            <div className="font-medium line-clamp-2">Optimizing Next.js for Blazing-Fast Performance</div>
           </div>
-          <div className="relative flex flex-col gap-2 group">
-            <Link href="#" className="absolute inset-0" prefetch={false}>
-              <span className="sr-only">View Post</span>
+          <div className="bg-background rounded-lg shadow-lg overflow-hidden group">
+            <Link href="#" prefetch={false}>
+              <Image
+                src={cuphead}
+                alt="Post Thumbnail"
+                width={400}
+                height={225}
+                className="object-cover w-full aspect-video group-hover:opacity-80 transition-opacity"
+              />
+              <div className="p-4 group-hover:bg-muted transition-colors">
+                <h3 className="text-lg font-semibold">Exploring the Power of React Hooks</h3>
+                <div className="text-sm text-muted-foreground">
+                  <span>90K views</span>
+                </div>
+              </div>
             </Link>
-            <Image
-              src={cuphead}
-              alt="Post Thumbnail"
-              width={600}
-              height={400}
-              className="object-cover rounded-lg aspect-[4/3]"
-            />
-            <div className="font-medium line-clamp-2">Building a Headless CMS with Sanity and Next.js</div>
           </div>
-          <div className="relative flex flex-col gap-2 group">
-            <Link href="#" className="absolute inset-0" prefetch={false}>
-              <span className="sr-only">View Post</span>
+          <div className="bg-background rounded-lg shadow-lg overflow-hidden group">
+            <Link href="#" prefetch={false}>
+              <Image
+                src={cuphead}
+                alt="Post Thumbnail"
+                width={400}
+                height={225}
+                className="object-cover w-full aspect-video group-hover:opacity-80 transition-opacity"
+              />
+              <div className="p-4 group-hover:bg-muted transition-colors">
+                <h3 className="text-lg font-semibold">Unleashing the Potential of Vercel Serverless Functions</h3>
+                <div className="text-sm text-muted-foreground">
+                  <span>110K views</span>
+                </div>
+              </div>
             </Link>
-            <Image
-              src={cuphead}
-              alt="Post Thumbnail"
-              width={600}
-              height={400}
-              className="object-cover rounded-lg aspect-[4/3]"
-            />
-            <div className="font-medium line-clamp-2">Deploying a Full-Stack App with Vercel and Prisma</div>
           </div>
-          <div className="relative flex flex-col gap-2 group">
-            <Link href="#" className="absolute inset-0" prefetch={false}>
-              <span className="sr-only">View Post</span>
+          <div className="bg-background rounded-lg shadow-lg overflow-hidden group">
+            <Link href="#" prefetch={false}>
+              <Image
+                src={cuphead}
+                alt="Post Thumbnail"
+                width={400}
+                height={225}
+                className="object-cover w-full aspect-video group-hover:opacity-80 transition-opacity"
+              />
+              <div className="p-4 group-hover:bg-muted transition-colors">
+                <h3 className="text-lg font-semibold">Mastering TypeScript for Enterprise-Level Applications</h3>
+                <div className="text-sm text-muted-foreground">
+                  <span>130K views</span>
+                </div>
+              </div>
             </Link>
-            <Image
-              src={cuphead}
-              alt="Post Thumbnail"
-              width={600}
-              height={400}
-              className="object-cover rounded-lg aspect-[4/3]"
-            />
-            <div className="font-medium line-clamp-2">Integrating Stripe Payments into a Next.js App</div>
           </div>
         </div>
       </div>
-      {isEditModalOpen && (
-        <Dialog>
-          <DialogContent className="p-6 sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Edit Profile</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  className="mt-2"
-                />
-              </div>
-              <div>
-                <Label htmlFor="profile-picture">Profile Picture</Label>
-                <Input
-                  id="profile-picture"
-                  type="file"
-                  onChange={(e) => setProfilePicture(e.target.files[0])}
-                  className="mt-2"
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button onClick={handleSaveChanges}>Save Changes</Button>
-              <Button variant="outline" onClick={handleCancelChanges}>
-                Cancel
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
     </div>
+  )
+}
+
+function StarIcon(props) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+    </svg>
   )
 }

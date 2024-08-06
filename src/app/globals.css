@@ -53,7 +53,8 @@
     --ring: 240 5% 90%;
     --radius: 0.5rem;
   }
-  :root{
+
+  .light{
     --background: 0 0% 100%;
     --foreground: 240 10% 3.9%;
     --card: 0 0% 100%;
