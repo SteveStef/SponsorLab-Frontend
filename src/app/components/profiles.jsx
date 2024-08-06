@@ -1,366 +1,320 @@
-/**
- * v0 by Vercel.
- * @see https://v0.dev/t/Lq26DPO60LG
- * Documentation: https://v0.dev/docs#integrating-generated-code-into-your-nextjs-app
- */
+"use client"
+
+import { useState, useMemo } from "react"
 import { Input } from "@/components/ui/input"
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import Link from "next/link"
-import { Badge } from "@/components/ui/badge"
-import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, PaginationLink, PaginationEllipsis, PaginationNext } from "@/components/ui/pagination"
-import Image from "next/image"
 import cuphead from "../../../public/headcup.jpg"
+import Image from "next/image"
+import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, PaginationLink, PaginationNext } from "@/components/ui/pagination"
 
 export default function Component() {
-  return (
-    <div className="container mx-auto px-4 py-8 md:px-6 lg:px-8">
-      <div className="mb-8 flex flex-col items-center justify-between gap-4 md:flex-row">
-        <h1 className="text-3xl font-bold">Discover Creators</h1>
-        <div className="flex w-full max-w-md items-center rounded-lg bg-muted px-4 py-2 md:w-auto">
-          <SearchIcon className="mr-2 h-5 w-5 text-muted-foreground" />
-          <Input type="search" placeholder="Search creators..." className="w-full bg-transparent focus:outline-none" />
-        </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="h-8 gap-1">
-              <div className="h-3.5 w-3.5" />
-              <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Filter</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Filter by</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuCheckboxItem checked>Active</DropdownMenuCheckboxItem>
-            <DropdownMenuCheckboxItem>Draft</DropdownMenuCheckboxItem>
-            <DropdownMenuCheckboxItem>Archived</DropdownMenuCheckboxItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
-        <div className="relative overflow-hidden rounded-lg shadow-lg transition-transform duration-300 ease-in-out hover:-translate-y-2 hover:shadow-xl">
-          <Link href="./Profile/penguins" className="absolute inset-0 z-10" prefetch={false}>
-            <span className="sr-only">View Creator</span>
-          </Link>
-          <div className="flex h-40 items-center justify-center bg-muted">
-            <Image
-              src={cuphead}
-              alt="Creator Avatar"
-              width={155} // 150
-              height={155} // 150
-              className="rounded-full"
-              style={{  aspectRatio: "150/150",objectFit: "cover" }}
-            />
-          </div>
-          <div className="p-4">
-            <h3 className="text-lg font-semibold">John Doe</h3>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <UsersIcon className="h-4 w-4" />
-              <span>1.2M Subscribers</span>
+ const [search, setSearch] = useState("")
+ const [sortBy, setSortBy] = useState("subscribers")
+ const [sortOrder, setSortOrder] = useState("desc")
+ const [currentPage, setCurrentPage] = useState(1)
+ const [itemsPerPage, setItemsPerPage] = useState(8)
+ const users = [
+  {
+    id: 1,
+    name: "John Doe",
+    avatar: "/placeholder-user.jpg",
+    subscribers: 10000,
+    avgViews: 1500,
+    needsSponsor: true,
+  },
+  {
+    id: 2,
+    name: "Jane Smith",
+    avatar: "/placeholder-user.jpg",
+    subscribers: 5000,
+    avgViews: 800,
+    needsSponsor: false,
+  },
+  {
+    id: 3,
+    name: "Bob Johnson",
+    avatar: "/placeholder-user.jpg",
+    subscribers: 15000,
+    avgViews: 2000,
+    needsSponsor: true,
+  },
+  {
+    id: 4,
+    name: "Sarah Lee",
+    avatar: "/placeholder-user.jpg",
+    subscribers: 8000,
+    avgViews: 1200,
+    needsSponsor: false,
+  },
+  {
+    id: 5,
+    name: "Tom Wilson",
+    avatar: "/placeholder-user.jpg",
+    subscribers: 12000,
+    avgViews: 1800,
+    needsSponsor: true,
+  },
+  {
+    id: 6,
+    name: "Emily Davis",
+    avatar: "/placeholder-user.jpg",
+    subscribers: 6000,
+    avgViews: 900,
+    needsSponsor: false,
+  },
+  {
+    id: 7,
+    name: "Michael Brown",
+    avatar: "/placeholder-user.jpg",
+    subscribers: 18000,
+    avgViews: 2500,
+    needsSponsor: true,
+  },
+  {
+    id: 8,
+    name: "Olivia Taylor",
+    avatar: "/placeholder-user.jpg",
+    subscribers: 9000,
+    avgViews: 1400,
+    needsSponsor: false,
+  },
+]
+  const featuredPosts = [
+    {
+      id: 8,
+      title: "Unlocking the Secrets of Productivity",
+      views: 6789,
+      author: {
+        name: "Ethan Ramirez",
+        image: "/placeholder-user.jpg",
+        subscribers: 100,
+      },
+      thumbnail: "/placeholder.svg",
+    },
+    {
+      id: 8,
+      title: "Unlocking the Secrets of Productivity",
+      views: 6789,
+      author: {
+        name: "Ethan Ramirez",
+        image: "/placeholder-user.jpg",
+        subscribers: 100,
+      },
+      thumbnail: "/placeholder.svg",
+    },
+    {
+      id: 8,
+      title: "Unlocking the Secrets of Productivity",
+      views: 6789,
+      author: {
+        name: "Ethan Ramirez",
+        image: "/placeholder-user.jpg",
+        subscribers: 100,
+      },
+      thumbnail: "/placeholder.svg",
+    },
+  ]
+ const filteredUsers = useMemo(() => {
+   return users
+     .filter((user) => user.name.toLowerCase().includes(search.toLowerCase()))
+     .sort((a, b) => {
+       if (sortBy === "subscribers") {
+         return sortOrder === "asc" ? a.subscribers - b.subscribers : b.subscribers - a.subscribers
+       } else {
+         return sortOrder === "asc" ? a.avgViews - b.avgViews : b.avgViews - a.avgViews
+       }
+     })
+ }, [search, sortBy, sortOrder])
+ const totalPages = Math.ceil(filteredUsers.length / itemsPerPage)
+ const startIndex = (currentPage - 1) * itemsPerPage
+ const endIndex = startIndex + itemsPerPage
+ const currentUsers = filteredUsers.slice(startIndex, endIndex)
+ const handlePageChange = (page) => {
+   setCurrentPage(page)
+ }
+ return (
+  <div className="container mx-auto px-4 py-8">
+  <div className="flex justify-between items-center mb-6">
+    <h1 className="text-2xl font-bold">User Profiles</h1>
+    <div className="flex items-center gap-4">
+      <Input
+        type="text"
+        placeholder="Search users..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="w-full max-w-md"
+      />
+      <Button
+        variant="outline"
+        onClick={() => setSortBy("subscribers")}
+        className={sortBy === "subscribers" ? "bg-primary text-primary-foreground" : ""}
+      >
+        Sort by Subscribers
+      </Button>
+      <Button
+        variant="outline"
+        onClick={() => setSortBy("avgViews")}
+        className={sortBy === "avgViews" ? "bg-primary text-primary-foreground" : ""}
+      >
+        Sort by Average Views
+      </Button>
+      <Button
+        variant="outline"
+        onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+        className={sortOrder === "asc" ? "bg-primary text-primary-foreground" : ""}
+      >
+        {sortOrder === "asc" ? "Ascending" : "Descending"}
+      </Button>
+    </div>
+  </div>
+  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    {currentUsers.map((user) => (
+      <Link href={`./Profile/${user.id}`}>
+      <Card
+            key={user.id}
+            className="bg-background p-4 rounded-lg shadow-md hover:bg-muted transition-colors duration-300"
+          >
+            <div className="flex items-center gap-4">
+              <Avatar className="w-16 h-16">
+                <AvatarImage src="/placeholder-user.jpg" alt={user.name} />
+                <AvatarFallback>{user.name.charAt(0).toUpperCase()}</AvatarFallback>
+              </Avatar>
+              <div>
+                <h3 className="text-lg font-semibold">{user.name}</h3>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <UsersIcon className="w-4 h-4" />
+                  {user.subscribers.toLocaleString()} Subscribers
+                </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <EyeIcon className="w-4 h-4" />
+                  {user.avgViews.toLocaleString()} Avg Views
+                </div>
+                {user.needsSponsor && (
+                  <div className="mt-2 bg-yellow-500 text-yellow-900 px-2 py-1 rounded-md text-xs font-medium">
+                    Needs Sponsor
+                  </div>
+                )}
+              </div>
             </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <EyeIcon className="h-4 w-4" />
-              <span>500K Average Views</span>
-            </div>
-            <div className="mt-2">
-              <Badge variant="outline">Looking for sponsor</Badge>
-            </div>
-          </div>
-        </div>
-        <div className="relative overflow-hidden rounded-lg shadow-lg transition-transform duration-300 ease-in-out hover:-translate-y-2 hover:shadow-xl">
-          <Link href="#" className="absolute inset-0 z-10" prefetch={false}>
-            <span className="sr-only">View Creator</span>
-          </Link>
-          <div className="flex h-40 items-center justify-center bg-muted">
-            <img
-              src="/placeholder.svg"
-              alt="Creator Avatar"
-              width={80}
-              height={80}
-              className="rounded-full"
-              style={{ aspectRatio: "80/80", objectFit: "cover" }}
-            />
-          </div>
-          <div className="p-4">
-            <h3 className="text-lg font-semibold">Jane Smith</h3>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <UsersIcon className="h-4 w-4" />
-              <span>800K Subscribers</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <EyeIcon className="h-4 w-4" />
-              <span>300K Average Views</span>
-            </div>
-            <div className="mt-2">
-              <Badge variant="outline">Looking for sponsor</Badge>
-            </div>
-          </div>
-        </div>
-        <div className="relative overflow-hidden rounded-lg shadow-lg transition-transform duration-300 ease-in-out hover:-translate-y-2 hover:shadow-xl">
-          <Link href="#" className="absolute inset-0 z-10" prefetch={false}>
-            <span className="sr-only">View Creator</span>
-          </Link>
-          <div className="flex h-40 items-center justify-center bg-muted">
-            <img
-              src="/placeholder.svg"
-              alt="Creator Avatar"
-              width={80}
-              height={80}
-              className="rounded-full"
-              style={{ aspectRatio: "80/80", objectFit: "cover" }}
-            />
-          </div>
-          <div className="p-4">
-            <h3 className="text-lg font-semibold">Michael Johnson</h3>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <UsersIcon className="h-4 w-4" />
-              <span>600K Subscribers</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <EyeIcon className="h-4 w-4" />
-              <span>200K Average Views</span>
-            </div>
-            <div className="mt-2">
-              <Badge variant="outline">Looking for sponsor</Badge>
-            </div>
-          </div>
-        </div>
-        <div className="relative overflow-hidden rounded-lg shadow-lg transition-transform duration-300 ease-in-out hover:-translate-y-2 hover:shadow-xl">
-          <Link href="#" className="absolute inset-0 z-10" prefetch={false}>
-            <span className="sr-only">View Creator</span>
-          </Link>
-          <div className="flex h-40 items-center justify-center bg-muted">
-            <img
-              src="/placeholder.svg"
-              alt="Creator Avatar"
-              width={80}
-              height={80}
-              className="rounded-full"
-              style={{ aspectRatio: "80/80", objectFit: "cover" }}
-            />
-          </div>
-          <div className="p-4">
-            <h3 className="text-lg font-semibold">Emily Davis</h3>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <UsersIcon className="h-4 w-4" />
-              <span>400K Subscribers</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <EyeIcon className="h-4 w-4" />
-              <span>150K Average Views</span>
-            </div>
-            <div className="mt-2">
-              <Badge variant="outline">Looking for sponsor</Badge>
-            </div>
-          </div>
-        </div>
-        <div className="relative overflow-hidden rounded-lg shadow-lg transition-transform duration-300 ease-in-out hover:-translate-y-2 hover:shadow-xl">
-          <Link href="#" className="absolute inset-0 z-10" prefetch={false}>
-            <span className="sr-only">View Creator</span>
-          </Link>
-          <div className="flex h-40 items-center justify-center bg-muted">
-            <img
-              src="/placeholder.svg"
-              alt="Creator Avatar"
-              width={80}
-              height={80}
-              className="rounded-full"
-              style={{ aspectRatio: "80/80", objectFit: "cover" }}
-            />
-          </div>
-          <div className="p-4">
-            <h3 className="text-lg font-semibold">David Lee</h3>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <UsersIcon className="h-4 w-4" />
-              <span>300K Subscribers</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <EyeIcon className="h-4 w-4" />
-              <span>100K Average Views</span>
-            </div>
-            <div className="mt-2">
-              <Badge variant="outline">Looking for sponsor</Badge>
-            </div>
-          </div>
-        </div>
-        <div className="relative overflow-hidden rounded-lg shadow-lg transition-transform duration-300 ease-in-out hover:-translate-y-2 hover:shadow-xl">
-          <Link href="#" className="absolute inset-0 z-10" prefetch={false}>
-            <span className="sr-only">View Creator</span>
-          </Link>
-          <div className="flex h-40 items-center justify-center bg-muted">
-            <img
-              src="/placeholder.svg"
-              alt="Creator Avatar"
-              width={80}
-              height={80}
-              className="rounded-full"
-              style={{ aspectRatio: "80/80", objectFit: "cover" }}
-            />
-          </div>
-          <div className="p-4">
-            <h3 className="text-lg font-semibold">Sarah Kim</h3>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <UsersIcon className="h-4 w-4" />
-              <span>250K Subscribers</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <EyeIcon className="h-4 w-4" />
-              <span>80K Average Views</span>
-            </div>
-            <div className="mt-2">
-              <Badge variant="outline">Looking for sponsor</Badge>
-            </div>
-          </div>
-        </div>
-        <div className="relative overflow-hidden rounded-lg shadow-lg transition-transform duration-300 ease-in-out hover:-translate-y-2 hover:shadow-xl">
-          <Link href="#" className="absolute inset-0 z-10" prefetch={false}>
-            <span className="sr-only">View Creator</span>
-          </Link>
-          <div className="flex h-40 items-center justify-center bg-muted">
-            <img
-              src="/placeholder.svg"
-              alt="Creator Avatar"
-              width={80}
-              height={80}
-              className="rounded-full"
-              style={{ aspectRatio: "80/80", objectFit: "cover" }}
-            />
-          </div>
-          <div className="p-4">
-            <h3 className="text-lg font-semibold">Alex Chen</h3>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <UsersIcon className="h-4 w-4" />
-              <span>180K Subscribers</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <EyeIcon className="h-4 w-4" />
-              <span>60K Average Views</span>
-            </div>
-            <div className="mt-2">
-              <Badge variant="outline">Looking for sponsor</Badge>
-            </div>
-          </div>
-        </div>
-        <div className="relative overflow-hidden rounded-lg shadow-lg transition-transform duration-300 ease-in-out hover:-translate-y-2 hover:shadow-xl">
-          <Link href="#" className="absolute inset-0 z-10" prefetch={false}>
-            <span className="sr-only">View Creator</span>
-          </Link>
-          <div className="flex h-40 items-center justify-center bg-muted">
-            <img
-              src="/placeholder.svg"
-              alt="Creator Avatar"
-              width={80}
-              height={80}
-              className="rounded-full"
-              style={{ aspectRatio: "80/80", objectFit: "cover" }}
-            />
-          </div>
-          <div className="p-4">
-            <h3 className="text-lg font-semibold">Olivia Patel</h3>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <UsersIcon className="h-4 w-4" />
-              <span>150K Subscribers</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <EyeIcon className="h-4 w-4" />
-              <span>40K Average Views</span>
-            </div>
-            <div className="mt-2">
-              <Badge variant="outline">Looking for sponsor</Badge>
-            </div>
-          </div>
-        </div>
-      </div>
+          </Card>
+      </Link>
+    ))}
+  </div>
+  <div className="flex justify-center mt-8">
+    <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+  </div>
+
       <div className="mt-8 flex justify-center">
         <Pagination>
           <PaginationContent>
             <PaginationItem>
-              <PaginationPrevious href="#" />
+              <PaginationPrevious
+                href="#"
+                disabled={currentPage === 1}
+                onClick={() => handlePageChange(currentPage - 1)}
+              />
             </PaginationItem>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <PaginationItem key={page}>
+                <PaginationLink href="#" isActive={page === currentPage} onClick={() => handlePageChange(page)}>
+                  {page}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
             <PaginationItem>
-              <PaginationLink href="#">1</PaginationLink>
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationLink href="#" isActive>
-                2
-              </PaginationLink>
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationLink href="#">3</PaginationLink>
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationEllipsis />
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationNext href="#" />
+              <PaginationNext
+                href="#"
+                disabled={currentPage === totalPages}
+                onClick={() => handlePageChange(currentPage + 1)}
+              />
             </PaginationItem>
           </PaginationContent>
         </Pagination>
       </div>
-    </div>
-  )
+     <div className="mt-12">
+        <h2 className="text-2xl font-bold mb-4">Featured Posts</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          {featuredPosts.map((post) => (
+          <Link href={`./Listings/${post.id}`}>
+          <div key={post.id} className="bg-background rounded-lg overflow-hidden shadow-md group" style={{cursor: "pointer"}}>
+              <Image
+                src={cuphead}
+                alt={post.title}
+                width={400}
+                height={225}
+                  className="w-full h-48 object-cover group-hover:opacity-80 transition-opacity"
+                style={{ aspectRatio: "400/225", objectFit: "cover" }}
+              />
+              <div className="p-4">
+                <h3 className="text-lg font-bold mb-2">{post.title}</h3>
+                <div className="flex items-center gap-2 mb-2">
+                  <Avatar className="w-6 h-6">
+                    <AvatarImage src="/placeholder-user.jpg" alt={post.author.name} />
+                    <AvatarFallback>{post.author.name.charAt(0).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="text-muted-foreground">{post.author.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {post.author.subscribers.toLocaleString()} subscribers
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <EyeIcon className="w-5 h-5" />
+                  <p>{post.views.toLocaleString()} views</p>
+                </div>
+              </div>
+            </div>
+            </Link>
+          ))}
+        </div>
+   </div>
+   </div>
+ )
 }
 
 function EyeIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-      <circle cx="12" cy="12" r="3" />
-    </svg>
-  )
-}
-
-
-function SearchIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="11" cy="11" r="8" />
-      <path d="m21 21-4.3-4.3" />
-    </svg>
-  )
+ return (
+   <svg
+     {...props}
+     xmlns="http://www.w3.org/2000/svg"
+     width="24"
+     height="24"
+     viewBox="0 0 24 24"
+     fill="none"
+     stroke="currentColor"
+     strokeWidth="2"
+     strokeLinecap="round"
+     strokeLinejoin="round"
+   >
+     <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+     <circle cx="12" cy="12" r="3" />
+   </svg>
+ )
 }
 
 
 function UsersIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-      <circle cx="9" cy="7" r="4" />
-      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-    </svg>
-  )
+ return (
+   <svg
+     {...props}
+     xmlns="http://www.w3.org/2000/svg"
+     width="24"
+     height="24"
+     viewBox="0 0 24 24"
+     fill="none"
+     stroke="currentColor"
+     strokeWidth="2"
+     strokeLinecap="round"
+     strokeLinejoin="round"
+   >
+     <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+     <circle cx="9" cy="7" r="4" />
+     <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+     <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+   </svg>
+ )
 }
