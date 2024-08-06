@@ -172,9 +172,9 @@ export default function Component() {
   </div>
   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
     {currentUsers.map((user) => (
-      <Link href={`./Profile/${user.id}`}>
+      <Link key={user.id} href={`./Profile/${user.id}`}>
       <Card
-            key={user.id}
+
             className="bg-background p-4 rounded-lg shadow-md hover:bg-muted transition-colors duration-300"
           >
             <div className="flex items-center gap-4">
@@ -238,8 +238,8 @@ export default function Component() {
         <h2 className="text-2xl font-bold mb-4">Featured Posts</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {featuredPosts.map((post) => (
-          <Link href={`./Listings/${post.id}`}>
-          <div key={post.id} className="bg-background rounded-lg overflow-hidden shadow-md group" style={{cursor: "pointer"}}>
+          <Link key={post.id} href={`./Listings/${post.id}`}>
+          <div  className="bg-background rounded-lg overflow-hidden shadow-md group" style={{cursor: "pointer"}}>
               <Image
                 src={cuphead}
                 alt={post.title}
