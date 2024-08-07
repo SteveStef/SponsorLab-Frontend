@@ -1,16 +1,16 @@
-/**
- * v0 by Vercel.
- * @see https://v0.dev/t/TK7UVQPbP2b
- * Documentation: https://v0.dev/docs#integrating-generated-code-into-your-nextjs-app
- */
+
 "use client"
+
 import Link from "next/link"
+import Header from "../components/nav";
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { useState } from "react";
-import Header from "../components/nav";
-import Footer from "../components/footer";
+import { useState, useRef } from "react";
+import { toast } from "sonner";
+import request from "@/request";
+import { useRouter } from 'next/navigation';
+import { useAppContext } from "@/context";
 
 export default function Component() {
   const [isSponsor, setIsSponsor] = useState(null);
@@ -67,32 +67,114 @@ export default function Component() {
   )
 }
 
-function Signup(props) {
+function Signup() {
+
+  const email = useRef("");
+  const password = useRef("");
+  const confirmPassword = useRef("");
+  const orginization = useRef("");
+  const name = useRef("");
+
+  const router = useRouter();
+  const { setAuth, setName, setOrganization, setEmail, setRole, setAccountType } = useAppContext();
+  const [loading, setLoading] = useState(false);
+
+  function validateInputs(email, orginization, password, confirmPassword, name) {
+    let isValid = true;
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      toast.error("Invalid Email");
+      isValid = false;
+    }
+    if (password.length < 8) {
+      toast.error("Password must be 8 character long");
+      isValid = false;
+    }
+    if (!password.trim()) {
+      toast.error("Invalid Password");
+      isValid = false;
+    }
+    if (password !== confirmPassword) {
+      toast.error("passwords do not match");
+      isValid = false;
+    }
+
+    if (!orginization.trim()) {
+      toast.error("Organization is required");
+      isValid = false;
+    }
+    if (!name.trim()) {
+      toast.error("name is required");
+      isValid = false;
+    }
+    setLoading(false);
+    return isValid;
+  }
+
+  async function signup(e) {
+    e.preventDefault();
+    setLoading(true);
+    let em = email.current.value;
+    let org = orginization.current.value;
+    let pass = password.current.value;
+    let confirmPass = confirmPassword.current.value;
+    let n = name.current.value;
+
+    if(!validateInputs(em,org,pass,confirmPass, n)) return;
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/auth/sponsor/sign-up`;
+    const body = { email: em, password: pass, name: n, role:"SPONSOR", orginizationName: org };
+    const response = await request(url, "POST", body);
+    //console.log(response);
+
+    if(!response || response.status === 500) toast.error("Internal server error, please try again later");
+    if(!response.success) {
+      toast.error(response.message);
+    } else if(response && response.success) {
+      document.cookie = `token=${response.token}; SameSite=None; Secure; Path=/`;
+      setAuth(true);
+      setRole("SPONSOR");
+      setName(n);
+      setEmail(em);
+      setAccountType("EMAIL");
+      setOrganization(org);
+      router.push("/listings");
+    }
+    setLoading(false);
+  }
+
   return (
-    <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-background px-4 py-12 sm:px-6 lg:px-8">
+    <form disabled={loading} onSubmit={signup} className="flex min-h-[100dvh] flex-col items-center justify-center bg-background px-4 py-12 sm:px-6 lg:px-8">
+
       <div className="mx-auto max-w-md w-full space-y-6">
         <div className="text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Sign in to your account</h1>
-          <p className="mt-2 text-muted-foreground">Enter your email and password below to access your account.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Sign up as a sponsor</h1>
+          <p className="mt-2 text-muted-foreground">Sign up to get started today!</p>
         </div>
         <div className="space-y-4">
           <div className="space-y-2">
+            <Label htmlFor="name">Name</Label>
+            <Input ref={name} id="name" type="text" placeholder="Joe Doe" required />
+          </div>
+          <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" placeholder="m@example.com" required />
+            <Input ref={email} type="email" placeholder="m@example.com" required />
           </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="password">Password</Label>
+              <Label>Password</Label>
             </div>
-            <Input id="password" type="password" required />
+            <Input ref={password} id="password" type="password" required />
           </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor="password">Confirm Password</Label>
             </div>
-            <Input id="password" type="password" required />
+            <Input ref={confirmPassword} id="confirm-password" type="password" required />
           </div>
-          <Button type="submit" className="w-full">
+          <div className="space-y-2">
+            <Label htmlFor="orginization">Organization</Label>
+            <Input ref={orginization} id="orginization" type="text" placeholder="company.co" required />
+          </div>
+          <Button disabled={loading} onClick={signup} type="submit" className="w-full">
             Sign Up
           </Button>
         </div>
@@ -110,12 +192,12 @@ function Signup(props) {
         </Button>
         <div className="text-center text-sm text-muted-foreground">
           Already have an account?{" "}
-          <Link href="./Login" className="font-medium hover:underline" prefetch={false}>
+          <Link href="./login" className="font-medium hover:underline" prefetch={false}>
             Login
           </Link>
         </div>
       </div>
-    </div>
+    </form>
   )
 }
 

@@ -1,19 +1,51 @@
-/**
- * v0 by Vercel.
- * @see https://v0.dev/t/Kht1pu5ErzO
- * Documentation: https://v0.dev/docs#integrating-generated-code-into-your-nextjs-app
- */
+
+"use client";
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import Header from "../components/nav";
+import request from "@/request";
+import { useRef } from "react";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { useAppContext } from "@/context";
 
 export default function Component() {
+  const email = useRef("");
+  const password = useRef("");
+  const { setEmail, setName, setRole, setOrganization, setAuth, setProfilePic } = useAppContext();
+  const router = useRouter();
+
+  async function login(e) {
+    e.preventDefault();
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/auth/sponsor/sign-in`;
+    const body = {
+      email: email.current.value,
+      password: password.current.value
+    };
+    const response = await request(url, "POST", body);
+    console.log(response);
+    if(!response || response.status === 500) toast.error("Internal server error, please try again later");
+    if(!response.success) {
+      toast.error(response.message);
+    } else if(response && response.success) {
+      document.cookie = `token=${response.token}; SameSite=None; Secure; Path=/`;
+      setAuth(true);
+      setRole("SPONSOR");
+      setName(response.body.name);
+      setEmail(email.current.value);
+      setProfilePic(response.body.profileImage);
+      //setAccountType("EMAIL");
+      setOrganization(response.body.company.orginization);
+      router.push("/listings");
+    }
+  }
+
   return (
     <div>
       <Header />
-    <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-background px-4 py-12 sm:px-6 lg:px-8">
+    <form onSubmit={login} className="flex min-h-[100dvh] flex-col items-center justify-center bg-background px-4 py-12 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-md w-full space-y-6">
         <div className="text-center">
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Sign in to your account</h1>
@@ -22,7 +54,7 @@ export default function Component() {
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" placeholder="m@example.com" required />
+            <Input ref={email} id="email" type="email" placeholder="m@example.com" required />
           </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between">
@@ -31,9 +63,9 @@ export default function Component() {
                 Forgot password?
               </Link>
             </div>
-            <Input id="password" type="password" required />
+            <Input ref={password} id="password" type="password" required />
           </div>
-          <Button type="submit" className="w-full">
+          <Button onClick={login} type="submit" className="w-full">
             Sign in
           </Button>
         </div>
@@ -51,12 +83,12 @@ export default function Component() {
         </Button>
         <div className="text-center text-sm text-muted-foreground">
           Dont have an account?{" "}
-          <Link href="./Signup" className="font-medium hover:underline" prefetch={false}>
+          <Link href="./signup" className="font-medium hover:underline" prefetch={false}>
             Create account
           </Link>
         </div>
       </div>
-    </div></div>
+    </form></div>
   )
 }
 

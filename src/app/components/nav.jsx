@@ -1,19 +1,33 @@
-/**
- * v0 by Vercel.
- * @see https://v0.dev/t/9ZiiVdA92MM
- * Documentation: https://v0.dev/docs#integrating-generated-code-into-your-nextjs-app
- */
-"use client"
+
+"use client";
 import Link from "next/link";
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { useAppContext } from "@/context";
 
 export default function Navbar() {
   const [isDarkMode, setIsDarkMode] = useState(false)
+  const { auth, role, } = useAppContext();
+
+  const links = [
+    { url: "../../listings", name: "Listings", auth: true, role: "ANY" },
+    { url: "../pricing", name: "Pricing", auth: true, role: "CREATOR" },
+    { url: "../../requests", name: "My Requests", auth: true, role: "ANY" },
+    { url: "../create", name: "Create", auth: true, role: "CREATOR" },
+    { url: "../profiles", name: "Youtubers", auth: true, role: "ANY" },
+    { url: "../../login", name: "Login/Signup", auth: false, role: "ANY" },
+    { url: "./login", name: "Logout", auth: true, role: "ANY" },
+  ];
+
+  function logout() {
+    document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    window.location.href = "/login";
+  }
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode)
   }
+
   return (
     <header className="fixed top-0 z-50 w-full bg-background border-b">
       <div className="container flex h-16 items-center justify-between px-4 md:px-6">
@@ -22,24 +36,25 @@ export default function Navbar() {
           <span className="text-lg font-semibold">Sponsor Lab</span>
         </Link>
         <nav className="hidden items-center gap-6 md:flex">
-          <Link href="../../Listings" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
-            Listings
-          </Link>
-          <Link href="../Pricing" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
-            Pricing
-          </Link>
-          <Link href="../Requests" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
-            Requests
-          </Link>
-          <Link href="../create" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
-            Create
-          </Link>
-          <Link href="../Profiles" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
-            Profiles
-          </Link>
-          <Link href="../Login" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
-            Login/Signup
-          </Link>
+        {
+          links.map((link, idx) => {
+            if((link.role === "ANY" || role === link.role) && (auth === link.auth)) {
+              if(link.name === "Logout") {
+                return (
+                  <Link key={idx} href={link.url} onClick={logout} className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
+                  {link.name}
+                  </Link>
+                )
+              } else {
+              return (
+                <Link key={idx} href={link.url} className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
+                {link.name}
+                </Link>
+              )
+              }
+            }
+          })
+        }
           <Button
             variant="ghost"
             size="icon"
@@ -62,24 +77,17 @@ export default function Navbar() {
           </SheetTrigger>
           <SheetContent side="top" className="md:hidden">
             <nav className="grid gap-4 py-6">
-          <Link href="../../Listings" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
-            Listings
-          </Link>
-          <Link href="../Pricing" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
-            Pricing
-          </Link>
-          <Link href="../Requests" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
-            Requests
-          </Link>
-          <Link href="../create" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
-            Create
-          </Link>
-          <Link href="../Profiles" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
-            Profiles
-          </Link>
-          <Link href="../Login" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
-            Login/Signup
-          </Link>
+        {
+          links.map((link, idx) => {
+            if((link.role === "ANY" || role === link.role) && (auth === link.auth)) {
+              return (
+                <Link key={idx} href={link.url} className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
+                {link.name}
+                </Link>
+              )
+            }
+          })
+        }
             </nav>
           </SheetContent>
         </Sheet>

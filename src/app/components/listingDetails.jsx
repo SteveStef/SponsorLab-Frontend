@@ -253,6 +253,8 @@ function LinechartChart(props) {
           }}
         >
           <CartesianGrid vertical={false} />
+    {
+      /*
           <XAxis
             dataKey="month"
             tickLine={false}
@@ -260,6 +262,8 @@ function LinechartChart(props) {
             tickMargin={8}
             tickFormatter={(value) => value.slice(0, 3)}
           />
+       * */
+    }
           <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
           <Line dataKey="desktop" type="natural" stroke="var(--color-desktop)" strokeWidth={2} dot={false} />
         </LineChart>

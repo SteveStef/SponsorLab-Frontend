@@ -102,7 +102,7 @@ export default function Component() {
   ];
   const featuredPosts = [
     {
-      id: 8,
+      id: 9,
       title: "Unlocking the Secrets of Productivity",
       views: 6789,
       author: {
@@ -124,7 +124,7 @@ export default function Component() {
       thumbnail: "/placeholder.svg",
     },
     {
-      id: 8,
+      id: 4,
       title: "Unlocking the Secrets of Productivity",
       views: 6789,
       author: {
@@ -137,14 +137,14 @@ export default function Component() {
 
   ];
   const [searchTerm, setSearchTerm] = useState("")
-  const [currentPage, setCurrentPage] = useState(1)
+  const [currPage, setCurrentPage] = useState(1)
   const [postsPerPage] = useState(6)
   const handleSearch = (e) => {
     setSearchTerm(e.target.value)
     setCurrentPage(1)
   }
   const filteredPosts = posts.filter((post) => post.title.toLowerCase().includes(searchTerm.toLowerCase()))
-  const indexOfLastPost = currentPage * postsPerPage
+  const indexOfLastPost = currPage * postsPerPage
   const indexOfFirstPost = indexOfLastPost - postsPerPage
   const currentPosts = filteredPosts.slice(indexOfFirstPost, indexOfLastPost)
   const totalPages = Math.ceil(filteredPosts.length / postsPerPage)
@@ -182,12 +182,12 @@ export default function Component() {
               <DropdownMenuItem>Oldest</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+          <Pagination />
         </div>
       </div>
       <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4 md:p-6">
       <div className="bg-background rounded-lg overflow-hidden shadow-lg transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
-        <Link href="./Listings/123" className="block" prefetch={false}>
+        <Link href="./listings/123" className="block" prefetch={false}>
           <Image
             src={cuphead}
             alt="Blog Post Image"
@@ -241,13 +241,13 @@ export default function Component() {
             <PaginationItem>
               <PaginationPrevious
                 href="#"
-                disabled={currentPage === 1}
-                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currPage === 1}
+                onClick={() => handlePageChange(currPage - 1)}
               />
             </PaginationItem>
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
               <PaginationItem key={page}>
-                <PaginationLink href="#" isActive={page === currentPage} onClick={() => handlePageChange(page)}>
+                <PaginationLink href="#" isActive={page === currPage} onClick={() => handlePageChange(page)}>
                   {page}
                 </PaginationLink>
               </PaginationItem>
@@ -255,21 +255,21 @@ export default function Component() {
             <PaginationItem>
               <PaginationNext
                 href="#"
-                disabled={currentPage === totalPages}
-                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currPage === totalPages}
+                onClick={() => handlePageChange(currPage + 1)}
               />
             </PaginationItem>
           </PaginationContent>
         </Pagination>
       </div>
       <div className="flex justify-center mt-8">
-        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+        <Pagination />
       </div>
       <div className="mt-12">
         <h2 className="text-2xl font-bold mb-4">Featured Posts</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {featuredPosts.map((post) => (
-          <Link key={post.id} href={`./Listings/${post.id}`}>
+          <Link key={post.id} href={`./listings/${post.id}`}>
           <div  className="bg-background rounded-lg overflow-hidden shadow-md group" style={{cursor: "pointer"}}>
               <Image
                 src={cuphead}

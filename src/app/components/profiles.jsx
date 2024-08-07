@@ -14,8 +14,9 @@ export default function Component() {
  const [search, setSearch] = useState("")
  const [sortBy, setSortBy] = useState("subscribers")
  const [sortOrder, setSortOrder] = useState("desc")
- const [currentPage, setCurrentPage] = useState(1)
+ const [currPage, setCurrentPage] = useState(1)
  const [itemsPerPage, setItemsPerPage] = useState(8)
+
  const users = [
   {
     id: 1,
@@ -129,7 +130,7 @@ export default function Component() {
      })
  }, [search, sortBy, sortOrder])
  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage)
- const startIndex = (currentPage - 1) * itemsPerPage
+ const startIndex = (currPage - 1) * itemsPerPage
  const endIndex = startIndex + itemsPerPage
  const currentUsers = filteredUsers.slice(startIndex, endIndex)
  const handlePageChange = (page) => {
@@ -172,7 +173,7 @@ export default function Component() {
   </div>
   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
     {currentUsers.map((user) => (
-      <Link key={user.id} href={`./Profile/${user.id}`}>
+      <Link key={user.id} href={`./profile/${user.id}`}>
       <Card
 
             className="bg-background p-4 rounded-lg shadow-md hover:bg-muted transition-colors duration-300"
@@ -204,7 +205,7 @@ export default function Component() {
     ))}
   </div>
   <div className="flex justify-center mt-8">
-    <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+    <Pagination />
   </div>
 
       <div className="mt-8 flex justify-center">
@@ -213,13 +214,13 @@ export default function Component() {
             <PaginationItem>
               <PaginationPrevious
                 href="#"
-                disabled={currentPage === 1}
-                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currPage=== 1}
+                onClick={() => handlePageChange(currPage - 1)}
               />
             </PaginationItem>
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
               <PaginationItem key={page}>
-                <PaginationLink href="#" isActive={page === currentPage} onClick={() => handlePageChange(page)}>
+                <PaginationLink href="#" isActive={page === currPage} onClick={() => handlePageChange(page)}>
                   {page}
                 </PaginationLink>
               </PaginationItem>
@@ -227,8 +228,8 @@ export default function Component() {
             <PaginationItem>
               <PaginationNext
                 href="#"
-                disabled={currentPage === totalPages}
-                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currPage === totalPages}
+                onClick={() => handlePageChange(currPage + 1)}
               />
             </PaginationItem>
           </PaginationContent>
