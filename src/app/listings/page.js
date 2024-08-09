@@ -6,8 +6,6 @@ export default function Listings() {
     <div className="py-10">
       <Header />
       <br></br>
-      <br></br>
-      <br></br>
       <Listing />
     </div>
   )

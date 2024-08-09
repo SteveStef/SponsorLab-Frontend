@@ -1,14 +1,14 @@
 
 "use client";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import Link from "next/link";
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
 import { useAppContext } from "@/context";
 
 export default function Navbar() {
-  const [isDarkMode, setIsDarkMode] = useState(false)
-  const { auth, role, } = useAppContext();
+  const { auth, role, name, profilePic } = useAppContext();
+  console.log(profilePic);
 
   const links = [
     { url: "../../listings", name: "Listings", auth: true, role: "ANY" },
@@ -16,16 +16,13 @@ export default function Navbar() {
     { url: "../../requests", name: "My Requests", auth: true, role: "ANY" },
     { url: "../create", name: "Create", auth: true, role: "CREATOR" },
     { url: "../profiles", name: "Youtubers", auth: true, role: "ANY" },
-    { url: "../../login", name: "Login/Signup", auth: false, role: "ANY" },
+    { url: "../../signup", name: "Login/Signup", auth: false, role: "ANY" },
     { url: "./login", name: "Logout", auth: true, role: "ANY" },
   ];
 
   function logout() {
     document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
     window.location.href = "/login";
-  }
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode)
   }
 
   return (
@@ -55,18 +52,15 @@ export default function Navbar() {
             }
           })
         }
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleDarkMode}
-            className={`rounded-full transition-colors ${isDarkMode
-              ? "bg-secondary text-secondary-foreground hover:bg-secondary/90"
-              : "bg-background text-muted-foreground hover:bg-muted"
-              }`}
-          >
-            {isDarkMode ? <MoonIcon className="h-5 w-5" /> : <SunIcon className="h-5 w-5" />}
-            <span className="sr-only">Toggle dark mode</span>
-          </Button>
+
+    {
+      auth &&
+        <Avatar className="h-10 w-10 border">
+          <AvatarImage src={profilePic} alt="Profile" />
+          <AvatarFallback>{name[0]}</AvatarFallback>
+        </Avatar>
+    }
+
         </nav>
         <Sheet>
           <SheetTrigger asChild>

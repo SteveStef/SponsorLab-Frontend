@@ -17,7 +17,7 @@ export default function middleware(req) {
 
   if (!idToken) {
     const url = req.nextUrl.clone();
-    url.pathname = '/login';
+    url.pathname = '/signup';
     return NextResponse.redirect(url);
   }
 
@@ -25,5 +25,5 @@ export default function middleware(req) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|favicon.ico|login|signup|$).*)'],
+  matcher: ['/((?!_next/static|favicon.ico|login|signup|authenticate|$).*)'],
 }

@@ -14,7 +14,7 @@ import { useAppContext } from "@/context";
 export default function Component() {
   const email = useRef("");
   const password = useRef("");
-  const { setEmail, setName, setRole, setOrganization, setAuth, setProfilePic } = useAppContext();
+  const { setEmail, setAccountType, setName, setRole, setOrganization, setAuth, setProfilePic } = useAppContext();
   const router = useRouter();
 
   async function login(e) {
@@ -24,8 +24,13 @@ export default function Component() {
       email: email.current.value,
       password: password.current.value
     };
+
+    if(!body.email || !body.password) {
+      toast.error("Please enter a valid email and password");
+      return;
+    }
+
     const response = await request(url, "POST", body);
-    console.log(response);
     if(!response || response.status === 500) toast.error("Internal server error, please try again later");
     if(!response.success) {
       toast.error(response.message);
@@ -36,17 +41,20 @@ export default function Component() {
       setName(response.body.name);
       setEmail(email.current.value);
       setProfilePic(response.body.profileImage);
-      //setAccountType("EMAIL");
+      setAccountType(response.body.accountType);
       setOrganization(response.body.company.orginization);
       router.push("/listings");
     }
   }
 
+  const googleLogin = () => window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/google/auth/sponsor`;
+
   return (
     <div>
       <Header />
-    <form onSubmit={login} className="flex min-h-[100dvh] flex-col items-center justify-center bg-background px-4 py-12 sm:px-6 lg:px-8">
+    <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-background px-4 py-12 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-md w-full space-y-6">
+    <form onSubmit={login} className="space-y-6">
         <div className="text-center">
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Sign in to your account</h1>
           <p className="mt-2 text-muted-foreground">Enter your email and password below to access your account.</p>
@@ -54,7 +62,7 @@ export default function Component() {
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
-            <Input ref={email} id="email" type="email" placeholder="m@example.com" required />
+            <Input ref={email} id="email" type="email" required />
           </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between">
@@ -77,7 +85,8 @@ export default function Component() {
             <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
           </div>
         </div>
-        <Button variant="outline" className="w-full">
+      </form>
+        <Button onClick={googleLogin} variant="outline" className="w-full ">
           <ChromeIcon className="mr-2 h-4 w-4" />
           Sign in with Google
         </Button>
@@ -87,8 +96,8 @@ export default function Component() {
             Create account
           </Link>
         </div>
-      </div>
-    </form></div>
+    </div>
+    </div></div>
   )
 }
 

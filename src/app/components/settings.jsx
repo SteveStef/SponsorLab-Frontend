@@ -1,10 +1,20 @@
+"use client";
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
+import { useAppContext } from "@/context";
+import { useRef, useEffect } from "react";
 
 export default function Component() {
+  const state = useAppContext();
+  const name = useRef("");
+
+  useEffect(() => {
+    name.current.value = state.name;
+  }, [state]);
+
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="space-y-8">
@@ -15,12 +25,12 @@ export default function Component() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="firstName">First Name</Label>
-              <Input id="firstName" placeholder="John" />
+              <Label htmlFor="firstName">Name</Label>
+              <Input ref={name} id="firstName" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="lastName">Last Name</Label>
-              <Input id="lastName" placeholder="Doe" />
+              <Label htmlFor="email">Email</Label>
+              <Input value={state.email} disabled id="email" type="email" />
             </div>
           </div>
           <div className="space-y-4">
@@ -29,7 +39,7 @@ export default function Component() {
               <div className="flex items-center gap-4">
                 <Avatar className="h-16 w-16 border">
                   <AvatarImage src="/placeholder-user.jpg" alt="Profile" />
-                  <AvatarFallback>JD</AvatarFallback>
+                  <AvatarFallback>{state.name[0]}</AvatarFallback>
                 </Avatar>
                 <Button variant="outline">
                   <UploadIcon className="mr-2 h-4 w-4" />
@@ -41,7 +51,7 @@ export default function Component() {
         </div>
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">Profile Description</Label>
             <Textarea id="description" placeholder="Tell us a bit about yourself..." className="min-h-[120px]" />
           </div>
         </div>
@@ -51,11 +61,11 @@ export default function Component() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="currentPassword">Current Password</Label>
-                <Input id="currentPassword" type="password" />
+                <Input disabled={state.accountType === "GOOGLE"} id="currentPassword" type="password" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="newPassword">New Password</Label>
-                <Input id="newPassword" type="password" />
+                <Input disabled={state.accountType === "GOOGLE"} id="newPassword" type="password" />
               </div>
             </div>
           </div>
