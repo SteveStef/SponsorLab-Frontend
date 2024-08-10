@@ -6,7 +6,8 @@ import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useAppContext } from "@/context";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu"
-
+import Image from "next/image";
+import SponsorLabLogo from "../../../public/SponsorLab.png";
 
 export default function Navbar() {
   const { organization, auth, role, name, profilePic } = useAppContext();
@@ -38,9 +39,12 @@ export default function Navbar() {
   return (
     <header className="fixed top-0 z-50 w-full bg-background border-b">
       <div className="container flex h-16 items-center justify-between px-4 md:px-6">
-        <Link href="../" className="flex items-center gap-2" prefetch={false}>
+        <Link href="../../../" className="flex items-center gap-2" prefetch={false}>
           <MountainIcon className="h-6 w-6" />
           <span className="text-lg font-semibold">Sponsor Lab</span>
+          {/*
+<Image src={SponsorLabLogo} alt="LOGO" style={{ width: '250px' }} />
+          */}
         </Link>
         <nav className="hidden items-center gap-6 md:flex">
           {

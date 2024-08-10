@@ -5,13 +5,13 @@ import request, { getCookie } from "@/request";
 const AppContext = createContext();
 
 export function AppWrapper({children}) {
-  const [name, setName] = useState(localStorage.getItem("name") || "");
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState(localStorage.getItem("role") || "");
-  const [accountType, setAccountType] = useState(localStorage.getItem("accountType") || "");
-  const [profilePic, setProfilePic] = useState(localStorage.getItem("profilePic") || "");
-  const [auth, setAuth] = useState(localStorage.getItem("accountType") !== null);
-  const [organization, setOrganization] = useState(localStorage.getItem("organization") || "");
+  const [role, setRole] = useState("");
+  const [accountType, setAccountType] = useState("");
+  const [profilePic, setProfilePic] = useState("");
+  const [auth, setAuth] = useState(false);
+  const [organization, setOrganization] = useState("");
 
   async function fetchUser() {
     const url = `${process.env.NEXT_PUBLIC_API_URL}/users/account`;
@@ -51,6 +51,12 @@ export function AppWrapper({children}) {
 
 
   useEffect(() => {
+  setName(localStorage.getItem("name") || "");
+  setRole(localStorage.getItem("role") || "");
+  setAccountType(localStorage.getItem("accountType") || "");
+  setProfilePic(localStorage.getItem("profilePic") || "");
+  setAuth(localStorage.getItem("accountType") !== null);
+  setOrganization(localStorage.getItem("organization") || "");
     fetchUser();
   },[]);
 

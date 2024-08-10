@@ -9,6 +9,7 @@ import cuphead from "../../../public/headcup.jpg";
 import Image from "next/image";
 import request from "@/request";
 import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, PaginationLink, PaginationNext } from "@/components/ui/pagination";
+import ProfileLoad from "./sub-component/profileLoad";
 
 export default function Component() {
  const [search, setSearch] = useState("")
@@ -76,26 +77,15 @@ export default function Component() {
   async function fetchCreators() {
     const url = `${process.env.NEXT_PUBLIC_API_URL}/users/creators`;
     const response = await request(url, "GET", null);
-    console.log(response);
     if(response && response.success) {
       setUsers(response.body);
     }
   }
 
-  /*{
-    id: 1,
-    name: "John Doe",
-    avatar: "/placeholder-user.jpg",
-    subscribers: 10000,
-    avgViews: 1500,
-    needsSponsor: true,
-  },*/
-
   useEffect(() => {
     fetchCreators();
   },[]);
 
-  console.log(users);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -133,10 +123,11 @@ export default function Component() {
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        { users.length === 0 && [''].map(_ => { return <ProfileLoad /> }) }
+
         {users.map((user, idx) => (
           <Link key={idx} href={`./profile/${user.channel.name}`}>
             <Card
-
               className="bg-background p-4 rounded-lg shadow-md hover:bg-muted transition-colors duration-300"
             >
               <div className="flex items-center gap-4">

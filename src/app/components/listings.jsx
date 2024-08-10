@@ -186,53 +186,47 @@ export default function Component() {
         </div>
       </div>
       <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4 md:p-6">
-      <div className="bg-background rounded-lg overflow-hidden shadow-lg transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
-        <Link href="./listings/123" className="block" prefetch={false}>
-          <Image
-            src={cuphead}
-            alt="Blog Post Image"
-            width={600}
-            height={400}
-            className="w-full h-48 object-cover"
-            style={{ aspectRatio: "600/400", objectFit: "cover" }}
-          />
-        </Link>
-        <div className="p-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="bg-primary text-primary-foreground px-2 py-1 rounded-full text-xs font-medium">
-              Technology
-            </span>
-            <div className="flex items-center gap-2 mt-0">
-                <div className="flex items-center gap-0.5">
-                  <StarIcon className="w-4 h-4 fill-primary" />
-                  <StarIcon className="w-4 h-4 fill-primary" />
-                  <StarIcon className="w-4 h-4 fill-primary" />
-                  <StarIcon className="w-4 h-4 fill-muted stroke-muted-foreground" />
-                  <StarIcon className="w-4 h-4 fill-muted stroke-muted-foreground" />
-                </div>
-              <span className="text-muted-foreground text-sm">
-                  <div>
-                    <EyeIcon className="h-4 w-4 mr-1 inline" />
-                    <span>4.5K views</span>
-                  </div>
-
-              </span>
+        <Link href="./listings/asdf"className="cursor-pointer bg-background rounded-lg overflow-hidden shadow-lg transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
+          <div className="relative h-48 sm:h-46 md:h-54 lg:h-52 overflow-hidden">
+            <Image
+              src={cuphead}
+              alt="Post Thumbnail"
+              className="w-full h-full object-cover"
+              width="576"
+              height="284"
+              style={{ aspectRatio: "576/284", objectFit: "cover" }}
+            />
+            <div className="absolute top-2 left-2 bg-primary-foreground text-primary px-2 py-1 rounded-md text-xs">
+              Tech
+            </div>
+            <div className="absolute bottom-2 right-2 bg-primary-foreground text-primary px-2 py-1 rounded-md text-xs">
+              Available
             </div>
           </div>
-          <h3 className="text-lg font-semibold mb-2">
-            <Link href="#" className="hover:text-primary transition-colors" prefetch={false}>
-              Unlocking the Power of React
-            </Link>
-          </h3>
-            <div className="flex items-center justify-between">
-              <div className="text-lg font-bold">$49.99</div>
-              <div className="flex items-center text-muted-foreground text-sm">
-                <CalendarIcon className="w-4 h-4 mr-1" />
-                <span>May 15, 2023</span>
+          <div className="p-4">
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-sm text-muted-foreground">
+                <EyeIcon className="w-4 h-4 inline-block mr-1" />
+                50K views
+              </div>
+              <div className="flex items-center gap-1">
+                <StarIcon className="w-4 h-4 fill-primary" />
+                <StarIcon className="w-4 h-4 fill-primary" />
+                <StarIcon className="w-4 h-4 fill-primary" />
+                <StarIcon className="w-4 h-4 fill-primary" />
+                <StarIcon className="w-4 h-4 fill-muted stroke-muted-foreground" />
               </div>
             </div>
+            <h3 className="text-lg font-semibold mb-2">Mastering the Latest AI Trends</h3>
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-muted-foreground">
+                <CalendarIcon className="w-4 h-4 inline-block mr-1" />
+                November 20, 2023
+              </div>
+              <div className="text-primary font-semibold">$29.99</div>
+            </div>
           </div>
-        </div>
+        </Link>
 
     </section>
       <div className="mt-8 flex justify-center">
@@ -270,35 +264,47 @@ export default function Component() {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {featuredPosts.map((post) => (
           <Link key={post.id} href={`./listings/${post.id}`}>
-          <div  className="bg-background rounded-lg overflow-hidden shadow-md group" style={{cursor: "pointer"}}>
-              <Image
-                src={cuphead}
-                alt={post.title}
-                width={400}
-                height={225}
-                  className="w-full h-48 object-cover group-hover:opacity-80 transition-opacity"
-                style={{ aspectRatio: "400/225", objectFit: "cover" }}
-              />
-              <div className="p-4">
-                <h3 className="text-lg font-bold mb-2">{post.title}</h3>
-                <div className="flex items-center gap-2 mb-2">
-                  <Avatar className="w-6 h-6">
-                    <AvatarImage src="/placeholder-user.jpg" alt={post.author.name} />
-                    <AvatarFallback>{post.author.name.charAt(0).toUpperCase()}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="text-muted-foreground">{post.author.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {post.author.subscribers.toLocaleString()} subscribers
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <EyeIcon className="w-5 h-5" />
-                  <p>{post.views.toLocaleString()} views</p>
-                </div>
+        <div className="cursor-pointer bg-background rounded-lg overflow-hidden shadow-lg transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
+          <div className="relative h-48 sm:h-46 md:h-54 lg:h-52 overflow-hidden">
+            <Image
+              src={cuphead}
+              alt="Post Thumbnail"
+              className="w-full h-full object-cover"
+              width="576"
+              height="284"
+              style={{ aspectRatio: "576/284", objectFit: "cover" }}
+            />
+            <div className="absolute top-2 left-2 bg-primary-foreground text-primary px-2 py-1 rounded-md text-xs">
+              Tech
+            </div>
+            <div className="absolute bottom-2 right-2 bg-primary-foreground text-primary px-2 py-1 rounded-md text-xs">
+              Available
+            </div>
+          </div>
+          <div className="p-4">
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-sm text-muted-foreground">
+                <EyeIcon className="w-4 h-4 inline-block mr-1" />
+                50K views
+              </div>
+              <div className="flex items-center gap-1">
+                <StarIcon className="w-4 h-4 fill-primary" />
+                <StarIcon className="w-4 h-4 fill-primary" />
+                <StarIcon className="w-4 h-4 fill-primary" />
+                <StarIcon className="w-4 h-4 fill-primary" />
+                <StarIcon className="w-4 h-4 fill-muted stroke-muted-foreground" />
               </div>
             </div>
+            <h3 className="text-lg font-semibold mb-2">Mastering the Latest AI Trends</h3>
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-muted-foreground">
+                <CalendarIcon className="w-4 h-4 inline-block mr-1" />
+                November 20, 2023
+              </div>
+              <div className="text-primary font-semibold">$29.99</div>
+            </div>
+          </div>
+        </div>
             </Link>
           ))}
         </div>

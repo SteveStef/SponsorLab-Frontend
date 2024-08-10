@@ -7,7 +7,8 @@
 import Image from "next/image"
 import Link from "next/link"
 import Footer from "./footer";
-import cuphead from "../../../public/connect.jpg"
+import cuphead from "../../../public/black.png"
+import SponsorLabLogo from "../../../public/SponsorLab.png"
 
 export default function Component() {
   return (
@@ -23,9 +24,11 @@ export default function Component() {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
         <div className="relative z-10 flex flex-col items-center justify-center h-full px-4 text-center text-primary-foreground">
-          <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl" style={{color: "white"}}>SponsorLab</h1>
+          <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl" style={{color: "white"}}>
+            SponsorLab
+            </h1>
           <p className="max-w-[700px] mt-4 text-lg md:text-xl" style={{color: "white"}}>
-            The future of connecting Youtubers and Sponsors!
+            The bridge between Youtubers and Sponsors!
           </p>
           <Link
             href="./signup"
@@ -81,7 +84,7 @@ export default function Component() {
           </div>
         </div>
       </section>
-      <section className="py-12 md:py-24 lg:py-32 bg-muted">
+      <section className="py-12 md:py-14 lg:py-22 bg-muted">
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Featured Posts</h2>
@@ -90,98 +93,47 @@ export default function Component() {
             </p>
           </div>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mt-8">
-            <div className="rounded-lg bg-background p-4 shadow-sm transition-all hover:shadow-md">
-              <Image
-                src={cuphead}
-                alt="Post Thumbnail"
-                width={400}
-                height={225}
-                className="rounded-lg object-cover"
-                style={{ aspectRatio: "400/225", objectFit: "cover" }}
-              />
-              <div className="mt-4 space-y-2">
-                <h3 className="text-lg font-medium">Unlocking the Power of Mindfulness</h3>
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <div>
-                    <EyeIcon className="h-4 w-4 mr-1 inline" />
-                    <span>2.3K views</span>
-                  </div>
-                  <div>
-                    <UserIcon className="h-4 w-4 mr-1 inline" />
-                    <span>Jane Doe</span>
-                  </div>
-                </div>
+        <div className="cursor-pointer bg-background rounded-lg overflow-hidden shadow-lg transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
+          <div className="relative h-48 sm:h-46 md:h-54 lg:h-52 overflow-hidden">
+            <Image
+              src={cuphead}
+              alt="Post Thumbnail"
+              className="w-full h-full object-cover"
+              width="576"
+              height="284"
+              style={{ aspectRatio: "576/284", objectFit: "cover" }}
+            />
+            <div className="absolute top-2 left-2 bg-primary-foreground text-primary px-2 py-1 rounded-md text-xs">
+              Tech
+            </div>
+            <div className="absolute bottom-2 right-2 bg-primary-foreground text-primary px-2 py-1 rounded-md text-xs">
+              Available
+            </div>
+          </div>
+          <div className="p-4">
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-sm text-muted-foreground">
+                <EyeIcon className="w-4 h-4 inline-block mr-1" />
+                50K views
+              </div>
+              <div className="flex items-center gap-1">
+                <StarIcon className="w-4 h-4 fill-primary" />
+                <StarIcon className="w-4 h-4 fill-primary" />
+                <StarIcon className="w-4 h-4 fill-primary" />
+                <StarIcon className="w-4 h-4 fill-primary" />
+                <StarIcon className="w-4 h-4 fill-muted stroke-muted-foreground" />
               </div>
             </div>
-            <div className="rounded-lg bg-background p-4 shadow-sm transition-all hover:shadow-md">
-              <Image
-                src={cuphead}
-                alt="Post Thumbnail"
-                width={400}
-                height={225}
-                className="rounded-lg object-cover"
-                style={{ aspectRatio: "400/225", objectFit: "cover" }}
-              />
-              <div className="mt-4 space-y-2">
-                <h3 className="text-lg font-medium">Mastering the Art of Productivity</h3>
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <div>
-                    <EyeIcon className="h-4 w-4 mr-1 inline" />
-                    <span>1.7K views</span>
-                  </div>
-                  <div>
-                    <UserIcon className="h-4 w-4 mr-1 inline" />
-                    <span>John Smith</span>
-                  </div>
-                </div>
+            <h3 className="text-lg font-semibold mb-2">Mastering the Latest AI Trends</h3>
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-muted-foreground">
+                <CalendarIcon className="w-4 h-4 inline-block mr-1" />
+                November 20, 2023
               </div>
+              <div className="text-primary font-semibold">$29.99</div>
             </div>
-            <div className="rounded-lg bg-background p-4 shadow-sm transition-all hover:shadow-md">
-              <Image
-                src={cuphead}
-                alt="Post Thumbnail"
-                width={400}
-                height={225}
-                className="rounded-lg object-cover"
-                style={{ aspectRatio: "400/225", objectFit: "cover" }}
-              />
-              <div className="mt-4 space-y-2">
-                <h3 className="text-lg font-medium">The Power of Positive Thinking</h3>
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <div>
-                    <EyeIcon className="h-4 w-4 mr-1 inline" />
-                    <span>3.1K views</span>
-                  </div>
-                  <div>
-                    <UserIcon className="h-4 w-4 mr-1 inline" />
-                    <span>Sarah Lee</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="rounded-lg bg-background p-4 shadow-sm transition-all hover:shadow-md">
-              <Image
-                src={cuphead}
-                alt="Post Thumbnail"
-                width={400}
-                height={225}
-                className="rounded-lg object-cover"
-                style={{ aspectRatio: "400/225", objectFit: "cover" }}
-              />
-              <div className="mt-4 space-y-2">
-                <h3 className="text-lg font-medium">Navigating the Entrepreneurial Journey</h3>
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <div>
-                    <EyeIcon className="h-4 w-4 mr-1 inline" />
-                    <span>4.5K views</span>
-                  </div>
-                  <div>
-                    <UserIcon className="h-4 w-4 mr-1 inline" />
-                    <span>Michael Johnson</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+          </div>
+        </div>
           </div>
         </div>
       </section>
@@ -297,6 +249,49 @@ function UserIcon(props) {
   )
 }
 
+
+function CalendarIcon(props) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M8 2v4" />
+      <path d="M16 2v4" />
+      <rect width="18" height="18" x="3" y="4" rx="2" />
+      <path d="M3 10h18" />
+    </svg>
+  )
+}
+
+
+
+function StarIcon(props) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+    </svg>
+  )
+}
 
 function UsersIcon(props) {
   return (
