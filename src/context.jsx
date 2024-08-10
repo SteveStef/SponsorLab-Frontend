@@ -16,7 +16,7 @@ export function AppWrapper({children}) {
   async function fetchUser() {
     const url = `${process.env.NEXT_PUBLIC_API_URL}/users/account`;
     const response = await request(url, "GET", null);
-    console.log(response);
+    //console.log(response);
     if(!response || !response.success) {
       setAuth(false);
       return;

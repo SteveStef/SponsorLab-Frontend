@@ -1,18 +1,74 @@
-/**
- * v0 by Vercel.
- * @see https://v0.dev/t/cOax5F2jfNU
- * Documentation: https://v0.dev/docs#integrating-generated-code-into-your-nextjs-app
- */
+"use client";
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
 import cuphead from "../../../public/headcup.jpg"
+import { useState } from "react";
+import { axiosRequest } from "@/request";
+import { toast } from "sonner";
 
 export default function Component() {
+  const [title, setTitle] = useState("Listing Title");
+  const [caption, setCaption] = useState("Capture the beauty of the great outdoors in this breathtaking nature photograph.");
+  const [image, setImage] = useState(null);
+  const [estimatedViews, setEstimatedViews] = useState(0);
+  const [uploadDate, setUploadDate] = useState("MM-DD-YYYY");
+  const [tagsList, setTagsList] = useState([]);
+  const [tags, setTags] = useState("");
+  const [price, setPrice] = useState(0.0);
+  const [selectedImage, setSelectedImage] = useState(null);
+
+  const handleImageChange = (event) => {
+    if (event.target.files && event.target.files[0]) {
+      setImage(event.target.files[0]);
+      setSelectedImage(URL.createObjectURL(event.target.files[0]));
+    }
+  };
+
+  function validate() {
+    let error = false;
+    let message = "";
+
+    if (!title) {
+      message = "Listing must have a title";
+      error = true;
+    } else if (!caption) {
+      message = "Listing must have a caption";
+      error = true;
+    } else if(price <= 0) {
+      message = "Price must be greater than $0.00";
+      error = true;
+    } else if(estimatedViews < 0) {
+      message = "Estimated views can not be negative";
+      error = true;
+    }
+    if(error) {
+      toast.error(message);
+      return false;
+    }
+    return true;
+  }
+
+  async function uploadListing(e) {
+    e.preventDefault();
+    if(!validate()) return;
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/posts`;
+    const formData = new FormData();
+    formData.append("file", image);
+    formData.append("title", title);
+    formData.append("caption", caption);
+    formData.append("tags", tags);
+    formData.append("uploadDate", uploadDate);
+    formData.append("estimatedViews", estimatedViews);
+    formData.append("estimatedPrice", price);
+    const response = await axiosRequest(url, "post", formData);
+    if(response.status === 200) toast.success("Listing was created")
+    //console.log(response);
+  }
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-7xl mx-auto p-4 md:p-8">
       <div className="grid gap-6">
@@ -20,85 +76,81 @@ export default function Component() {
         <form className="grid gap-4">
           <div className="grid gap-2">
             <Label htmlFor="title">Title</Label>
-            <Input id="title" placeholder="Enter a title" />
+            <Input value={title} onChange={(e) => setTitle(e.target.value)} id="title" />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="caption">Caption</Label>
-            <Textarea id="caption" placeholder="Enter a caption" rows={3} />
+            <Textarea value={caption} onChange={(e) => setCaption(e.target.value) } id="caption" placeholder="Enter a caption" rows={3} />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="image">Image</Label>
-            <Input id="image" type="file" />
+            <Label htmlFor="image">Thumbnail</Label>
+            <Input className="" onChange={handleImageChange} id="image" type="file" />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
               <Label htmlFor="views">Estimated Views</Label>
-              <Input id="views" type="number" placeholder="Enter estimated views" />
+              <Input value={estimatedViews} onChange={(e) => setEstimatedViews(e.target.value)} id="views" type="number" placeholder="Enter estimated views" />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="upload-date">Upload Date</Label>
-              <Input id="upload-date" type="date" />
+              <Input value={uploadDate} onChange={(e) => setUploadDate(e.target.value)} id="upload-date" type="date" />
             </div>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="tags">Tags</Label>
-            <Select id="tags" multiple>
-              <SelectTrigger>
-                <SelectValue placeholder="Select tags" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="nature">Nature</SelectItem>
-                <SelectItem value="travel">Travel</SelectItem>
-                <SelectItem value="food">Food</SelectItem>
-                <SelectItem value="architecture">Architecture</SelectItem>
-                <SelectItem value="portrait">Portrait</SelectItem>
-              </SelectContent>
-            </Select>
+            <Label htmlFor="tags">Tags (separate each tag with a comma)</Label>
+            <Input value={tags} onChange={(e) => {
+              setTags(e.target.value);
+              let list = e.target.value.split(",");
+              if(list.length <= 2) setTagsList(e.target.value.split(","));
+            }} id="tags" type="text" />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="price">Price</Label>
-            <Input id="price" type="number" placeholder="Enter a price" />
+            <Input value={price} onChange={(e) => setPrice(e.target.value)} id="price" type="number" placeholder="Enter a price" />
           </div>
-          <Button type="submit" className="justify-self-start">
+          <Button onClick={uploadListing} type="submit" className="justify-self-start bg-green-500">
             Create Listing
           </Button>
         </form>
       </div>
-      <div className="bg-muted p-6 rounded-lg shadow-lg">
+      <div className="p-6 rounded-lg shadow-lg border-2">
         <h2 className="text-2xl font-bold mb-4">Preview</h2>
         <div className="grid gap-4">
           <Image
-            src={cuphead}
+            src={selectedImage || cuphead}
             alt="Listing Image"
             width={600}
             height={400}
             className="rounded-lg w-full aspect-[3/2] object-cover"
           />
           <div className="grid gap-2">
-            <h3 className="text-xl font-bold">Stunning Nature Landscape</h3>
+            <h3 className="text-xl font-bold">{title}</h3>
             <p className="text-muted-foreground">
-              Capture the beauty of the great outdoors in this breathtaking nature photograph.
+              {caption}
             </p>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-1">
               <div className="font-semibold">Estimated Views</div>
-              <div>10,000</div>
+              <div>{estimatedViews}</div>
             </div>
             <div className="grid gap-1">
               <div className="font-semibold">Upload Date</div>
-              <div>2023-08-10</div>
+              <div>{uploadDate}</div>
             </div>
             <div className="grid gap-1">
               <div className="font-semibold">Tags</div>
               <div className="flex gap-2">
-                <Badge variant="outline">Nature</Badge>
-                <Badge variant="outline">Landscape</Badge>
+                {
+                  tagsList.map((tag, idx)=> {
+                    return <Badge key={idx} variant="outline">{tag}</Badge>
+                  })
+                }
               </div>
             </div>
             <div className="grid gap-1">
               <div className="font-semibold">Price</div>
-              <div>$99.99</div>
+              <div>${price}</div>
             </div>
           </div>
         </div>

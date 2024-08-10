@@ -1,3 +1,5 @@
+import axios from "axios";
+
 const request = async (url, req_method, body) => {
   try {
     let method = req_method.toUpperCase();
@@ -19,6 +21,11 @@ const request = async (url, req_method, body) => {
         credentials: 'include',
         body: JSON.stringify(body)
       }
+
+      if(usingFormData) {
+        requestOptions.headers = undefined;
+      }
+
       const response = await fetch(url, requestOptions);
       const data = await response.json();
       if(response.status === 401 && data.error) {
@@ -35,6 +42,26 @@ const request = async (url, req_method, body) => {
     return null;
   }
 }
+
+export async function axiosRequest(url, req_method, body) {
+  try {
+    const opt = {
+      method: req_method,
+      url,
+      credentials: 'include',
+      withCredentials: true,
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        Authorization: `Bearer ${getCookie()}`,
+      },
+      data: body
+    };
+    return await axios(opt);
+  } catch (error) {
+    console.log(error);
+    return error.response;
+  }
+};
 
 export function getCookie() {
   try {

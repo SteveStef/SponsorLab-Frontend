@@ -132,6 +132,7 @@ export default function Navbar() {
           </SheetContent>
         </Sheet>
       </div>
+      <div class="w-full bg-green-500 h-0.5"></div>
     </header>
   )
 }

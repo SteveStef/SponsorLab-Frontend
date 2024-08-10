@@ -25,11 +25,8 @@ export default function Component() {
         <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
         <div className="relative z-10 flex flex-col items-center justify-center h-full px-4 text-center text-primary-foreground">
           <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl" style={{color: "white"}}>
-            SponsorLab
+<Image src={SponsorLabLogo} alt="LOGO" style={{ width: '700px' }} />
             </h1>
-          <p className="max-w-[700px] mt-4 text-lg md:text-xl" style={{color: "white"}}>
-            The bridge between Youtubers and Sponsors!
-          </p>
           <Link
             href="./signup"
             className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 mt-8"

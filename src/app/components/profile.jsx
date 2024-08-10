@@ -14,6 +14,7 @@ import Image from "next/image";
 export default function Component({id}) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [listings, setListings] = useState([]);
 
   async function fetchUser(id) {
     const url = `${process.env.NEXT_PUBLIC_API_URL}/users/${id.replace("%40","@")}`;
@@ -21,6 +22,7 @@ export default function Component({id}) {
     console.log(response);
     if(response && response.success) {
       setUser(response.body);
+      setListings(response.body.posts);
     }
     setLoading(false);
   }
@@ -88,47 +90,61 @@ export default function Component({id}) {
       <br></br>
       <div class="w-full bg-gray-500 h-0.5"></div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-8">
-        <div className="cursor-pointer bg-background rounded-lg overflow-hidden shadow-lg transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
-          <div className="relative h-48 sm:h-46 md:h-54 lg:h-52 overflow-hidden">
-            <Image
-              src={black}
-              alt="Post Thumbnail"
-              className="w-full h-full object-cover"
-              width="576"
-              height="284"
-              style={{ aspectRatio: "576/284", objectFit: "cover" }}
-            />
-            <div className="absolute top-2 left-2 bg-primary-foreground text-primary px-2 py-1 rounded-md text-xs">
-              Tech
-            </div>
-            <div className="absolute bottom-2 right-2 bg-primary-foreground text-primary px-2 py-1 rounded-md text-xs">
-              Available
-            </div>
-          </div>
-          <div className="p-4">
-            <div className="flex items-center justify-between mb-2">
-              <div className="text-sm text-muted-foreground">
-                <EyeIcon className="w-4 h-4 inline-block mr-1" />
-                50K views
+        {
+          listings.map((listing, idx) => {
+            return (
+              <div key={idx}className="cursor-pointer bg-background rounded-lg overflow-hidden shadow-lg transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
+                <div className="relative h-48 sm:h-46 md:h-54 lg:h-52 overflow-hidden">
+                  <Image
+                    src={black}
+                    alt="Post Thumbnail"
+                    className="w-full h-full object-cover"
+                    width="576"
+                    height="284"
+                    style={{ aspectRatio: "576/284", objectFit: "cover" }}
+                  />
+                  {
+                    listing.tags.map((tag, i) => {
+                      let pos = 2;
+                      if(i == 1)  pos = 12;
+                      return (
+                        <div key={i}className={`absolute top-2 left-${pos} bg-primary-foreground text-primary px-2 py-1 rounded-md text-xs`}>
+                          {tag}
+                        </div>
+                      )
+                    })
+                  }
+                  {/*<div className="absolute bottom-2 right-2 bg-primary-foreground text-primary px-2 py-1 rounded-md text-xs">
+                    Available
+                  </div>*/}
+                </div>
+                <div className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-sm text-muted-foreground">
+                      <EyeIcon className="w-4 h-4 inline-block mr-1" />
+                      {new Intl.NumberFormat().format(listing.estimatedViews)}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <StarIcon className="w-4 h-4 fill-primary" />
+                      <StarIcon className="w-4 h-4 fill-primary" />
+                      <StarIcon className="w-4 h-4 fill-primary" />
+                      <StarIcon className="w-4 h-4 fill-primary" />
+                      <StarIcon className="w-4 h-4 fill-muted stroke-muted-foreground" />
+                    </div>
+                  </div>
+                  <h3 className="text-lg font-semibold mb-2">{listing.title}</h3>
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-muted-foreground">
+                      <CalendarIcon className="w-4 h-4 inline-block mr-1" />
+                      {new Date(listing.uploadDate).toDateString()}
+                    </div>
+                    <div className="text-primary font-semibold">${listing.estimatedPrice}</div>
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center gap-1">
-                <StarIcon className="w-4 h-4 fill-primary" />
-                <StarIcon className="w-4 h-4 fill-primary" />
-                <StarIcon className="w-4 h-4 fill-primary" />
-                <StarIcon className="w-4 h-4 fill-primary" />
-                <StarIcon className="w-4 h-4 fill-muted stroke-muted-foreground" />
-              </div>
-            </div>
-            <h3 className="text-lg font-semibold mb-2">Mastering the Latest AI Trends</h3>
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-muted-foreground">
-                <CalendarIcon className="w-4 h-4 inline-block mr-1" />
-                November 20, 2023
-              </div>
-              <div className="text-primary font-semibold">$29.99</div>
-            </div>
-          </div>
-        </div>
+            )
+          })
+        }
       </div>
     </div>
   )
