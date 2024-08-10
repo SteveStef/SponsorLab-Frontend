@@ -17,8 +17,9 @@ export default function Signup({ params }) {
   const email = useRef("");
   const orginization = useRef("");
   const name = useRef("");
+  const [profilePic, setPfp] = useState("");
 
-  const { setAuth, setName, setOrganization, setEmail, setRole, setAccountType } = useAppContext();
+  const { setProfilePic, setAuth, setName, setOrganization, setEmail, setRole, setAccountType } = useAppContext();
   const [loading, setLoading] = useState(true);
 
   async function loadInfo() {
@@ -30,6 +31,7 @@ export default function Signup({ params }) {
       if(data && data.success) {
         email.current.value = data.body.email;
         name.current.value = data.body.name;
+        setPfp(data.body.profilePic);
       } else {
         router.push("/login");
       }
@@ -58,7 +60,8 @@ export default function Signup({ params }) {
     }
 
     const url = `${process.env.NEXT_PUBLIC_API_URL}/auth/sponsor/sign-up`;
-    const body = { email: em, password: "google", name: n, role:"SPONSOR", orginizationName: org, accountType: "GOOGLE" };
+    const body = { email: em, password: "google", name: n, role:"SPONSOR",
+      orginizationName: org, accountType: "GOOGLE", googleImage: profilePic };
     const response = await request(url, "POST", body);
 
     if(!response || response.status === 500) toast.error("Internal server error, please try again later");
@@ -72,6 +75,9 @@ export default function Signup({ params }) {
       setEmail(em);
       setAccountType("GOOGLE");
       setOrganization(org);
+      setProfilePic(profilePic);
+      localStorage.setItem("profilePic", response.body.googleImage);
+
       router.push("/listings");
     }
     setLoading(false);

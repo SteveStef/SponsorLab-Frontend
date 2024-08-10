@@ -36,12 +36,12 @@ export default function Component() {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>Profile Picture</Label>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4"style={{cursor: state.accountType === "GOOGLE" ? "not-allowed" : ""}} >
                 <Avatar className="h-16 w-16 border">
-                  <AvatarImage src="/placeholder-user.jpg" alt="Profile" />
+                  <AvatarImage src={state.profilePic} alt="Profile" />
                   <AvatarFallback>{state.name[0]}</AvatarFallback>
                 </Avatar>
-                <Button variant="outline">
+                <Button  disabled={state.accountType === "GOOGLE"}  variant="outline">
                   <UploadIcon className="mr-2 h-4 w-4" />
                   Change
                 </Button>

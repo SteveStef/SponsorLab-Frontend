@@ -30,8 +30,8 @@ export default function Authenticating({params}) {
         setOrganization(response.body.channel.name);
         setProfilePic(response.body.channel.imageUrl || "");
       }
-      router.push("/listings");
     }
+    router.push("/listings");
   }
 
   useEffect(() => {
@@ -40,8 +40,12 @@ export default function Authenticating({params}) {
   },[params]);
 
   return (
-    <div className="py-10">
-      Authenticating...
+    <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-background">
+      <div className="flex flex-col items-center space-y-6">
+        <div className="animate-spin rounded-full border-4 border-primary border-t-transparent h-16 w-16" />
+        <h2 className="text-2xl font-bold text-foreground">Syncing with Google...</h2>
+        <p className="text-muted-foreground">Please wait while we connect your account.</p>
+      </div>
     </div>
   )
 }
