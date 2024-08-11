@@ -123,7 +123,7 @@ export default function Component() {
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        { users.length === 0 && [''].map(_ => { return <ProfileLoad /> }) }
+        { users.length === 0 && [''].map((_,idx) => { return <ProfileLoad key={idx}/> }) }
 
         {users.map((user, idx) => (
           <Link key={idx} href={`./profile/${user.channel.name}`}>

@@ -7,10 +7,11 @@ import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
 import cuphead from "../../../public/headcup.jpg"
 import { useState } from "react";
-import { axiosRequest } from "@/request";
+import {axiosRequest} from "@/request";
 import { toast } from "sonner";
 
 export default function Component() {
+
   const [title, setTitle] = useState("Listing Title");
   const [caption, setCaption] = useState("Capture the beauty of the great outdoors in this breathtaking nature photograph.");
   const [image, setImage] = useState(null);
@@ -55,18 +56,19 @@ export default function Component() {
   async function uploadListing(e) {
     e.preventDefault();
     if(!validate()) return;
+
     const url = `${process.env.NEXT_PUBLIC_API_URL}/posts`;
     const formData = new FormData();
-    formData.append("file", image);
-    formData.append("title", title);
-    formData.append("caption", caption);
     formData.append("tags", tags);
+    formData.append("estimatedPrice", price);
     formData.append("uploadDate", uploadDate);
     formData.append("estimatedViews", estimatedViews);
-    formData.append("estimatedPrice", price);
-    const response = await axiosRequest(url, "post", formData);
-    if(response.status === 200) toast.success("Listing was created")
-    //console.log(response);
+    formData.append("caption", caption);
+    formData.append("title", title);
+    formData.append("file", image);
+
+    const response = await axiosRequest(url, "POST", formData);
+    console.log(response);
   }
 
   return (

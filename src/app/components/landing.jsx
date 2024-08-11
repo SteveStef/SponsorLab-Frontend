@@ -13,7 +13,7 @@ import SponsorLabLogo from "../../../public/SponsorLab.png"
 export default function Component() {
   return (
     <div className="flex flex-col min-h-dvh">
-      <header className="relative w-full h-[70vh] overflow-hidden">
+      <header className="relative w-full h-[60vh] overflow-hidden">
         <Image
           src={cuphead}
           alt="Banner"

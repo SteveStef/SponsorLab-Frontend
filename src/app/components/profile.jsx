@@ -26,7 +26,7 @@ export default function Component({id}) {
     }
     setLoading(false);
   }
-
+  console.log(listings)
   useEffect(() => {
     if(id) fetchUser(id);
   },[id]);
@@ -88,7 +88,7 @@ export default function Component({id}) {
         </div>
       </div>
       <br></br>
-      <div class="w-full bg-gray-500 h-0.5"></div>
+      <div className="w-full bg-gray-500 h-0.5"></div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-8">
         {
           listings.map((listing, idx) => {
@@ -96,7 +96,7 @@ export default function Component({id}) {
               <div key={idx}className="cursor-pointer bg-background rounded-lg overflow-hidden shadow-lg transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
                 <div className="relative h-48 sm:h-46 md:h-54 lg:h-52 overflow-hidden">
                   <Image
-                    src={black}
+                    src={listing.thumbnailName || black}
                     alt="Post Thumbnail"
                     className="w-full h-full object-cover"
                     width="576"
