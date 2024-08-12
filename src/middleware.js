@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server';
 
 export default function middleware(req) {
  const { pathname } = req.nextUrl;
@@ -7,13 +7,9 @@ export default function middleware(req) {
     pathname.startsWith("/api") || // exclude all API routes
     pathname.startsWith("/static") || // exclude static files
     pathname.includes(".") // exclude all files in the public folder
-  )
-  return NextResponse.next();
+  ) return NextResponse.next();
 
   const idToken = req.cookies.get('token');
-
-  // ensure token is valid
-  // basic request to server to ensure that the token is valid
 
   if (!idToken) {
     const url = req.nextUrl.clone();

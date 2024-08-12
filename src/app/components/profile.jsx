@@ -1,10 +1,5 @@
-/**
- * v0 by Vercel.
- * @see https://v0.dev/t/REerwT0PZBe
- * Documentation: https://v0.dev/docs#integrating-generated-code-into-your-nextjs-app
- */
 "use client";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import black from "../../../public/black.png";
 import { useState, useEffect } from "react";
@@ -19,14 +14,13 @@ export default function Component({id}) {
   async function fetchUser(id) {
     const url = `${process.env.NEXT_PUBLIC_API_URL}/users/${id.replace("%40","@")}`;
     const response = await request(url, "GET", null);
-    console.log(response);
+    //console.log(response);
     if(response && response.success) {
       setUser(response.body);
       setListings(response.body.posts);
     }
     setLoading(false);
   }
-  console.log(listings)
   useEffect(() => {
     if(id) fetchUser(id);
   },[id]);
@@ -60,6 +54,7 @@ export default function Component({id}) {
         </div>
       </div>
       <div className="bg-background p-6 sm:p-8 rounded-b-lg">
+
         <div className="grid gap-6">
           <div>
             <h3 className="text-lg font-semibold">About Me</h3>
@@ -67,10 +62,16 @@ export default function Component({id}) {
             {user && user.channel.description || "This user has no description"}
             </p>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+
+      <div className="w-full bg-gray-500 h-0.5"></div>
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
             <div className="flex flex-col items-center">
               <div className="text-2xl font-bold">{user && user.channel.subscribersCount || 0}</div>
               <div className="text-sm text-muted-foreground">Subscribers</div>
+            </div>
+            <div className="flex flex-col items-center">
+              <div className="text-2xl font-bold">{10}K</div>
+              <div className="text-sm text-muted-foreground">Total Views</div>
             </div>
             <div className="flex flex-col items-center">
               <div className="text-2xl font-bold">{50 || 0}</div>
@@ -87,7 +88,6 @@ export default function Component({id}) {
           </div>
         </div>
       </div>
-      <br></br>
       <div className="w-full bg-gray-500 h-0.5"></div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-8">
         {

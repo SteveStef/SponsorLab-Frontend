@@ -1,277 +1,186 @@
-/**
- * v0 by Vercel.
- * @see https://v0.dev/t/5ZpgAUnY6DX
- * Documentation: https://v0.dev/docs#integrating-generated-code-into-your-nextjs-app
- */
-"use client"
-import Image from "next/image"
-import cuphead from "../../../public/headcup.jpg"
+"use client";
 import { Badge } from "@/components/ui/badge"
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
-import { Card, CardContent } from "@/components/ui/card"
-import { CartesianGrid, XAxis, Line, LineChart } from "recharts"
-import { ChartTooltipContent, ChartTooltip, ChartContainer } from "@/components/ui/chart"
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import { Separator } from "@/components/ui/separator"
+import Link from "next/link";
+import { useState, useEffect } from "react";
+import request from "@/request";
+import Image from "next/image";
+import SponsorForm from "../components/sponsorForm";
 
-export default function ListingDetails() {
+export default function Component({ params }) {
+
+  const [listing, setListing] = useState(null);
+  const [showSponsorForm, setShowSponsorForm] = useState(false);
+
+  async function fetchListing() {
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/posts/${params.id}`;
+    const response = await request(url, "GET", null);
+    if(response && response.success) setListing(response.body);
+    console.log(response);
+  }
+
+  useEffect(() => {
+    if(params.id) fetchListing();
+  }, [params]);
+
+  if(showSponsorForm) return <SponsorForm />
+
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div>
+    <div className="grid md:grid-cols-2 gap-6 lg:gap-12 items-start max-w-6xl px-4 mx-auto py-6">
+      <div className="grid gap-4">
+        <div className="rounded-xl overflow-hidden">
           <Image
-            src={cuphead}
-            alt="Post Image"
+            src={listing && listing.thumbnailName || "/place.svg"}
+            alt="Video Thumbnail"
             width={800}
-            height={500}
-            className="w-full h-auto rounded-lg object-cover"
-            style={{ aspectRatio: "800/500", objectFit: "cover" }}
+            height={450}
+            className="w-full aspect-video object-cover"
           />
         </div>
-        <div className="space-y-6">
-          <div>
-            <h1 className="text-3xl font-bold">Exclusive NFT Drop</h1>
-            <div className="flex items-center gap-2 mt-2">
-              <div className="flex items-center gap-0.5">
-                <StarIcon className="w-5 h-5 fill-primary" />
-                <StarIcon className="w-5 h-5 fill-primary" />
-                <StarIcon className="w-5 h-5 fill-primary" />
-                <StarIcon className="w-5 h-5 fill-muted stroke-muted-foreground" />
-                <StarIcon className="w-5 h-5 fill-muted stroke-muted-foreground" />
-              </div>
-              <span className="text-muted-foreground text-sm">(4.2)</span>
+        <div className="grid gap-2">
+          <h1 className="text-2xl font-bold">{listing && listing.title}</h1>
+          <div className="text-xs text-muted-foreground">
+            Due on {listing && new Date(listing.uploadDate).toDateString()}
             </div>
-            <div className="flex flex-wrap gap-2 mt-2">
-              <Badge variant="secondary">Art</Badge>
-              <Badge variant="secondary">Digital</Badge>
-              <Badge variant="secondary">Collectible</Badge>
-            </div>
-            <p className="text-muted-foreground mt-2">
-              Dont miss out on this limited edition NFT drop. Get yours before theyre gone!
-            </p>
+          <div className="text-muted-foreground">
+            {listing && listing.description}
+
           </div>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-0.5">
+              <StarIcon className="w-5 h-5 fill-primary" />
+              <StarIcon className="w-5 h-5 fill-primary" />
+              <StarIcon className="w-5 h-5 fill-primary" />
+              <StarIcon className="w-5 h-5 fill-muted stroke-muted-foreground" />
+              <StarIcon className="w-5 h-5 fill-muted stroke-muted-foreground" />
+            </div>
+            <div className="text-4xl font-bold">${listing && listing.estimatedPrice|| 0}</div>
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {
+            listing && listing.tags.map((tag, idx) => {
+              return <Badge key={idx} variant="secondary">{tag}</Badge>
+            })
+          }
+        </div>
+        <Button onClick={() => setShowSponsorForm(true)} className="mt-4">Sponsor this listing</Button>
+      </div>
+      <div className="grid gap-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Author Stats</CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-4">
+            <div className="flex items-center justify-between">
+              <div>Subscribers</div>
+              <div className="font-bold">{listing && listing.user.channel.subscribersCount}</div>
+            </div>
+            <div className="flex items-center justify-between">
+              <div>Total Views</div>
+              <div className="font-bold">1.2M</div>
+            </div>
+            <div className="flex items-center justify-between">
+              <div>Total Videos</div>
+              <div className="font-bold">124</div>
+            </div>
+            <div className="flex items-center justify-between">
+              <div>Avg. Views per Video</div>
+              <div className="font-bold">9.7K</div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>About the Author</CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-4">
             <div>
-              <p className="text-2xl font-bold">$99</p>
-              <p className="text-muted-foreground">Due: August 31, 2023</p>
+              <div className="text-sm font-semibold">{listing && listing.user.name}</div>
+              <div className="text-muted-foreground text-sm">
+                Users description
+              </div>
             </div>
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button>Sponsor Post</Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[600px]">
-                <DialogHeader>
-                  <DialogTitle>Sponsor This Post</DialogTitle>
-                  <DialogDescription>Fill out the form below to sponsor this post.</DialogDescription>
-                </DialogHeader>
-                <form className="space-y-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="name">Name</Label>
-                    <Input id="name" type="text" placeholder="Enter your name" />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input id="email" type="email" placeholder="Enter your email" />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="amount">How much are you willing to pay for the advertisement? (in USD)</Label>
-                    <Input id="amount" type="number" placeholder="Enter the amount" />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="title">Title</Label>
-                    <Input id="title" type="text" placeholder="Enter the title" />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="message">What do you want the sponsor to say in the advertisement?</Label>
-                    <Textarea id="message" rows={4} placeholder="Enter your message" />
-                  </div>
-                </form>
-                <DialogFooter>
-                  <div>
-                    <Button type="button" variant="ghost">
-                      Cancel
-                    </Button>
-                  </div>
-                  <Button type="submit">Submit</Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
-        </div>
-      </div>
-      <div className="mt-12 space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-muted rounded-lg p-4">
+            <Separator />
             <div className="flex items-center gap-4">
-              <Avatar>
-                <AvatarImage src="/placeholder-user.jpg" alt="Author" />
-                <AvatarFallback>JD</AvatarFallback>
-              </Avatar>
+              <Image
+                src={listing && listing.user.channel.imageUrl || "/place.scg"}
+                alt="Author"
+                width={40}
+                height={40}
+                className="rounded-full object-cover aspect-square"
+              />
               <div>
-                <h3 className="text-lg font-bold">John Doe</h3>
-                <p className="text-muted-foreground">Author</p>
+                <div className="font-semibold">{listing && listing.user.name}</div>
+                <div className="text-xs text-muted-foreground">{listing && listing.user.channel.subscribersCount} subscribers</div>
               </div>
             </div>
-            <p className="text-4xl font-bold mt-4">12.5K</p>
-          </div>
-          <div className="bg-muted rounded-lg p-4">
-            <h3 className="text-lg font-bold">Average Views</h3>
-            <p className="text-4xl font-bold">15.2K</p>
-          </div>
-          <div className="bg-muted rounded-lg p-4">
-            <h3 className="text-lg font-bold">View Trend</h3>
-            <LinechartChart className="aspect-[9/4]" />
-          </div>
-        </div>
-      </div>
-      <div className="mt-12">
-        <h2 className="text-2xl font-bold mb-4">Related Posts</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          <Card>
-            <CardContent>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Related Videos</CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-4">
+            <div className="flex items-start gap-4 relative">
+              <Link href="#" className="absolute inset-0" prefetch={false}>
+                <span className="sr-only">View</span>
+              </Link>
               <img
                 src="/placeholder.svg"
-                alt="Related Post Image"
-                width={400}
-                height={300}
-                className="w-full h-auto rounded-lg object-cover"
-                style={{ aspectRatio: "400/300", objectFit: "cover" }}
+                alt="Thumbnail"
+                width={168}
+                height={94}
+                className="aspect-video rounded-lg object-cover"
               />
-              <div className="mt-4">
-                <h3 className="text-lg font-bold">Exclusive Digital Art</h3>
-                <div className="flex items-center gap-2 mt-2">
-                  <div className="flex items-center gap-0.5">
-                    <StarIcon className="w-4 h-4 fill-primary" />
-                    <StarIcon className="w-4 h-4 fill-primary" />
-                    <StarIcon className="w-4 h-4 fill-primary" />
-                    <StarIcon className="w-4 h-4 fill-muted stroke-muted-foreground" />
-                    <StarIcon className="w-4 h-4 fill-muted stroke-muted-foreground" />
-                  </div>
-                  <span className="text-muted-foreground text-sm">(4.1)</span>
-                </div>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  <Badge variant="secondary">Art</Badge>
-                  <Badge variant="secondary">Digital</Badge>
-                  <Badge variant="secondary">Collectible</Badge>
-                </div>
+              <div className="text-sm">
+                <div className="font-medium line-clamp-2">Introducing v0: Generative UI</div>
+                <div className="text-xs text-muted-foreground line-clamp-1">Vercel</div>
+                <div className="text-xs text-muted-foreground line-clamp-1">300K views &middot; 5 days ago</div>
               </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent>
+            </div>
+            <div className="flex items-start gap-4 relative">
+              <Link href="#" className="absolute inset-0" prefetch={false}>
+                <span className="sr-only">View</span>
+              </Link>
               <img
                 src="/placeholder.svg"
-                alt="Related Post Image"
-                width={400}
-                height={300}
-                className="w-full h-auto rounded-lg object-cover"
-                style={{ aspectRatio: "400/300", objectFit: "cover" }}
+                alt="Thumbnail"
+                width={168}
+                height={94}
+                className="aspect-video rounded-lg object-cover"
               />
-              <div className="mt-4">
-                <h3 className="text-lg font-bold">Metaverse Landscapes</h3>
-                <div className="flex items-center gap-2 mt-2">
-                  <div className="flex items-center gap-0.5">
-                    <StarIcon className="w-4 h-4 fill-primary" />
-                    <StarIcon className="w-4 h-4 fill-primary" />
-                    <StarIcon className="w-4 h-4 fill-primary" />
-                    <StarIcon className="w-4 h-4 fill-primary" />
-                    <StarIcon className="w-4 h-4 fill-muted stroke-muted-foreground" />
-                  </div>
-                  <span className="text-muted-foreground text-sm">(4.7)</span>
-                </div>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  <Badge variant="secondary">Art</Badge>
-                  <Badge variant="secondary">Digital</Badge>
-                  <Badge variant="secondary">Metaverse</Badge>
-                </div>
+              <div className="text-sm">
+                <div className="font-medium line-clamp-2">Using Vercel KV with Svelte</div>
+                <div className="text-xs text-muted-foreground line-clamp-1">Lee Robinson</div>
+                <div className="text-xs text-muted-foreground line-clamp-1">21K views &middot; 1 week ago</div>
               </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent>
+            </div>
+            <div className="flex items-start gap-4 relative">
+              <Link href="#" className="absolute inset-0" prefetch={false}>
+                <span className="sr-only">View</span>
+              </Link>
               <img
                 src="/placeholder.svg"
-                alt="Related Post Image"
-                width={400}
-                height={300}
-                className="w-full h-auto rounded-lg object-cover"
-                style={{ aspectRatio: "400/300", objectFit: "cover" }}
+                alt="Thumbnail"
+                width={168}
+                height={94}
+                className="aspect-video rounded-lg object-cover"
               />
-              <div className="mt-4">
-                <h3 className="text-lg font-bold">Generative NFT Avatars</h3>
-                <div className="flex items-center gap-2 mt-2">
-                  <div className="flex items-center gap-0.5">
-                    <StarIcon className="w-4 h-4 fill-primary" />
-                    <StarIcon className="w-4 h-4 fill-primary" />
-                    <StarIcon className="w-4 h-4 fill-primary" />
-                    <StarIcon className="w-4 h-4 fill-primary" />
-                    <StarIcon className="w-4 h-4 fill-primary" />
-                  </div>
-                  <span className="text-muted-foreground text-sm">(5.0)</span>
-                </div>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  <Badge variant="secondary">Art</Badge>
-                  <Badge variant="secondary">Digital</Badge>
-                  <Badge variant="secondary">Avatar</Badge>
-                </div>
+              <div className="text-sm">
+                <div className="font-medium line-clamp-2">Loading UI with Next.js 13</div>
+                <div className="text-xs text-muted-foreground line-clamp-1">Delba</div>
+                <div className="text-xs text-muted-foreground line-clamp-1">12K views &middot; 10 days ago</div>
               </div>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )
 }
-
-function LinechartChart(props) {
-  return (
-    <div {...props}>
-      <ChartContainer
-        config={{
-          desktop: {
-            label: "Desktop",
-            color: "hsl(var(--chart-1))",
-          },
-        }}
-      >
-        <LineChart
-          accessibilityLayer
-          data={[
-            { month: "January", desktop: 186 },
-            { month: "February", desktop: 305 },
-            { month: "March", desktop: 237 },
-            { month: "April", desktop: 73 },
-            { month: "May", desktop: 209 },
-            { month: "June", desktop: 214 },
-          ]}
-          margin={{
-            left: 12,
-            right: 12,
-          }}
-        >
-          <CartesianGrid vertical={false} />
-    {
-      /*
-          <XAxis
-            dataKey="month"
-            tickLine={false}
-            axisLine={false}
-            tickMargin={8}
-            tickFormatter={(value) => value.slice(0, 3)}
-          />
-       * */
-    }
-          <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
-          <Line dataKey="desktop" type="natural" stroke="var(--color-desktop)" strokeWidth={2} dot={false} />
-        </LineChart>
-      </ChartContainer>
-    </div>
-  )
-}
-
 
 function StarIcon(props) {
   return (

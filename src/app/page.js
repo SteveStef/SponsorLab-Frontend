@@ -6,6 +6,7 @@ export default function Home() {
   return (
     <div>
       <Header />
+      <br></br>
       <Landing />
     </div>
   );

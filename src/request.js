@@ -22,10 +22,6 @@ const request = async (url, req_method, body) => {
         body: JSON.stringify(body)
       }
 
-      if(usingFormData) {
-        requestOptions.headers = undefined;
-      }
-
       const response = await fetch(url, requestOptions);
       const data = await response.json();
       if(response.status === 401 && data.error) {

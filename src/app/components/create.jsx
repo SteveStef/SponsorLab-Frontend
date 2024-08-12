@@ -6,11 +6,20 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
 import cuphead from "../../../public/headcup.jpg"
-import { useState } from "react";
-import {axiosRequest} from "@/request";
+import { useState, useLayoutEffect } from "react";
+import { axiosRequest } from "@/request";
 import { toast } from "sonner";
+import { useAppContext } from "@/context";
+import { redirect } from 'next/navigation';
 
 export default function Component() {
+  const { role } = useAppContext();
+
+  useLayoutEffect(() => {
+    if(role !== "CREATOR"){
+      redirect("/");
+    }
+  }, []);
 
   const [title, setTitle] = useState("Listing Title");
   const [caption, setCaption] = useState("Capture the beauty of the great outdoors in this breathtaking nature photograph.");

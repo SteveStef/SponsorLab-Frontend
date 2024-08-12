@@ -10,6 +10,7 @@ import Image from "next/image";
 import request from "@/request";
 import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, PaginationLink, PaginationNext } from "@/components/ui/pagination";
 import ProfileLoad from "./sub-component/profileLoad";
+import FeaturedListings from "./sub-component/featuredListings";
 
 export default function Component() {
  const [search, setSearch] = useState("")
@@ -190,39 +191,7 @@ export default function Component() {
       <div className="mt-12">
         <h2 className="text-2xl font-bold mb-4">Featured Posts</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {featuredPosts.map((post) => (
-            <Link key={post.id} href={`./Listings/${post.id}`}>
-              <div className="bg-background rounded-lg overflow-hidden shadow-md group" style={{ cursor: "pointer" }}>
-                <Image
-                  src={cuphead}
-                  alt={post.title}
-                  width={400}
-                  height={225}
-                  className="w-full h-48 object-cover group-hover:opacity-80 transition-opacity"
-                  style={{ aspectRatio: "400/225", objectFit: "cover" }}
-                />
-                <div className="p-4">
-                  <h3 className="text-lg font-bold mb-2">{post.title}</h3>
-                  <div className="flex items-center gap-2 mb-2">
-                    <Avatar className="w-6 h-6">
-                      <AvatarImage src="/placeholder-user.jpg" alt={post.author.name} />
-                      <AvatarFallback>{post.author.name.charAt(0).toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="text-muted-foreground">{post.author.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {post.author.subscribers.toLocaleString()} subscribers
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <EyeIcon className="w-5 h-5" />
-                    <p>{post.views.toLocaleString()} views</p>
-                  </div>
-                </div>
-              </div>
-            </Link>
-          ))}
+          <FeaturedListings />
         </div>
       </div>
     </div>

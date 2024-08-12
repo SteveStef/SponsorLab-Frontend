@@ -1,141 +1,20 @@
-/**
- * v0 by Vercel.
- * @see https://v0.dev/t/p6dBjn2YwG3
- * Documentation: https://v0.dev/docs#integrating-generated-code-into-your-nextjs-app
- */
-
-"use client"
+"use client";
 import Image from "next/image"
-import cuphead from "../../../public/headcup.jpg"
+//import cuphead from "../../../public/headcup.jpg"
 import Link from "next/link"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Input } from "@/components/ui/input"
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+//import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, PaginationLink, PaginationNext } from "@/components/ui/pagination"
+import request from "@/request.js";
+import ListingLoad from "./sub-component/listingLoad.jsx";
+import FeaturedListings from "./sub-component/featuredListings.jsx";
 
 
 export default function Component() {
-  const posts = [
-    {
-      id: 1,
-      title: "The Art of Mindful Living",
-      views: 12345,
-      author: {
-        name: "Emily Wilkins",
-        image: "/placeholder-user.jpg",
-      },
-      thumbnail: "/placeholder.svg",
-    },
-    {
-      id: 2,
-      title: "Exploring the Wonders of Nature",
-      views: 8765,
-      author: {
-        name: "Michael Johnson",
-        image: "/placeholder-user.jpg",
-      },
-      thumbnail: "/placeholder.svg",
-    },
-    {
-      id: 3,
-      title: "The Future of Renewable Energy",
-      views: 6543,
-      author: {
-        name: "Sarah Lee",
-        image: "/placeholder-user.jpg",
-      },
-      thumbnail: "/placeholder.svg",
-    },
-    {
-      id: 4,
-      title: "Mastering the Art of Public Speaking",
-      views: 9876,
-      author: {
-        name: "David Chen",
-        image: "/placeholder-user.jpg",
-      },
-      thumbnail: cuphead
-    },
-    {
-      id: 5,
-      title: "The Science of Happiness",
-      views: 7890,
-      author: {
-        name: "Olivia Patel",
-        image: "/placeholder-user.jpg",
-      },
-      thumbnail: "/placeholder.svg",
-    },
-    {
-      id: 6,
-      title: "Navigating the Digital Landscape",
-      views: 5432,
-      author: {
-        name: "Liam Nguyen",
-        image: "/placeholder-user.jpg",
-      },
-      thumbnail: "/placeholder.svg",
-    },
-    {
-      id: 7,
-      title: "The Art of Storytelling",
-      views: 9012,
-      author: {
-        name: "Isabella Gomez",
-        image: "/placeholder-user.jpg",
-      },
-      thumbnail: "/placeholder.svg",
-    },
-    {
-      id: 8,
-      title: "Unlocking the Secrets of Productivity",
-      views: 6789,
-      author: {
-        name: "Ethan Ramirez",
-        image: "/placeholder-user.jpg",
-      },
-      thumbnail: "/placeholder.svg",
-    },
-  ];
-  const featuredPosts = [
-    {
-      id: 9,
-      title: "Unlocking the Secrets of Productivity",
-      views: 6789,
-      author: {
-        name: "Ethan Ramirez",
-        image: "/placeholder-user.jpg",
-        subscribers: 100,
-      },
-      thumbnail: "/placeholder.svg",
-    },
-    {
-      id: 8,
-      title: "Unlocking the Secrets of Productivity",
-      views: 6789,
-      author: {
-        name: "Ethan Ramirez",
-        image: "/placeholder-user.jpg",
-        subscribers: 100,
-      },
-      thumbnail: "/placeholder.svg",
-    },
-    {
-      id: 4,
-      title: "Unlocking the Secrets of Productivity",
-      views: 6789,
-      author: {
-        name: "Ethan Ramirez",
-        image: "/placeholder-user.jpg",
-        subscribers: 100,
-      },
-      thumbnail: "/placeholder.svg",
-    },
-
-  ];
   const [searchTerm, setSearchTerm] = useState("")
   const [currPage, setCurrentPage] = useState(1)
   const [postsPerPage] = useState(6)
@@ -143,14 +22,31 @@ export default function Component() {
     setSearchTerm(e.target.value)
     setCurrentPage(1)
   }
-  const filteredPosts = posts.filter((post) => post.title.toLowerCase().includes(searchTerm.toLowerCase()))
+
+  const featuredPosts = [];
   const indexOfLastPost = currPage * postsPerPage
   const indexOfFirstPost = indexOfLastPost - postsPerPage
-  const currentPosts = filteredPosts.slice(indexOfFirstPost, indexOfLastPost)
-  const totalPages = Math.ceil(filteredPosts.length / postsPerPage)
+  const currentPosts = [];//filteredPosts.slice(indexOfFirstPost, indexOfLastPost)
+  const totalPages = 1;//Math.ceil(filteredPosts.length / postsPerPage)
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber)
   }
+
+  const [listings, setListings] = useState([]);
+
+  async function fetchListings() {
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/posts/page/1`;
+    const response = await request(url, "GET", null);
+    console.log(response);
+    if(response && response.success) {
+      setListings(response.body);
+    }
+  }
+
+  useEffect(() => {
+    fetchListings();
+  },[]);
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6 flex items-center justify-between">
@@ -186,47 +82,67 @@ export default function Component() {
         </div>
       </div>
       <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4 md:p-6">
-        <Link href="./listings/asdf"className="cursor-pointer bg-background rounded-lg overflow-hidden shadow-lg transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
-          <div className="relative h-48 sm:h-46 md:h-54 lg:h-52 overflow-hidden">
-            <Image
-              src={cuphead}
-              alt="Post Thumbnail"
-              className="w-full h-full object-cover"
-              width="576"
-              height="284"
-              style={{ aspectRatio: "576/284", objectFit: "cover" }}
-            />
-            <div className="absolute top-2 left-2 bg-primary-foreground text-primary px-2 py-1 rounded-md text-xs">
-              Tech
-            </div>
-            <div className="absolute bottom-2 right-2 bg-primary-foreground text-primary px-2 py-1 rounded-md text-xs">
-              Available
-            </div>
-          </div>
-          <div className="p-4">
-            <div className="flex items-center justify-between mb-2">
-              <div className="text-sm text-muted-foreground">
-                <EyeIcon className="w-4 h-4 inline-block mr-1" />
-                50K views
-              </div>
-              <div className="flex items-center gap-1">
-                <StarIcon className="w-4 h-4 fill-primary" />
-                <StarIcon className="w-4 h-4 fill-primary" />
-                <StarIcon className="w-4 h-4 fill-primary" />
-                <StarIcon className="w-4 h-4 fill-primary" />
-                <StarIcon className="w-4 h-4 fill-muted stroke-muted-foreground" />
-              </div>
-            </div>
-            <h3 className="text-lg font-semibold mb-2">Mastering the Latest AI Trends</h3>
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-muted-foreground">
-                <CalendarIcon className="w-4 h-4 inline-block mr-1" />
-                November 20, 2023
-              </div>
-              <div className="text-primary font-semibold">$29.99</div>
-            </div>
+        {
+          listings.length === 0 && [''].map((_, idx) => {
+            return <ListingLoad key={idx}/>
+          })
+        }
+        {
+          listings.map((listing, idx) => {
+            return (
+        <Link key={idx} href={`./listings/${listing.id}`} className="cursor-pointer bg-background rounded-lg overflow-hidden shadow-lg transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
+                <div className="relative h-48 sm:h-46 md:h-54 lg:h-52 overflow-hidden">
+                  <Image
+                    src={listing.thumbnailName || black}
+                    alt="Post Thumbnail"
+                    className="w-full h-full object-cover"
+                    width="576"
+                    height="284"
+                    style={{ aspectRatio: "576/284", objectFit: "cover" }}
+                  />
+                  {
+                    listing.tags.map((tag, i) => {
+                      let pos = 2;
+                      if(i == 1)  pos = 12;
+                      return (
+                        <div key={i}className={`absolute top-2 left-${pos} bg-primary-foreground text-primary px-2 py-1 rounded-md text-xs`}>
+                          {tag}
+                        </div>
+                      )
+                    })
+                  }
+                  {/*<div className="absolute bottom-2 right-2 bg-primary-foreground text-primary px-2 py-1 rounded-md text-xs">
+                    Available
+                  </div>*/}
+                </div>
+                <div className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-sm text-muted-foreground">
+                      <EyeIcon className="w-4 h-4 inline-block mr-1" />
+                      {new Intl.NumberFormat().format(listing.estimatedViews)}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <StarIcon className="w-4 h-4 fill-primary" />
+                      <StarIcon className="w-4 h-4 fill-primary" />
+                      <StarIcon className="w-4 h-4 fill-primary" />
+                      <StarIcon className="w-4 h-4 fill-primary" />
+                      <StarIcon className="w-4 h-4 fill-muted stroke-muted-foreground" />
+                    </div>
+                  </div>
+                  <h3 className="text-lg font-semibold mb-2">{listing.title}</h3>
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-muted-foreground">
+                      <CalendarIcon className="w-4 h-4 inline-block mr-1" />
+                      {new Date(listing.uploadDate).toDateString()}
+                    </div>
+                    <div className="text-primary font-semibold">${listing.estimatedPrice}</div>
+                  </div>
           </div>
         </Link>
+              
+            )
+          })
+        }
 
     </section>
       <div className="mt-8 flex justify-center">
@@ -262,51 +178,7 @@ export default function Component() {
       <div className="mt-12">
         <h2 className="text-2xl font-bold mb-4">Featured Posts</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {featuredPosts.map((post) => (
-          <Link key={post.id} href={`./listings/${post.id}`}>
-        <div className="cursor-pointer bg-background rounded-lg overflow-hidden shadow-lg transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
-          <div className="relative h-48 sm:h-46 md:h-54 lg:h-52 overflow-hidden">
-            <Image
-              src={cuphead}
-              alt="Post Thumbnail"
-              className="w-full h-full object-cover"
-              width="576"
-              height="284"
-              style={{ aspectRatio: "576/284", objectFit: "cover" }}
-            />
-            <div className="absolute top-2 left-2 bg-primary-foreground text-primary px-2 py-1 rounded-md text-xs">
-              Tech
-            </div>
-            <div className="absolute bottom-2 right-2 bg-primary-foreground text-primary px-2 py-1 rounded-md text-xs">
-              Available
-            </div>
-          </div>
-          <div className="p-4">
-            <div className="flex items-center justify-between mb-2">
-              <div className="text-sm text-muted-foreground">
-                <EyeIcon className="w-4 h-4 inline-block mr-1" />
-                50K views
-              </div>
-              <div className="flex items-center gap-1">
-                <StarIcon className="w-4 h-4 fill-primary" />
-                <StarIcon className="w-4 h-4 fill-primary" />
-                <StarIcon className="w-4 h-4 fill-primary" />
-                <StarIcon className="w-4 h-4 fill-primary" />
-                <StarIcon className="w-4 h-4 fill-muted stroke-muted-foreground" />
-              </div>
-            </div>
-            <h3 className="text-lg font-semibold mb-2">Mastering the Latest AI Trends</h3>
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-muted-foreground">
-                <CalendarIcon className="w-4 h-4 inline-block mr-1" />
-                November 20, 2023
-              </div>
-              <div className="text-primary font-semibold">$29.99</div>
-            </div>
-          </div>
-        </div>
-            </Link>
-          ))}
+          <FeaturedListings />
         </div>
       </div>
     </div>

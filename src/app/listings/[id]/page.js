@@ -1,11 +1,11 @@
 import Header from "../../components/nav"
 import ListingDetails from "@/app/components/listingDetails";
 
-export default function ListingDetail() {
+export default function ListingDetail({params}) {
   return (
-    <div style={{marginTop: "10%"}}>
+    <div style={{marginTop: "5%"}}>
       <Header />
-      <ListingDetails />
+      <ListingDetails params={params}/>
     </div>
   )
 }

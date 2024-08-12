@@ -31,8 +31,9 @@ export default function Component() {
     }
 
     const response = await request(url, "POST", body);
+    console.log(response);
     if(!response || response.status === 500) toast.error("Internal server error, please try again later");
-    if(!response.success) {
+    else if(!response.success) {
       toast.error(response.message);
     } else if(response && response.success) {
       document.cookie = `token=${response.token}; SameSite=None; Secure; Path=/`;

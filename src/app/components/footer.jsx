@@ -8,7 +8,7 @@ import { Separator } from "@/components/ui/separator"
 
 export default function Footer() {
   return (
-    <footer className="bg-muted py-6 text-sm text-muted-foreground">
+    <footer className="py-6 text-sm text-muted-foreground">
       <div className="container mx-auto flex flex-col items-center justify-between gap-4 sm:flex-row">
         <p>&copy; 2024 SponsorLab Inc. All rights reserved.</p>
         <div className="flex items-center gap-4">
