@@ -20,41 +20,6 @@ export default function Component() {
  const [itemsPerPage, setItemsPerPage] = useState(8)
  const [users, setUsers] = useState([]);
 
-  const featuredPosts = [
-    {
-      id: 2,
-      title: "Unlocking the Secrets of Productivity",
-      views: 6789,
-      author: {
-        name: "Ethan Ramirez",
-        image: "/placeholder-user.jpg",
-        subscribers: 100,
-      },
-      thumbnail: "/placeholder.svg",
-    },
-    {
-      id: 3,
-      title: "Unlocking the Secrets of Productivity",
-      views: 6789,
-      author: {
-        name: "Ethan Ramirez",
-        image: "/placeholder-user.jpg",
-        subscribers: 100,
-      },
-      thumbnail: "/placeholder.svg",
-    },
-    {
-      id: 4,
-      title: "Unlocking the Secrets of Productivity",
-      views: 6789,
-      author: {
-        name: "Ethan Ramirez",
-        image: "/placeholder-user.jpg",
-        subscribers: 100,
-      },
-      thumbnail: "/placeholder.svg",
-    },
-  ]
   const filteredUsers = useMemo(() => {
     return users
       .filter((user) => user.name.toLowerCase().includes(search.toLowerCase()))
@@ -86,7 +51,6 @@ export default function Component() {
   useEffect(() => {
     fetchCreators();
   },[]);
-
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -124,7 +88,7 @@ export default function Component() {
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        { users.length === 0 && [''].map((_,idx) => { return <ProfileLoad key={idx}/> }) }
+        { users.length === 0 && ['','',''].map((_,idx) => { return <ProfileLoad key={idx}/> }) }
 
         {users.map((user, idx) => (
           <Link key={idx} href={`./profile/${user.channel.name}`}>
@@ -144,7 +108,7 @@ export default function Component() {
                   </div>
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <EyeIcon className="w-4 h-4" />
-                    {"50".toLocaleString()} Avg Views
+                    {(user.channel.videoCount !== 0 ? (user.channel.totalViews / user.channel.videoCount) : 0).toLocaleString()} Avg Views
                   </div>
                   {user.needsSponsor && (
                     <div className="mt-2 bg-yellow-500 text-yellow-900 px-2 py-1 rounded-md text-xs font-medium">

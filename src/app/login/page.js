@@ -48,7 +48,8 @@ export default function Component() {
     }
   }
 
-  const googleLogin = () => window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/google/auth/sponsor`;
+  const googleLoginSponsor = () => window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/google/auth/sponsor`;
+  const googleLoginYoutuber = () => window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/google/auth/creator`;
 
   return (
     <div>
@@ -82,22 +83,35 @@ export default function Component() {
           <div className="absolute inset-0 flex items-center">
             <span className="w-full border-t" />
           </div>
-          <div className="relative flex justify-center text-xs uppercase">
+<div className="relative flex justify-center text-sm">
             <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
           </div>
         </div>
       </form>
-        <Button onClick={googleLogin} variant="outline" className="w-full ">
-          <ChromeIcon className="mr-2 h-4 w-4" />
-          Sign in with Google
-        </Button>
+        <div className="grid grid-cols-2 gap-4">
+          <Button
+            onClick={googleLoginYoutuber}
+            variant="outline"
+            className="flex w-full items-center justify-center rounded-md border border-muted py-2 px-4 text-sm font-medium text-muted-foreground hover:bg-muted"
+          >
+            <ChromeIcon className="mr-2 h-5 w-5" />
+            Google (YouTuber)
+          </Button>
+          <Button
+            onClick={googleLoginSponsor}
+            variant="outline"
+            className="flex w-full items-center justify-center rounded-md border border-muted py-2 px-4 text-sm font-medium text-muted-foreground hover:bg-muted"
+          >
+            <ChromeIcon className="mr-2 h-5 w-5" />
+            Google (Sponsor)
+          </Button>
+        </div>
         <div className="text-center text-sm text-muted-foreground">
           Dont have an account?{" "}
           <Link href="./signup" className="font-medium hover:underline" prefetch={false}>
             Create account
           </Link>
-        </div>
-    </div>
+    </div></div>
     </div></div>
   )
 }

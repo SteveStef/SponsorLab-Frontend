@@ -10,10 +10,12 @@ import { useState, useLayoutEffect } from "react";
 import { axiosRequest } from "@/request";
 import { toast } from "sonner";
 import { useAppContext } from "@/context";
-import { redirect } from 'next/navigation';
+import { redirect, useRouter } from 'next/navigation';
 
 export default function Component() {
-  const { role } = useAppContext();
+  const { role, organization } = useAppContext();
+  const [load, setLoad] = useState(false);
+  const router = useRouter();
 
   useLayoutEffect(() => {
     if(role !== "CREATOR"){
@@ -57,12 +59,14 @@ export default function Component() {
     }
     if(error) {
       toast.error(message);
+      setLoad(false);
       return false;
     }
     return true;
   }
 
   async function uploadListing(e) {
+    setLoad(true);
     e.preventDefault();
     if(!validate()) return;
 
@@ -77,7 +81,12 @@ export default function Component() {
     formData.append("file", image);
 
     const response = await axiosRequest(url, "POST", formData);
-    console.log(response);
+    if(response.status === 200) {
+      router.push(`../profile/${organization}`);
+    } else {
+      toast.error("Something went wrong, try again later");
+    }
+    setLoad(false);
   }
 
   return (
@@ -119,8 +128,8 @@ export default function Component() {
             <Label htmlFor="price">Price</Label>
             <Input value={price} onChange={(e) => setPrice(e.target.value)} id="price" type="number" placeholder="Enter a price" />
           </div>
-          <Button onClick={uploadListing} type="submit" className="justify-self-start bg-green-500">
-            Create Listing
+          <Button onClick={uploadListing} disabled={load} type="submit" className="justify-self-start bg-green-500">
+            {load ? "Creating..." : "Create Listing"}
           </Button>
         </form>
       </div>

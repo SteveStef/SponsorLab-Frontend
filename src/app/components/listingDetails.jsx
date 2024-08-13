@@ -39,10 +39,12 @@ export default function Component({ params }) {
             className="w-full aspect-video object-cover"
           />
         </div>
-        <div className="grid gap-2">
+        <div className="grid gap-1">
           <h1 className="text-2xl font-bold">{listing && listing.title}</h1>
-          <div className="text-xs text-muted-foreground">
-            Due on {listing && new Date(listing.uploadDate).toDateString()}
+          <div className="text-xs text-muted-foreground"> 
+            Due on {listing && new Date(listing.uploadDate).toDateString()} {' | '}
+            Estimated {' '} <EyeIcon className="w-4 h-4 inline-block mr-1" />
+              {new Intl.NumberFormat().format(listing && listing.estimatedViews || 0)}
             </div>
           <div className="text-muted-foreground">
             {listing && listing.description}
@@ -56,7 +58,9 @@ export default function Component({ params }) {
               <StarIcon className="w-5 h-5 fill-muted stroke-muted-foreground" />
               <StarIcon className="w-5 h-5 fill-muted stroke-muted-foreground" />
             </div>
-            <div className="text-4xl font-bold">${listing && listing.estimatedPrice|| 0}</div>
+            <div className="text-4xl font-bold">
+              ${listing && (listing.estimatedPrice || 0).toLocaleString()}
+            </div>
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -76,19 +80,22 @@ export default function Component({ params }) {
           <CardContent className="grid gap-4">
             <div className="flex items-center justify-between">
               <div>Subscribers</div>
-              <div className="font-bold">{listing && listing.user.channel.subscribersCount}</div>
+              <div className="font-bold">{listing && (listing.user.channel.subscribersCount || 0).toLocaleString()
+              }</div>
             </div>
             <div className="flex items-center justify-between">
               <div>Total Views</div>
-              <div className="font-bold">1.2M</div>
+              <div className="font-bold">{listing && (listing.user.channel.totalViews || 0).toLocaleString()
+              }</div>
             </div>
             <div className="flex items-center justify-between">
               <div>Total Videos</div>
-              <div className="font-bold">124</div>
+              <div className="font-bold">{listing && (listing.user.channel.videoCount || 0).toLocaleString()
+              }</div>
             </div>
             <div className="flex items-center justify-between">
               <div>Avg. Views per Video</div>
-              <div className="font-bold">9.7K</div>
+              <div className="font-bold">{listing && ((listing.user.channel.totalViews / listing.user.channel.videoCount)||0).toLocaleString()}</div>
             </div>
           </CardContent>
         </Card>
@@ -100,13 +107,13 @@ export default function Component({ params }) {
             <div>
               <div className="text-sm font-semibold">{listing && listing.user.name}</div>
               <div className="text-muted-foreground text-sm">
-                Users description
+                {listing && listing.user.channel.description}
               </div>
             </div>
             <Separator />
             <div className="flex items-center gap-4">
               <Image
-                src={listing && listing.user.channel.imageUrl || "/place.scg"}
+                src={listing && listing.user.googleImage || listing && listing.user.channel.imageUrl || "/place.svg"}
                 alt="Author"
                 width={40}
                 height={40}
@@ -114,7 +121,8 @@ export default function Component({ params }) {
               />
               <div>
                 <div className="font-semibold">{listing && listing.user.name}</div>
-                <div className="text-xs text-muted-foreground">{listing && listing.user.channel.subscribersCount} subscribers</div>
+                <div className="text-xs text-muted-foreground">
+                  {listing && (listing.user.channel.subscribersCount || 0).toLocaleString()} subscribers</div>
               </div>
             </div>
           </CardContent>
@@ -197,6 +205,26 @@ function StarIcon(props) {
       strokeLinejoin="round"
     >
       <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+    </svg>
+  )
+}
+
+function EyeIcon(props) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+      <circle cx="12" cy="12" r="3" />
     </svg>
   )
 }

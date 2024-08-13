@@ -5,25 +5,47 @@ import black from "../../../public/black.png";
 import { useState, useEffect } from "react";
 import request from "@/request";
 import Image from "next/image";
+import { useAppContext } from "@/context";
+import Editor from "../components/editListing";
+import {useRouter}from "next/navigation";
 
 export default function Component({id}) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [listings, setListings] = useState([]);
+  const { organization } = useAppContext();
+  const [owner, setOwner] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [selectedListing, setSelectedListing] = useState(null);
+  const router = useRouter();
 
   async function fetchUser(id) {
     const url = `${process.env.NEXT_PUBLIC_API_URL}/users/${id.replace("%40","@")}`;
     const response = await request(url, "GET", null);
-    //console.log(response);
     if(response && response.success) {
       setUser(response.body);
       setListings(response.body.posts);
     }
     setLoading(false);
   }
+
   useEffect(() => {
     if(id) fetchUser(id);
+    if(organization === id.replace("%40","@")) {
+      setOwner(true);
+    }
   },[id]);
+
+  function handleListingClick(listing) {
+    if(owner) {
+      setSelectedListing(listing);
+      setIsEditing(true);
+    } else {
+      router.push(`../../listings/${listing.id}`);
+    }
+  }
+
+  if(isEditing) return <Editor listing={selectedListing} setIsEditing={setIsEditing}/>
 
   return (
     <div className={`w-full max-w-6xl mx-auto ${loading ? "animate-pulse rounded" : ""}`}>
@@ -66,24 +88,25 @@ export default function Component({id}) {
       <div className="w-full bg-gray-500 h-0.5"></div>
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
             <div className="flex flex-col items-center">
-              <div className="text-2xl font-bold">{user && user.channel.subscribersCount || 0}</div>
+              <div className="text-2xl font-bold">{user && user.channel.subscribersCount.toLocaleString()
+               || 0}</div>
               <div className="text-sm text-muted-foreground">Subscribers</div>
             </div>
             <div className="flex flex-col items-center">
-              <div className="text-2xl font-bold">{10}K</div>
+              <div className="text-2xl font-bold">{user && user.channel.totalViews}</div>
               <div className="text-sm text-muted-foreground">Total Views</div>
             </div>
             <div className="flex flex-col items-center">
-              <div className="text-2xl font-bold">{50 || 0}</div>
+              <div className="text-2xl font-bold">{user && (user.channel.totalViews / user.channel.videoCount) || 0}</div>
               <div className="text-sm text-muted-foreground">Avg. Views</div>
             </div>
             <div className="flex flex-col items-center">
-              <div className="text-2xl font-bold">{user && new Date(user.createdAt).toDateString()}</div>
+              <div className="text-2xl font-bold">{user && new Date(user.channel.joinedDate).toLocaleDateString()}</div>
               <div className="text-sm text-muted-foreground">Joined</div>
             </div>
             <div className="flex flex-col items-center">
-              <div className="text-2xl font-bold">24</div>
-              <div className="text-sm text-muted-foreground">Posts</div>
+              <div className="text-2xl font-bold">{user && user.posts.length}</div>
+              <div className="text-sm text-muted-foreground">Listings</div>
             </div>
           </div>
         </div>
@@ -93,7 +116,7 @@ export default function Component({id}) {
         {
           listings.map((listing, idx) => {
             return (
-              <div key={idx}className="cursor-pointer bg-background rounded-lg overflow-hidden shadow-lg transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
+              <div onClick={() => handleListingClick(listing)} key={idx}className="cursor-pointer bg-background rounded-lg overflow-hidden shadow-lg transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
                 <div className="relative h-48 sm:h-46 md:h-54 lg:h-52 overflow-hidden">
                   <Image
                     src={listing.thumbnailName || black}
@@ -114,9 +137,9 @@ export default function Component({id}) {
                       )
                     })
                   }
-                  {/*<div className="absolute bottom-2 right-2 bg-primary-foreground text-primary px-2 py-1 rounded-md text-xs">
-                    Available
-                  </div>*/}
+                  <div className="absolute bottom-2 right-2 bg-primary-foreground text-primary px-2 py-1 rounded-md text-xs">
+                    Published
+                  </div>
                 </div>
                 <div className="p-4">
                   <div className="flex items-center justify-between mb-2">
