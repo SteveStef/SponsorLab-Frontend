@@ -5,15 +5,53 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { useAppContext } from "@/context";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
+import { axiosRequest } from "@/request";
+import { toast } from "sonner";
 
 export default function Component() {
   const state = useAppContext();
   const name = useRef("");
+  const description = useRef("");
+  const [image, setImage] = useState(null);
+  const [selectedImage, setSelectedImage] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [oldPassword, setOldPassword] = useState("");
+  const [load, setLoad] = useState(false);
 
   useEffect(() => {
     name.current.value = state.name;
+    description.current.value = state.description;
   }, [state]);
+
+  const handleImageChange = (event) => {
+    if (event.target.files && event.target.files[0]) {
+      setImage(event.target.files[0]);
+      setSelectedImage(URL.createObjectURL(event.target.files[0]));
+    }
+  };
+
+  async function updateProfile() {
+    setLoad(true);
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/users/update-profile`;
+    const formData = new FormData();
+    formData.append("name", name.current.value);
+    formData.append("bio", description.current.value);
+    formData.append("file", image);
+    formData.append("oldPassword", oldPassword);
+    formData.append("newPassword", newPassword);
+
+    const response = await axiosRequest(url, "PUT", formData);
+    console.log(response);
+    if(response && response.status === 200) {
+      toast.success("Uploaded profile");
+    } else if(response.status !== 500) {
+      toast.error(response.data.message);
+    } else {
+      toast.error("Something went wrong");
+    }
+    setLoad(false);
+  }
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -38,11 +76,12 @@ export default function Component() {
               <Label>Profile Picture</Label>
               <div className="flex items-center gap-4"style={{cursor: state.accountType === "GOOGLE" ? "not-allowed" : ""}} >
                 <Avatar className="h-16 w-16 border">
-                  <AvatarImage src={state.profilePic} alt="Profile" />
+                  <AvatarImage src={selectedImage || state.profilePic} alt="Profile" />
                   <AvatarFallback>{state.name[0]}</AvatarFallback>
                 </Avatar>
                 <Button  disabled={state.accountType === "GOOGLE"}  variant="outline">
-                  <UploadIcon className="mr-2 h-4 w-4" />
+                  <input onChange={handleImageChange} type="file" id="fileInput" style={{opacity: "0", position: "absolute", width: "100px", cursor: "pointer"}} />
+                  <UploadIcon className="mr-2 h-4 w-4 cursor-pointer" />
                   Change
                 </Button>
               </div>
@@ -52,7 +91,7 @@ export default function Component() {
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="description">Profile Description</Label>
-            <Textarea id="description" placeholder="Tell us a bit about yourself..." className="min-h-[120px]" />
+            <Textarea ref={description} id="description" placeholder="Tell us a bit about yourself..." className="min-h-[120px]" />
           </div>
         </div>
         <div className="space-y-4">
@@ -61,11 +100,11 @@ export default function Component() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="currentPassword">Current Password</Label>
-                <Input disabled={state.accountType === "GOOGLE"} id="currentPassword" type="password" />
+                <Input disabled={state.accountType === "GOOGLE"} onChange={(e) => setOldPassword(e.target.value)}value={oldPassword}id="currentPassword" type="password" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="newPassword">New Password</Label>
-                <Input disabled={state.accountType === "GOOGLE"} id="newPassword" type="password" />
+                <Input disabled={state.accountType === "GOOGLE"} onChange={(e) => setNewPassword(e.target.value)} value={newPassword}id="newPassword" type="password" />
               </div>
             </div>
           </div>
@@ -80,7 +119,7 @@ export default function Component() {
           </div>
         </div>
         <div className="flex justify-end">
-          <Button>Save Changes</Button>
+          <Button onClick={updateProfile} disabled={load}>Save Changes</Button>
         </div>
       </div>
     </div>

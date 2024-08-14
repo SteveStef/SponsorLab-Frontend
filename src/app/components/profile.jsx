@@ -7,7 +7,8 @@ import request from "@/request";
 import Image from "next/image";
 import { useAppContext } from "@/context";
 import Editor from "../components/editListing";
-import {useRouter}from "next/navigation";
+import { useRouter }from "next/navigation";
+import Link from "next/link";
 
 export default function Component({id}) {
   const [user, setUser] = useState(null);
@@ -15,7 +16,6 @@ export default function Component({id}) {
   const [listings, setListings] = useState([]);
   const { organization } = useAppContext();
   const [owner, setOwner] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
   const [selectedListing, setSelectedListing] = useState(null);
   const router = useRouter();
 
@@ -25,27 +25,22 @@ export default function Component({id}) {
     if(response && response.success) {
       setUser(response.body);
       setListings(response.body.posts);
+      setOwner(response.body.owner);
     }
     setLoading(false);
   }
 
   useEffect(() => {
-    if(id) fetchUser(id);
-    if(organization === id.replace("%40","@")) {
-      setOwner(true);
+    if(id) {
+      fetchUser(id);
     }
   },[id]);
 
   function handleListingClick(listing) {
-    if(owner) {
-      setSelectedListing(listing);
-      setIsEditing(true);
-    } else {
-      router.push(`../../listings/${listing.id}`);
-    }
-  }
+    router.push(`../../listings/${listing.id}`);
+  } // Date object being wrong, and add banner change in settings
 
-  if(isEditing) return <Editor listing={selectedListing} setIsEditing={setIsEditing}/>
+  if(selectedListing) return <Editor listing={selectedListing} setSelectedListing={setSelectedListing}/>
 
   return (
     <div className={`w-full max-w-6xl mx-auto ${loading ? "animate-pulse rounded" : ""}`}>
@@ -69,9 +64,14 @@ export default function Component({id}) {
               <h2 className="text-xl font-bold">{user && user.name}</h2>
               <div className="text-sm text-muted-foreground">{id.replace("%40","@")}</div>
             </div>
-            <Button variant="outline" className="shrink-0">
-              Edit Profile
-            </Button>
+            {
+              organization === id.replace("%40", "@") && 
+                <Link  href="../../settings">
+                  <Button variant="outline" className="shrink-0">
+                    Edit Profile
+                  </Button>
+                </Link>
+            }
           </div>
         </div>
       </div>
@@ -116,30 +116,40 @@ export default function Component({id}) {
         {
           listings.map((listing, idx) => {
             return (
-              <div onClick={() => handleListingClick(listing)} key={idx}className="cursor-pointer bg-background rounded-lg overflow-hidden shadow-lg transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
+              <div  key={idx}className=" bg-background rounded-lg overflow-hidden shadow-lg transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
                 <div className="relative h-48 sm:h-46 md:h-54 lg:h-52 overflow-hidden">
                   <Image
+                    onClick={() => handleListingClick(listing)}
                     src={listing.thumbnailName || black}
                     alt="Post Thumbnail"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover cursor-pointer"
                     width="576"
                     height="284"
                     style={{ aspectRatio: "576/284", objectFit: "cover" }}
                   />
                   {
-                    listing.tags.map((tag, i) => {
-                      let pos = 2;
-                      if(i == 1)  pos = 12;
-                      return (
-                        <div key={i}className={`absolute top-2 left-${pos} bg-primary-foreground text-primary px-2 py-1 rounded-md text-xs`}>
-                          {tag}
-                        </div>
-                      )
-                    })
+                    listing.tags.length === 1 && 
+                      <div className={`absolute top-2 left-2 bg-primary-foreground text-primary px-2 py-1 rounded-md text-xs`}>
+                        {listing.tags[0]}
+                      </div>
                   }
-                  <div className="absolute bottom-2 right-2 bg-primary-foreground text-primary px-2 py-1 rounded-md text-xs">
-                    Published
-                  </div>
+                  {
+                    listing.tags.length === 2 && 
+                      <>
+                      <div className={`absolute top-2 left-2 bg-primary-foreground text-primary px-2 py-1 rounded-md text-xs`}>
+                        {listing.tags[0]}
+                      </div>
+                        <div className={`absolute top-2 right-2 bg-primary-foreground text-primary px-2 py-1 rounded-md text-xs`}>
+                        {listing.tags[1]}
+                        </div>
+                      </>
+                  }
+                  {
+                    owner && 
+                      <div className="bg-green-800 absolute bottom-2 right-2 text-primary px-2 py-1 rounded-md text-xs">
+                        {listing.published ? "Public" : "Private"}
+                      </div>
+                  }
                 </div>
                 <div className="p-4">
                   <div className="flex items-center justify-between mb-2">
@@ -155,13 +165,22 @@ export default function Component({id}) {
                       <StarIcon className="w-4 h-4 fill-muted stroke-muted-foreground" />
                     </div>
                   </div>
-                  <h3 className="text-lg font-semibold mb-2">{listing.title}</h3>
+                  <h3 onClick={() => handleListingClick(listing)} className="text-lg font-semibold mb-2 cursor-pointer">
+                    {listing.title}
+                  </h3>
                   <div className="flex items-center justify-between">
                     <div className="text-sm text-muted-foreground">
                       <CalendarIcon className="w-4 h-4 inline-block mr-1" />
                       {new Date(listing.uploadDate).toDateString()}
                     </div>
-                    <div className="text-primary font-semibold">${listing.estimatedPrice}</div>
+                    <div className="text-primary font-semibold">${listing.estimatedPrice}
+                      {
+                        owner && 
+                      <Button onClick={() => setSelectedListing(listing)} variant="outline" className="shrink-0 ml-4">
+                        Edit  Listing 
+                      </Button>
+                      }
+                    </div>
                   </div>
                 </div>
               </div>

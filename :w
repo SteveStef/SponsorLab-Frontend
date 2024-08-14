@@ -113,6 +113,9 @@ export default function Component() {
                         </div>
                       </>
                   }
+                  {/*<div className="absolute bottom-2 right-2 bg-primary-foreground text-primary px-2 py-1 rounded-md text-xs">
+                    Available
+                  </div>*/}
                 </div>
                 <div className="p-4">
                   <div className="flex items-center justify-between mb-2">

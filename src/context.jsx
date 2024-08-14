@@ -12,11 +12,12 @@ export function AppWrapper({children}) {
   const [profilePic, setProfilePic] = useState("");
   const [auth, setAuth] = useState(false);
   const [organization, setOrganization] = useState("");
+  const [description, setDescription] = useState("");
 
   async function fetchUser() {
     const url = `${process.env.NEXT_PUBLIC_API_URL}/users/account`;
     const response = await request(url, "GET", null);
-    //console.log(response);
+    console.log(response);
     if(!response || !response.success) {
       setAuth(false);
       return;
@@ -29,13 +30,15 @@ export function AppWrapper({children}) {
     localStorage.setItem("role", response.body.role);
     setAccountType(response.body.accountType);
     localStorage.setItem("accountType", response.body.accountType);
+    setDescription(response.body.bio);
+    localStorage.setItem("description", response.body.bio);
 
     if(response.body.accountType === "GOOGLE") {
       setProfilePic(response.body.googleImage);
       localStorage.setItem("profilePic", response.body.googleImage);
     } else {
-      setProfilePic(response.body.profileImage || "");
-      localStorage.setItem("profilePic", response.body.profileImage || "");
+      setProfilePic(response.body.s3ImageName|| "");
+      localStorage.setItem("profilePic", response.body.s3ImageName|| "");
     }
 
     if(response.body.role === "SPONSOR") {
@@ -57,6 +60,7 @@ export function AppWrapper({children}) {
   setProfilePic(localStorage.getItem("profilePic") || "");
   setAuth(localStorage.getItem("accountType") !== null);
   setOrganization(localStorage.getItem("organization") || "");
+  setDescription(localStorage.getItem("description") || "");
     fetchUser();
   },[]);
 
@@ -67,7 +71,8 @@ export function AppWrapper({children}) {
     profilePic, setProfilePic,
     auth, setAuth,
     organization, setOrganization,
-    email, setEmail
+    email, setEmail,
+    description, setDescription
   }
 
   return (

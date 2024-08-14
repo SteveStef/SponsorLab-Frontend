@@ -76,7 +76,7 @@ export default function Signup({ params }) {
       setAccountType("GOOGLE");
       setOrganization(org);
       setProfilePic(profilePic);
-      localStorage.setItem("profilePic", response.body.googleImage);
+      localStorage.setItem("profilePic", profilePic);
 
       router.push("/listings");
     }

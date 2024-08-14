@@ -14,7 +14,7 @@ import { useAppContext } from "@/context";
 export default function Component() {
   const email = useRef("");
   const password = useRef("");
-  const { setEmail, setAccountType, setName, setRole, setOrganization, setAuth, setProfilePic } = useAppContext();
+  const { setDescription, setEmail, setAccountType, setName, setRole, setOrganization, setAuth, setProfilePic } = useAppContext();
   const router = useRouter();
 
   async function login(e) {
@@ -44,6 +44,7 @@ export default function Component() {
       setProfilePic(response.body.profileImage);
       setAccountType(response.body.accountType);
       setOrganization(response.body.company.orginization);
+      setDescription(response.body.bio);
       router.push("/listings");
     }
   }
