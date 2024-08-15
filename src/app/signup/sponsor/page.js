@@ -4,13 +4,26 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { useState, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import request from "@/request";
 import { useRouter } from 'next/navigation';
 import { useAppContext } from "@/context";
+import { useSearchParams } from 'next/navigation';
 
 export default function Signup() {
+
+  const params = useSearchParams();
+  const [err, setErr] = useState("");
+  
+  useEffect(() => {
+    if(!params || !params.get("error")) return;
+    setErr(params.get("error").replaceAll("_"," "));
+  }, [params]);
+
+  useEffect(() => {
+    if(err) toast.error(err);
+  }, [err]);
 
   const email = useRef("");
   const password = useRef("");

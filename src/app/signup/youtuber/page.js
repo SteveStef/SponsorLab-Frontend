@@ -2,9 +2,25 @@
 import Link from "next/link"
 import Header from "../../components/nav";
 import { Button } from "@/components/ui/button"
+import { useSearchParams } from 'next/navigation';
+import { toast } from "sonner";
+import { useState, useEffect } from "react";
 
 export default function SignupYoutuber() {
+  const params = useSearchParams();
   const handleYoutuberSignup = () => window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/google/auth/creator`;
+  const [err, setErr] = useState("");
+
+  
+  useEffect(() => {
+    if(!params || !params.get("error")) return;
+    setErr(params.get("error").replaceAll("_"," "));
+  }, [params]);
+
+  useEffect(() => {
+    if(err) toast.error(err);
+  }, [err]);
+
   return (
     <>
     <Header />
