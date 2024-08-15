@@ -15,14 +15,13 @@ export default function Signup() {
   const email = useRef("");
   const password = useRef("");
   const confirmPassword = useRef("");
-  const orginization = useRef("");
   const name = useRef("");
 
   const router = useRouter();
-  const { setAuth, setName, setOrganization, setEmail, setRole, setAccountType } = useAppContext();
+  const { setOrganization, setAuth, setName, setEmail, setRole, setAccountType } = useAppContext();
   const [loading, setLoading] = useState(false);
 
-  function validateInputs(email, orginization, password, confirmPassword, name) {
+  function validateInputs(email, password, confirmPassword, name) {
     let isValid = true;
     if (!/\S+@\S+\.\S+/.test(email)) {
       toast.error("Invalid Email");
@@ -41,10 +40,6 @@ export default function Signup() {
       isValid = false;
     }
 
-    if (!orginization.trim()) {
-      toast.error("Organization is required");
-      isValid = false;
-    }
     if (!name.trim()) {
       toast.error("name is required");
       isValid = false;
@@ -57,14 +52,13 @@ export default function Signup() {
     e.preventDefault();
     setLoading(true);
     let em = email.current.value;
-    let org = orginization.current.value;
     let pass = password.current.value;
     let confirmPass = confirmPassword.current.value;
     let n = name.current.value;
 
-    if(!validateInputs(em,org,pass,confirmPass, n)) return;
+    if(!validateInputs(em,pass,confirmPass, n)) return;
     const url = `${process.env.NEXT_PUBLIC_API_URL}/auth/sponsor/sign-up`;
-    const body = { email: em, password: pass, name: n, role:"SPONSOR", orginizationName: org, accountType: "EMAIL"};
+    const body = { email: em, password: pass, name: n, role:"SPONSOR", accountType: "EMAIL"};
     const response = await request(url, "POST", body);
 
     if(!response || response.status === 500) toast.error("Internal server error, please try again later");
@@ -77,7 +71,7 @@ export default function Signup() {
       setName(n);
       setEmail(em);
       setAccountType("EMAIL");
-      setOrganization(org);
+      setOrganization(response.oranization);
       router.push("/listings");
     }
     setLoading(false);
@@ -99,8 +93,8 @@ export default function Signup() {
               <Input ref={name} id="name" type="text" required />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input ref={email} type="email" required />
+              <Label htmlFor="email">Company Email (Prefered)</Label>
+              <Input ref={email} type="email" placeholder="example@company.com" required />
             </div>
             <div className="space-y-4">
 
@@ -117,12 +111,8 @@ export default function Signup() {
                 <Input ref={confirmPassword} id="confirm-password" type="password" required />
               </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="orginization">Organization</Label>
-              <Input ref={orginization} id="orginization" type="text" required />
-            </div>
             <Button disabled={loading} onClick={signup} type="submit" className="w-full">
-              Sign Up
+              { loading? "working..." : "Sign Up" }
             </Button>
           </div>
           <div className="relative">
@@ -143,7 +133,7 @@ export default function Signup() {
 
         <div className="text-center text-sm text-muted-foreground">
           Already have an account?{" "}
-          <Link href="./login" className="font-medium hover:underline" prefetch={false}>
+          <Link href="../login" className="font-medium hover:underline" prefetch={false}>
             Login
           </Link>
         </div>

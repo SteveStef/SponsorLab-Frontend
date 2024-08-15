@@ -12,7 +12,6 @@ export default function Authenticating({params}) {
   async function authenticateUser(id) {
     const url = `${process.env.NEXT_PUBLIC_API_URL}/google/account/${id}`;
     const response = await request(url, "GET", null);
-    //console.log(response);
     if(!response || response.status === 500) toast.error("Internal server error, please try again later");
     if(!response.success && response.status !== 400) {
       toast.error(response.message);
@@ -24,11 +23,11 @@ export default function Authenticating({params}) {
       setEmail(response.body.email);
       setAccountType(response.body.accountType);
       if(response.body.role === "SPONSOR") {
-        setProfilePic(response.body.profileImage || "");
+        setProfilePic(response.body.googleImage || "");
         setOrganization(response.body.company.orginization);
       } else {
         setOrganization(response.body.channel.name);
-        setProfilePic(response.body.channel.imageUrl || "");
+        setProfilePic(response.body.googleImage || response.body.channel.imageUrl || "");
       }
     }
     router.push("/listings");

@@ -7,8 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useAppContext } from "@/context";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu"
 import Image from "next/image";
-import SponsorLabLogo from "../../../public/SponsorLab.png";
-import Beaker from "../../../public/Beaker.jpeg";
+import Beaker from "../../../public/Beaker.png"
 
 export default function Navbar() {
   const { organization, auth, role, name, profilePic } = useAppContext();
@@ -41,10 +40,8 @@ export default function Navbar() {
     <header className="fixed top-0 z-50 w-full bg-background border-b">
       <div className="container flex h-16 items-center justify-between px-4 md:px-6">
         <Link href="../../../" className="flex items-center gap-2" prefetch={false}>
-          <span className="text-lg font-semibold">Sponsor Lab</span>
-          {/*
-<Image src={SponsorLabLogo} alt="LOGO" style={{ width: '250px' }} />
-          */}
+          <Image src={Beaker} alt="LOGO" style={{ width: '35px' }} />
+          <span className="font-semibold" style={{fontSize: "25px"}}>Sponsor<span style={{color: "lightgreen"}}>Lab</span></span>
         </Link>
         <nav className="hidden items-center gap-6 md:flex">
           {

@@ -8,16 +8,22 @@ import { useAppContext } from "@/context";
 import { useRef, useEffect, useState } from "react";
 import { axiosRequest } from "@/request";
 import { toast } from "sonner";
+import request from "@/request";
+
+import { loadStripe } from "@stripe/stripe-js";
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY);
 
 export default function Component() {
   const state = useAppContext();
   const name = useRef("");
   const description = useRef("");
+
   const [image, setImage] = useState(null);
   const [selectedImage, setSelectedImage] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [oldPassword, setOldPassword] = useState("");
   const [load, setLoad] = useState(false);
+  const [loadingRedirect, setLoadingRedirect] = useState(false);
 
   useEffect(() => {
     name.current.value = state.name;
@@ -51,6 +57,57 @@ export default function Component() {
       toast.error("Something went wrong");
     }
     setLoad(false);
+  }
+
+  const addBankAccount = async () => {
+    setLoadingRedirect(true);
+    const path = `${process.env.NEXT_PUBLIC_API_URL}/stripe/manage-account`;
+    const body = { email: state.email || "" };
+    const response = await request(path, "POST", body);
+    console.log(response);
+    if(!response || !response.body || !response.body.url) {
+      toast({ title: response.message || "Error creating account" });
+      setLoadingRedirect(false);
+      return;
+    }
+    window.location.href = response.body.url;
+  };
+
+
+  const addPaymentMethod = async () => {
+    setLoadingRedirect(true);
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/stripe/manage-customer`;
+    const body = { email: state.email || "", name: state.name };
+    const response = await request(url, "POST", body);
+
+    console.log(response);
+    if(!response) {
+      toast({ title: "Error creating customer" });
+      setLoadingRedirect(false);
+      return;
+    }
+
+    if(!response.sessionId) {
+      toast({ title: response.message || "Error creating customer" });
+      setLoadingRedirect(false);
+      return;
+    }
+
+    const stripe = await stripePromise;
+    const data = await stripe.redirectToCheckout({ sessionId: response.sessionId });
+    if(data.error) {
+      toast.error("Error redirecting to checkout");
+      setLoadingRedirect(false);
+      return;
+    }
+  };
+
+  function routeToFn() {
+    if(state.role === "SPONSOR") {
+      addPaymentMethod();
+    } else {
+      addBankAccount();
+    }
   }
 
   return (
@@ -112,7 +169,7 @@ export default function Component() {
         <div className="space-y-4">
           <div className="space-y-2">
             <h2 className="text-xl font-bold">Payment Methods</h2>
-            <Button variant="outline">
+            <Button onClick={routeToFn} variant="outline">
               <CreditCardIcon className="mr-2 h-4 w-4" />
               Manage Credit Card/Banking Info
             </Button>

@@ -112,7 +112,13 @@ export default function Component({id}) {
         </div>
       </div>
       <div className="w-full bg-gray-500 h-0.5"></div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-8">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-8" style={{marginLeft: "45.1%"}}>
+        {
+          listings.length === 0 && organization === id.replace("%40", "@") ? 
+          <Link href="../../create">
+          <Button>Create Listing</Button>
+          </Link> : listings.length === 0 && <div className="font-semibold">No Listings Yet...</div>
+        }
         {
           listings.map((listing, idx) => {
             return (
