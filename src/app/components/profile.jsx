@@ -14,7 +14,7 @@ export default function Component({id}) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [listings, setListings] = useState([]);
-  const { organization } = useAppContext();
+  const { organization, description } = useAppContext();
   const [owner, setOwner] = useState(false);
   const [selectedListing, setSelectedListing] = useState(null);
   const router = useRouter();
@@ -81,7 +81,7 @@ export default function Component({id}) {
           <div>
             <h3 className="text-lg font-semibold">About Me</h3>
             <p className="text-muted-foreground">
-            {user && user.channel.description || "This user has no description"}
+            {user && user.channel.description || description ||  "This user has no description"}
             </p>
           </div>
 
@@ -97,7 +97,7 @@ export default function Component({id}) {
               <div className="text-sm text-muted-foreground">Total Views</div>
             </div>
             <div className="flex flex-col items-center">
-              <div className="text-2xl font-bold">{user && (user.channel.totalViews / user.channel.videoCount) || 0}</div>
+              <div className="text-2xl font-bold">{user && (parseInt(user.channel.totalViews / user.channel.videoCount)) || 0}</div>
               <div className="text-sm text-muted-foreground">Avg. Views</div>
             </div>
             <div className="flex flex-col items-center">
@@ -112,12 +112,12 @@ export default function Component({id}) {
         </div>
       </div>
       <div className="w-full bg-gray-500 h-0.5"></div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-8" style={{marginLeft: "45.1%"}}>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-8">
         {
           listings.length === 0 && organization === id.replace("%40", "@") ? 
           <Link href="../../create">
-          <Button>Create Listing</Button>
-          </Link> : listings.length === 0 && <div className="font-semibold">No Listings Yet...</div>
+          <Button style={{marginLeft: "140%"}}>Create Listing</Button>
+          </Link> : listings.length === 0 && <div className="font-semibold" style={{marginLeft: "140%"}} >No Listings Yet...</div>
         }
         {
           listings.map((listing, idx) => {

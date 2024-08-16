@@ -15,16 +15,19 @@ export default function Navbar() {
   const links = [
     { url: "../../listings", name: "Listings", auth: true, role: "ANY" },
     //{ url: "../pricing", name: "Pricing", auth: true, role: "CREATOR" },
+    { url: "../organizations", name: "Organizations", auth: true, role: "ANY" },
     { url: "../profiles", name: "Youtubers", auth: true, role: "ANY" },
-    { url: "../create", name: "Create", auth: true, role: "CREATOR" },
+    //{ url: "../create", name: "Create", auth: true, role: "CREATOR" },
     { url: "../../signup", name: "Login/Signup", auth: false, role: "ANY" },
+    { url: "../../requests", name: "Requests", auth: true, role: "ANY" },
   ];
 
   const childLinks = [
     { url: "../../listings", name: "Listings", auth: true, role: "ANY" },
     //{ url: "../pricing", name: "Pricing", auth: true, role: "CREATOR" },
     { url: "../profiles", name: "Youtubers", auth: true, role: "ANY" },
-    { url: "../create", name: "Create", auth: true, role: "CREATOR" },
+    { url: "../create", name: "Create", auth: true, role: "ANY" },
+    { url: "../organizations", name: "Organization", auth: true, role: "CREATOR" },
     { url: "../../signup", name: "Login/Signup", auth: false, role: "ANY" },
     { url: "../../requests", name: "Requests", auth: true, role: "ANY" },
     { url: "../../profile/"+organization, name: "Profile", auth: true, role: "ANY" },
@@ -40,8 +43,8 @@ export default function Navbar() {
     <header className="fixed top-0 z-50 w-full bg-background border-b">
       <div className="container flex h-16 items-center justify-between px-4 md:px-6">
         <Link href="../../../" className="flex items-center gap-2" prefetch={false}>
-          <Image src={Beaker} alt="LOGO" style={{ width: '35px' }} />
-          <span className="font-semibold" style={{fontSize: "25px"}}>Sponsor<span style={{color: "lightgreen"}}>Lab</span></span>
+          <Image src={Beaker} alt="LOGO" style={{ width: '32px' }} />
+          <span className="font-semibold" style={{fontSize: "25px"}}>Sponsor <span className="text-green-500">Lab</span></span>
         </Link>
         <nav className="hidden items-center gap-6 md:flex">
           {
@@ -63,7 +66,6 @@ export default function Navbar() {
               }
             })
           }
-
           {
             auth &&
             <DropdownMenu>
@@ -76,12 +78,14 @@ export default function Navbar() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+              { role === "CREATOR" && 
                 <DropdownMenuItem>
-                  <Link href="../../../requests" className="flex items-center gap-2" prefetch={false}>
+                  <Link href="../../../create" className="flex items-center gap-2" prefetch={false}>
                     <div className="h-4 w-4" />
-                    <span>Requests</span>
+                    <span>Create</span>
                   </Link>
                 </DropdownMenuItem>
+              }
                 <DropdownMenuItem>
                   <Link href={`../../profile/${organization}`} className="flex items-center gap-2" prefetch={false}>
                     <div className="h-4 w-4" />

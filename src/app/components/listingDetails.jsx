@@ -28,7 +28,7 @@ export default function Component({ params }) {
   if(showSponsorForm) return <SponsorForm />
 
   return (
-    <div className="grid md:grid-cols-2 gap-6 lg:gap-12 items-start max-w-6xl px-4 mx-auto py-6">
+    <div className="grid md:grid-cols-2 gap-6 lg:gap-12 items-start max-w-7xl px-4 mx-auto py-6">
       <div className="grid gap-4">
         <div className="rounded-xl overflow-hidden">
           <Image
@@ -43,7 +43,7 @@ export default function Component({ params }) {
           <h1 className="text-2xl font-bold">{listing && listing.title}</h1>
           <div className="text-xs text-muted-foreground"> 
             Due on {listing && new Date(listing.uploadDate).toDateString()} {' | '}
-            Estimated {' '} <EyeIcon className="w-4 h-4 inline-block mr-1" />
+            Estimated {' '} <EyeIcon className="w-4 h-6 inline-block mr-1" />
               {new Intl.NumberFormat().format(listing && listing.estimatedViews || 0)}
             </div>
           <div className="text-muted-foreground">

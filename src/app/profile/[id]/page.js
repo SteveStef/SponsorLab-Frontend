@@ -1,5 +1,6 @@
 import Header from "../../components/nav"
 import Profile from "@/app/components/profile";
+//import { useAppContext } from "@/context";
 
 export default function ListingDetail({params}) {
   return (
