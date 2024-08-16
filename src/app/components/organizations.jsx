@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UsersIcon, SearchIcon, InfoIcon } from "lucide-react";
 import request from "@/request";
+import Link from "next/link"
 
 export default function Component() {
   const [searchTerm, setSearchTerm] = useState("")
@@ -110,7 +111,10 @@ export default function Component() {
                 </CardContent>
                 <CardFooter>
                   <Button className="w-full bg-green-600 hover:bg-green-700 text-white">
+              <Link href={`./organizations/${org.id}`}>
                     View Details
+
+              </Link>
                   </Button>
                 </CardFooter>
               </Card>

@@ -19,33 +19,25 @@ export default function Component({ listingId, rating, price }) {
               <ChevronLeftIcon className="w-4 h-4" />
               Back
             </Link>
-            <h1 className="text-3xl font-bold">Feedback Form</h1>
+            <h1 className="text-3xl font-bold">Sponsor Listing</h1>
           </div>
           <p className="text-muted-foreground">
-            Please take a few minutes to answer the following questions. Your feedback is valuable to us.
+            Please take a few minutes to answer the following questions about your request.
           </p>
         </div>
         <form className="mt-8 space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
-              <Input id="name" placeholder="Enter your name" />
+              <Label htmlFor="name">Title of Product/Service</Label>
+              <Input id="name" placeholder="Dog toy" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="Enter your email" />
+              <Label htmlFor="ad">Timestamp of advertisement</Label>
+              <Input id="penguins" type="text" placeholder="First 2 minutes of the video" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="company">Company</Label>
-              <Input id="company" placeholder="Enter your company" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="role">Role</Label>
-              <Input id="role" placeholder="Enter your role" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="location">Location</Label>
-              <Input id="location" placeholder="Enter your location" />
+              <Label htmlFor="price">How much are you willing to pay?</Label>
+              <Input id="price" type="number" placeholder="$" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="ad-duration">Ad Duration</Label>
@@ -55,14 +47,18 @@ export default function Component({ listingId, rating, price }) {
               <Label htmlFor="ad-type">Ad Type</Label>
               <Input id="ad-type" placeholder="Enter type of advertisement" />
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="sample">Are you sending the Youtuber a sample product/service</Label>
+              <Input id="sample" placeholder="yes" />
+            </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="feedback">Feedback</Label>
-            <Textarea id="feedback" placeholder="Share your thoughts and suggestions" rows={4} />
+            <Label htmlFor="feedback">Description of Product/Service</Label>
+            <Textarea id="desc" placeholder="" rows={4} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="additional-comments">Additional Comments</Label>
-            <Textarea id="additional-comments" placeholder="Add any additional comments" rows={4} />
+            <Label htmlFor="feedback">Advertisement Speech Requirements</Label>
+            <Textarea id="feedback" placeholder="" rows={4} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="newsletter">

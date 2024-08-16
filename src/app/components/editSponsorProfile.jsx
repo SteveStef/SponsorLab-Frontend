@@ -73,7 +73,7 @@ export default function Component() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="container mx-auto px-4 py-8">
+    <form onSubmit={handleSubmit} className="container mx-auto px-4 py-8" style={{width: "70%"}}>
       <h1 className="mb-8 text-3xl font-bold">Edit Sponsor Profile</h1>
 
       <Card className="mb-6">
