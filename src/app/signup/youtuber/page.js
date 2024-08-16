@@ -38,7 +38,7 @@ export default function SignupYoutuber() {
         </div>
         <div className="text-center text-sm text-muted-foreground">
           Already have an account?{" "}
-          <Link href="./login" className="font-medium hover:underline" prefetch={false}>
+          <Link href="../login" className="font-medium hover:underline" prefetch={false}>
             Sign in
           </Link>
         </div>

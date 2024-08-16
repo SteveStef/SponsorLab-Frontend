@@ -19,7 +19,7 @@ export default function Component() {
           Sign Up as YouTuber
         </Link>
         <Link
-          href="./signup/sponsor"
+          href="../../signup/sponsor"
           className="cursor-pointer inline-flex h-12 items-center justify-center rounded-md border border-input bg-background px-6 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
         >
           Sign Up as Sponsor
@@ -27,7 +27,7 @@ export default function Component() {
       </div>
       <div>
         <Link
-          href="./login"
+          href="../../login"
           className="inline-flex h-12 items-center justify-center rounded-md border border-input bg-background px-6 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
           prefetch={false}
         >

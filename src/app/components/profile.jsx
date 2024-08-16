@@ -9,6 +9,7 @@ import { useAppContext } from "@/context";
 import Editor from "../components/editListing";
 import { useRouter }from "next/navigation";
 import Link from "next/link";
+import { Badge } from "@/components/ui/badge"
 
 export default function Component({id}) {
   const [user, setUser] = useState(null);
@@ -141,19 +142,13 @@ export default function Component({id}) {
                   }
                   {
                     listing.tags.length === 2 && 
-                      <>
-                      <div className={`absolute top-2 left-2 bg-primary-foreground text-primary px-2 py-1 rounded-md text-xs`}>
+                      <div className="absolute top-2 left-2 flex gap-2">
+                      <div className={`bg-primary-foreground text-primary px-2 py-1 rounded-md text-xs`}>
                         {listing.tags[0]}
                       </div>
-                        <div className={`absolute top-2 right-2 bg-primary-foreground text-primary px-2 py-1 rounded-md text-xs`}>
+                        <div className={`bg-primary-foreground text-primary px-2 py-1 rounded-md text-xs`}>
                         {listing.tags[1]}
                         </div>
-                      </>
-                  }
-                  {
-                    owner && 
-                      <div className="bg-green-800 absolute bottom-2 right-2 text-primary px-2 py-1 rounded-md text-xs">
-                        {listing.published ? "Public" : "Private"}
                       </div>
                   }
                 </div>
@@ -163,13 +158,17 @@ export default function Component({id}) {
                       <EyeIcon className="w-4 h-4 inline-block mr-1" />
                       {new Intl.NumberFormat().format(listing.estimatedViews)}
                     </div>
-                    <div className="flex items-center gap-1">
-                      <StarIcon className="w-4 h-4 fill-primary" />
-                      <StarIcon className="w-4 h-4 fill-primary" />
-                      <StarIcon className="w-4 h-4 fill-primary" />
-                      <StarIcon className="w-4 h-4 fill-primary" />
-                      <StarIcon className="w-4 h-4 fill-muted stroke-muted-foreground" />
-                    </div>
+
+                  {
+                    owner && 
+                        <Badge
+                          variant="solid"
+                          className="px-3 py-1 rounded-md text-xs font-medium"
+                          style={{ backgroundColor: listing.published ? "green" : "gray", color: "white" }}
+                        >
+                          {listing.published ? "Public" : "Private"}
+                        </Badge>
+                  }
                   </div>
                   <h3 onClick={() => handleListingClick(listing)} className="text-lg font-semibold mb-2 cursor-pointer">
                     {listing.title}

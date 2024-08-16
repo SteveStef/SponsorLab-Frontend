@@ -12,6 +12,7 @@ import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, Pagi
 import request from "@/request.js";
 import ListingLoad from "./sub-component/listingLoad.jsx";
 import FeaturedListings from "./sub-component/featuredListings.jsx";
+import { Badge } from "@/components/ui/badge"
 
 
 export default function Component() {
@@ -104,14 +105,14 @@ export default function Component() {
                   }
                   {
                     listing.tags.length === 2 && 
-                      <>
-                      <div className={`absolute top-2 left-2 bg-primary-foreground text-primary px-2 py-1 rounded-md text-xs`}>
+                      <div className="absolute top-2 left-2 flex gap-2">
+                      <div className={`bg-primary-foreground text-primary px-2 py-1 rounded-md text-xs`}>
                         {listing.tags[0]}
                       </div>
-                        <div className={`absolute top-2 right-2 bg-primary-foreground text-primary px-2 py-1 rounded-md text-xs`}>
+                        <div className={`bg-primary-foreground text-primary px-2 py-1 rounded-md text-xs`}>
                         {listing.tags[1]}
                         </div>
-                      </>
+                      </div>
                   }
                 </div>
                 <div className="p-4">
@@ -120,13 +121,14 @@ export default function Component() {
                       <EyeIcon className="w-4 h-4 inline-block mr-1" />
                       {new Intl.NumberFormat().format(listing.estimatedViews)}
                     </div>
-                    <div className="flex items-center gap-1">
-                      <StarIcon className="w-4 h-4 fill-primary" />
-                      <StarIcon className="w-4 h-4 fill-primary" />
-                      <StarIcon className="w-4 h-4 fill-primary" />
-                      <StarIcon className="w-4 h-4 fill-primary" />
-                      <StarIcon className="w-4 h-4 fill-muted stroke-muted-foreground" />
-                    </div>
+
+                    <Badge
+                      variant="solid"
+                      className="px-3 py-1 rounded-md text-xs font-medium"
+                      style={{ backgroundColor: "red", color: "white" }}
+                    >
+                      High Risk
+                    </Badge>
                   </div>
                   <h3 className="text-lg font-semibold mb-2">{listing.title}</h3>
                   <div className="flex items-center justify-between">

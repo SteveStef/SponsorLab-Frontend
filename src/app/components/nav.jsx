@@ -19,15 +19,14 @@ export default function Navbar() {
     { url: "../profiles", name: "Youtubers", auth: true, role: "ANY" },
     //{ url: "../create", name: "Create", auth: true, role: "CREATOR" },
     { url: "../../signup", name: "Login/Signup", auth: false, role: "ANY" },
-    { url: "../../requests", name: "Requests", auth: true, role: "ANY" },
   ];
 
   const childLinks = [
     { url: "../../listings", name: "Listings", auth: true, role: "ANY" },
     //{ url: "../pricing", name: "Pricing", auth: true, role: "CREATOR" },
     { url: "../profiles", name: "Youtubers", auth: true, role: "ANY" },
-    { url: "../create", name: "Create", auth: true, role: "ANY" },
-    { url: "../organizations", name: "Organization", auth: true, role: "CREATOR" },
+    { url: "../create", name: "Create Listing", auth: true, role: "ANY" },
+    { url: "../organizations", name: "Organizations", auth: true, role: "CREATOR" },
     { url: "../../signup", name: "Login/Signup", auth: false, role: "ANY" },
     { url: "../../requests", name: "Requests", auth: true, role: "ANY" },
     { url: "../../profile/"+organization, name: "Profile", auth: true, role: "ANY" },
@@ -66,48 +65,70 @@ export default function Navbar() {
               }
             })
           }
+
           {
-            auth &&
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full">
-                  <Avatar className="h-10 w-10 border">
-                    <AvatarImage src={profilePic} alt="Profile" />
-                    <AvatarFallback>{name[0]}</AvatarFallback>
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-              { role === "CREATOR" && 
-                <DropdownMenuItem>
-                  <Link href="../../../create" className="flex items-center gap-2" prefetch={false}>
-                    <div className="h-4 w-4" />
-                    <span>Create</span>
-                  </Link>
-                </DropdownMenuItem>
+            auth && 
+              <>
+
+        <div className="relative">
+          <Link href="../../requests" prefetch={false}>
+          <Button variant="ghost" size="icon" className="rounded-full">
+            <InboxIcon className="h-5 w-5" />
+            <span className="sr-only">Requests</span>
+          </Button>
+          </Link>
+          <div className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">
+            1
+          </div>
+        </div>
+
+        <div className="relative">
+                  <Link href="../../chat" prefetch={false}>
+          <Button variant="ghost" size="icon" className="rounded-full">
+            <BellIcon className="h-5 w-5" />
+            <span className="sr-only">Notifications</span>
+          </Button>
+          </Link>
+          <div className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">
+            1
+          </div>
+        </div>
+
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Avatar className="h-10 w-10 border">
+                <AvatarImage src={profilePic} alt="Profile" />
+                <AvatarFallback>{name[0]}</AvatarFallback>
+              </Avatar>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {
+                role === "CREATOR" && 
+              <DropdownMenuItem>
+                <Link href={`../../create`} className="flex items-center gap-2" prefetch={false}>Create Listing</Link>
+              </DropdownMenuItem>
               }
-                <DropdownMenuItem>
-                  <Link href={`../../profile/${organization}`} className="flex items-center gap-2" prefetch={false}>
-                    <div className="h-4 w-4" />
-                    <span>Profile</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Link href="../../../settings" className="flex items-center gap-2" prefetch={false}>
-                    <div className="h-4 w-4" />
-                    <span>Settings</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <Link onClick={logout} href="#" className="flex items-center gap-2" prefetch={false}>
-                    <div className="h-4 w-4" />
-                    <span className="flex" ><span style={{position: "absolute", left: "5px", top:"8px"}}><LogInIcon /></span>{" "}Logout</span>
-                  </Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+              <DropdownMenuItem>  
+                <Link href={`../../profile/${organization}`} className="flex items-center gap-2" prefetch={false}>My Profile</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Link href={`../../settings`} className="flex items-center gap-2" prefetch={false}>Settings</Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>
+                <Link onClick={logout} href="#" className="flex items-center gap-2" prefetch={false}>
+                  <span className="flex" ><span style={{position: "absolute", left: "5px", top:"8px"}}><LogInIcon /></span>{" "}
+                    <span style={{marginLeft: "20px"}}>Logout</span></span>
+                </Link>
+              </DropdownMenuItem>
+
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+              </>
           }
+
         </nav>
         <Sheet>
           <SheetTrigger asChild>
@@ -159,74 +180,6 @@ function MenuIcon(props) {
   )
 }
 
-
-function MountainIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="m8 3 4 8 5-5 5 15H2L8 3z" />
-    </svg>
-  )
-}
-
-
-function MoonIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
-    </svg>
-  )
-}
-
-
-function SunIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="12" cy="12" r="4" />
-      <path d="M12 2v2" />
-      <path d="M12 20v2" />
-      <path d="m4.93 4.93 1.41 1.41" />
-      <path d="m17.66 17.66 1.41 1.41" />
-      <path d="M2 12h2" />
-      <path d="M20 12h2" />
-      <path d="m6.34 17.66-1.41 1.41" />
-      <path d="m19.07 4.93-1.41 1.41" />
-    </svg>
-  )
-}
-
 function LogInIcon(props) {
   return (
     <svg
@@ -244,6 +197,45 @@ function LogInIcon(props) {
       <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
       <polyline points="10 17 15 12 10 7" />
       <line x1="15" x2="3" y1="12" y2="12" />
+    </svg>
+  )
+}
+
+function BellIcon(props) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+      <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+    </svg>
+  )
+}
+function InboxIcon(props) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <polyline points="22 12 16 12 14 15 10 15 8 12 2 12" />
+      <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
     </svg>
   )
 }
