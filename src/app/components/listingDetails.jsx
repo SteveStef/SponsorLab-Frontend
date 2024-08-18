@@ -51,13 +51,10 @@ export default function Component({ params }) {
 
           </div>
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-0.5">
-              <StarIcon className="w-5 h-5 fill-primary" />
-              <StarIcon className="w-5 h-5 fill-primary" />
-              <StarIcon className="w-5 h-5 fill-primary" />
-              <StarIcon className="w-5 h-5 fill-muted stroke-muted-foreground" />
-              <StarIcon className="w-5 h-5 fill-muted stroke-muted-foreground" />
-            </div>
+            {
+              listing && 
+                displayBadge(listing)
+            }
             <div className="text-4xl font-bold">
               ${listing && (listing.estimatedPrice || 0).toLocaleString()}
             </div>
@@ -228,3 +225,37 @@ function EyeIcon(props) {
     </svg>
   )
 }
+
+function displayBadge(listing) {
+  const deviations = listing.user.channel.viewDeviations;
+  const views = listing.estimatedViews;
+  const details = [
+    {backgroundColor: "green", color: "white"},
+    {backgroundColor: "#FDDA0D", color: "black"},
+    {backgroundColor: "red", color: "white"}
+  ];
+  const text = [
+    "Low Risk",
+    "Medium Risk",
+    "High Risk",
+  ];
+  for(let i = 0; i < deviations.length - 1; i++) {
+    if(views >= deviations[i] && views <= deviations[i + 1]) {
+      return <Badge
+        variant="solid"
+        className="px-3 py-1 rounded-md text-xs font-medium"
+        style={details[i]}
+      >
+        { text[i] }
+      </Badge>
+    }
+  }
+  return <Badge
+    variant="solid"
+    className="px-3 py-1 rounded-md text-xs font-medium"
+    style={{ backgroundColor: "red", color: "white" }}
+  >
+    High Risk
+  </Badge>
+}
+

@@ -5,9 +5,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { useState } from "react"; 
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge"
 import request, { axiosRequest } from "@/request";
 
-export default function Component({listing, setSelectedListing}) {
+export default function Component({listing, setSelectedListing, viewDeviations}) {
   const [title, setTitle] = useState(listing.title);
   const [estimatedPrice, setEstimatedPrice] = useState(listing.estimatedPrice);
   const [estimatedViews, setEstimatedViews] = useState(listing.estimatedViews);
@@ -23,6 +24,7 @@ export default function Component({listing, setSelectedListing}) {
       setImage(event.target.files[0]);
     }
   };
+
   function formatDate(date) {
     const year = date.getFullYear(); // Get the full year
     const month = String(date.getMonth() + 1).padStart(2, '0'); // Get the month and ensure it's two digits
@@ -157,14 +159,8 @@ export default function Component({listing, setSelectedListing}) {
         <div className="space-y-2">
           <h3 className="text-lg font-semibold">Post Stats</h3>
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1">
-              <StarIcon className="w-5 h-5 fill-primary" />
-              <StarIcon className="w-5 h-5 fill-primary" />
-              <StarIcon className="w-5 h-5 fill-primary" />
-              <StarIcon className="w-5 h-5 fill-muted stroke-muted-foreground" />
-              <StarIcon className="w-5 h-5 fill-muted stroke-muted-foreground" />
-            </div>
-            <span className="text-muted-foreground">4.2</span>
+
+            {displayBadge(listing, viewDeviations)}
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div className="flex items-center gap-2">
@@ -269,4 +265,36 @@ function StarIcon(props) {
       <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
     </svg>
   )
+}
+
+function displayBadge(listing, deviations) {
+  const views = listing.estimatedViews;
+  const details = [
+    {backgroundColor: "green", color: "white"},
+    {backgroundColor: "#FDDA0D", color: "black"},
+    {backgroundColor: "red", color: "white"}
+  ];
+  const text = [
+    "Low Risk",
+    "Medium Risk",
+    "High Risk",
+  ];
+  for(let i = 0; i < deviations.length - 1; i++) {
+    if(views >= deviations[i] && views <= deviations[i + 1]) {
+      return <Badge
+        variant="solid"
+        className="px-3 py-1 rounded-md text-xs font-medium"
+        style={details[i]}
+      >
+        { text[i] }
+      </Badge>
+    }
+  }
+  return <Badge
+    variant="solid"
+    className="px-3 py-1 rounded-md text-xs font-medium"
+    style={{ backgroundColor: "red", color: "white" }}
+  >
+    High Risk
+  </Badge>
 }

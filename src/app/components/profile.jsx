@@ -26,6 +26,7 @@ export default function Component({id}) {
     if(response && response.success) {
       setUser(response.body);
       setListings(response.body.posts);
+      console.log(response.body);
       setOwner(response.body.owner);
     }
     setLoading(false);
@@ -41,7 +42,7 @@ export default function Component({id}) {
     router.push(`../../listings/${listing.id}`);
   } // Date object being wrong, and add banner change in settings
 
-  if(selectedListing) return <Editor listing={selectedListing} setSelectedListing={setSelectedListing}/>
+  if(selectedListing) return <Editor listing={selectedListing} viewDeviations={user.channel.viewDeviations} setSelectedListing={setSelectedListing}/>
 
   return (
     <div className={`w-full max-w-6xl mx-auto ${loading ? "animate-pulse rounded" : ""}`}>

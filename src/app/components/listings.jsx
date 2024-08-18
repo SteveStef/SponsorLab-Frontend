@@ -34,11 +34,13 @@ export default function Component() {
   async function fetchListings() {
     const url = `${process.env.NEXT_PUBLIC_API_URL}/posts/page/1`;
     const response = await request(url, "GET", null);
-    console.log(response);
+    // console.log(response);
     if(response && response.success) {
       setListings(response.body);
     }
   }
+
+
 
   useEffect(() => {
     fetchListings();
@@ -122,13 +124,9 @@ export default function Component() {
                       {new Intl.NumberFormat().format(listing.estimatedViews)}
                     </div>
 
-                    <Badge
-                      variant="solid"
-                      className="px-3 py-1 rounded-md text-xs font-medium"
-                      style={{ backgroundColor: "red", color: "white" }}
-                    >
-                      High Risk
-                    </Badge>
+                    {
+                      displayBadge(listing)
+                    }
                   </div>
                   <h3 className="text-lg font-semibold mb-2">{listing.title}</h3>
                   <div className="flex items-center justify-between">
@@ -306,3 +304,37 @@ function UserIcon(props) {
     </svg>
   )
 }
+
+function displayBadge(listing) {
+  const deviations = listing.user.channel.viewDeviations;
+  const views = listing.estimatedViews;
+  const details = [
+    {backgroundColor: "green", color: "white"},
+    {backgroundColor: "yellow", color: "black"},
+    {backgroundColor: "red", color: "white"}
+  ];
+  const text = [
+    "Low Risk",
+    "Medium Risk",
+    "High Risk",
+  ];
+  for(let i = 0; i < deviations.length - 1; i++) {
+    if(views >= deviations[i] && views <= deviations[i + 1]) {
+      return <Badge
+        variant="solid"
+        className="px-3 py-1 rounded-md text-xs font-medium"
+        style={details[i]}
+      >
+        { text[i] }
+      </Badge>
+    }
+  }
+  return <Badge
+    variant="solid"
+    className="px-3 py-1 rounded-md text-xs font-medium"
+    style={{ backgroundColor: "red", color: "white" }}
+  >
+    High Risk
+  </Badge>
+}
+

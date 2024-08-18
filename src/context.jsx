@@ -1,7 +1,7 @@
 
 "use client"
 import { createContext, useContext, useState, useEffect } from "react";
-import request, { getCookie } from "@/request";
+import request from "@/request";
 const AppContext = createContext();
 
 export function AppWrapper({children}) {
@@ -50,8 +50,6 @@ export function AppWrapper({children}) {
     }
     setAuth(true);
   }
-
-
 
   useEffect(() => {
   setName(localStorage.getItem("name") || "");

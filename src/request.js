@@ -12,6 +12,14 @@ const request = async (url, req_method, body) => {
       }
       const response = await fetch(url, requestOptions);
       const data = await response.json();
+
+      if(response.status === 401 && data.error && data.error === "Not authorized") {
+        const parts = window.location.href.split("/");
+        const path = "/" + parts[parts.length - 1];
+        const validPaths = ["/login", "/", "/signup", "/terms-of-service", "/signup/youtuber", "signup/sponsor"];
+        //if(!validPaths.includes(path)) window.location.href = "../../../signup";
+      }
+
       return data;
     } else if(method === 'POST' || method === 'PUT') {
       const requestOptions = {
@@ -24,11 +32,14 @@ const request = async (url, req_method, body) => {
 
       const response = await fetch(url, requestOptions);
       const data = await response.json();
-      if(response.status === 401 && data.error) {
-        console.log("Unauthorized");
-        window.location.href = "/login";
-        return null;
+
+      if(response.status === 401 && data.error && data.error === "Not authorized") {
+        const parts = window.location.href.split("/");
+        const path = "/" + parts[parts.length - 1];
+        const validPaths = ["/login", "/", "/signup", "/terms-of-service", "/signup/youtuber", "signup/sponsor"];
+        if(!validPaths.includes(path)) window.location.href = "../../../signup";
       }
+
       return data;
     } else {
       return null;
