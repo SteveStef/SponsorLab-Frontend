@@ -1,8 +1,4 @@
-/**
- * v0 by Vercel.
- * @see https://v0.dev/t/zxDUDhfUUxI
- * Documentation: https://v0.dev/docs#integrating-generated-code-into-your-nextjs-app
- */
+"use client";
 import { Label } from "@/components/ui/label"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
@@ -10,8 +6,29 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogTrigger, DialogContent, DialogFooter, DialogClose } from "@/components/ui/dialog"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import request from "@/request";
+import { useAppContext } from "@/context";
 
 export default function Requests() {
+  const [requests, setRequests] = useState([]);
+
+  async function getRequests() {
+    let url = "";
+    url = `${process.env.NEXT_PUBLIC_API_URL}/requests/creator`;
+    const response = await request(url, "GET", null);
+    //console.log(response);
+    if(response && response.success) {
+      setRequests(response.body);
+    }
+  }
+
+  useEffect(() => {
+    getRequests();
+  },[]);
+
+
   return (
     <div className="w-full max-w-4xl mx-auto py-12 px-4 md:px-6">
       <div className="space-y-8">
@@ -39,10 +56,39 @@ export default function Requests() {
         </div>
         <div className="space-y-6">
           <div className="grid gap-6">
+            {
+              requests.map((req, idx) => {
+                if(req.status === "PENDING") return <div key={idx}><PendingCard requestData={req} /></div>
+                  else if(req.status === "ACCEPTED") return <div key={idx}> <AcceptedCard requestData={req} /></div>
+                  else return <div key={idx}><DeclinedCard requestData={req} /></div>
+              })
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+
+function PendingCard({ requestData }) {
+  const router = useRouter();
+
+  async function openChat() {
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/chat`;
+    const body = { sponsorEmail: requestData.sponsor.email }
+    const response = await request(url, "POST", body);
+    //console.log(response);
+    if(response && response.success) {
+      router.push("../chat");
+    }
+  }
+
+  return (
             <Card className="w-full">
               <CardHeader>
-                <CardTitle>Acme Co. Sponsorship</CardTitle>
-                <CardDescription>Requested by John Doe</CardDescription>
+                <CardTitle>{requestData.sponsor.company.orginization}</CardTitle>
+                <CardDescription>Requested by {requestData.sponsor.name}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-3 gap-4">
@@ -54,11 +100,11 @@ export default function Requests() {
                   </div>
                   <div>
                     <p className="text-sm font-medium">Requested Price</p>
-                    <p className="text-lg font-medium">$5,000</p>
+                    <p className="text-lg font-medium">${requestData.requestedPrice}</p>
                   </div>
                   <div>
                     <p className="text-sm font-medium">Duration</p>
-                    <p className="text-lg font-medium">3 months</p>
+                    <p className="text-lg font-medium">{requestData.duration} seconds</p>
                   </div>
                 </div>
               </CardContent>
@@ -66,7 +112,7 @@ export default function Requests() {
                 <Button variant="outline" size="sm">
                   Decline
                 </Button>
-                <Button size="sm">Accept</Button>
+                <Button onClick={openChat} size="sm">Accept</Button>
                 <Dialog>
                   <DialogTrigger asChild>
                     <Button variant="outline" size="sm">
@@ -80,13 +126,11 @@ export default function Requests() {
                         <AvatarFallback>JD</AvatarFallback>
                       </Avatar>
                       <div className="grid gap-1">
-                        <h3 className="text-lg font-semibold">John Doe</h3>
-                        <p className="text-muted-foreground">Acme Co.</p>
+                        <h3 className="text-lg font-semibold">{requestData.sponsor.name}</h3>
+                        <p className="text-muted-foreground">{requestData.sponsor.company.orginization}</p>
                       </div>
                       <p>
-                        We are excited to partner with your platform and believe our\n products would be a great fit
-                        for your audience. We are\n requesting a 3-month sponsorship at a rate of $5,000 per\n month.
-                        Please let us know if you have any questions or\n concerns.
+                          { requestData.description }
                       </p>
                     </div>
                     <DialogFooter>
@@ -98,6 +142,13 @@ export default function Requests() {
                 </Dialog>
               </CardFooter>
             </Card>
+
+  )
+}
+
+
+function AcceptedCard() {
+  return (
             <Card className="w-full">
               <CardHeader>
                 <CardTitle>Acme Inc. Sponsorship</CardTitle>
@@ -125,6 +176,12 @@ export default function Requests() {
                 <Button size="sm">Initiate Payment</Button>
               </CardFooter>
             </Card>
+  )
+}
+
+
+function DeclinedCard() {
+  return (
             <Card className="w-full">
               <CardHeader>
                 <CardTitle>Acme LLC Sponsorship</CardTitle>
@@ -191,9 +248,13 @@ export default function Requests() {
                 </div>
               </CardFooter>
             </Card>
-          </div>
-        </div>
-      </div>
-    </div>
   )
 }
+
+
+
+
+
+
+
+

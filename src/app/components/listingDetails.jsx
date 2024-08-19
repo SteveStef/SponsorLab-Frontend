@@ -18,14 +18,14 @@ export default function Component({ params }) {
     const url = `${process.env.NEXT_PUBLIC_API_URL}/posts/${params.id}`;
     const response = await request(url, "GET", null);
     if(response && response.success) setListing(response.body);
-    console.log(response);
+    //console.log(response);
   }
 
   useEffect(() => {
     if(params.id) fetchListing();
   }, [params]);
 
-  if(showSponsorForm) return <SponsorForm />
+  if(listing && showSponsorForm) return <SponsorForm listing={listing} />
 
   return (
     <div className="grid md:grid-cols-2 gap-6 lg:gap-12 items-start max-w-7xl px-4 mx-auto py-6">

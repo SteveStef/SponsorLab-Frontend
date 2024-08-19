@@ -2,6 +2,8 @@
 "use client"
 import { createContext, useContext, useState, useEffect } from "react";
 import request from "@/request";
+import io from "socket.io-client";
+
 const AppContext = createContext();
 
 export function AppWrapper({children}) {
@@ -13,11 +15,12 @@ export function AppWrapper({children}) {
   const [auth, setAuth] = useState(false);
   const [organization, setOrganization] = useState("");
   const [description, setDescription] = useState("");
+  const [socket, setSocket] = useState(null);
 
   async function fetchUser() {
     const url = `${process.env.NEXT_PUBLIC_API_URL}/users/account`;
     const response = await request(url, "GET", null);
-    console.log(response);
+    //console.log(response);
     if(!response || !response.success) {
       setAuth(false);
       return;
@@ -48,6 +51,7 @@ export function AppWrapper({children}) {
       setOrganization(response.body.channel.name);
       localStorage.setItem("organization", response.body.channel.name);
     }
+    connectToSocket();
     setAuth(true);
   }
 
@@ -62,6 +66,14 @@ export function AppWrapper({children}) {
     fetchUser();
   },[]);
 
+  function connectToSocket() {
+    if(!socket) {
+      const socketConn = io.connect(process.env.NEXT_PUBLIC_API_URL);
+      console.log("connected to socket");
+      setSocket(socketConn);
+    }
+  }
+
   const state = {
     name, setName,
     role, setRole,
@@ -70,7 +82,8 @@ export function AppWrapper({children}) {
     auth, setAuth,
     organization, setOrganization,
     email, setEmail,
-    description, setDescription
+    description, setDescription,
+    socket, setSocket
   }
 
   return (

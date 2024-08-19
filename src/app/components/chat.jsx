@@ -1,52 +1,111 @@
 "use client"
-import { useState } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { UserIcon, DollarSignIcon, SendIcon, MenuIcon } from "lucide-react"
+import { useState, useEffect } from "react";
+import { useAppContext } from "@/context";
+import request from "@/request";
+
+//import io from "socket.io-client";
+//const socket = io.connect(process.env.NEXT_PUBLIC_API_URL);
 
 export default function Component() {
-  const [messages, setMessages] = useState([
-    { id: 1, sender: 'You', content: 'Hi, I\'m interested in a sponsorship opportunity.' },
-    { id: 2, sender: 'TechReviewer', content: 'Great! I\'d love to hear more about your product.' },
-    { id: 3, sender: 'You', content: 'We have a new smartphone accessory that we think would be perfect for your tech review channel.' },
-  ])
+  const { socket } = useAppContext();
+  const [chatRooms, setChatRooms] = useState([]);
+
+  const [selected, setSelected] = useState(0);
+  const [selectedParticipant, setSelectedParticipant] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [joined, setJoined] = useState(false);
+  const [messages, setMessages] = useState([]);
+
   const [newMessage, setNewMessage] = useState('')
   const [showSidebar, setShowSidebar] = useState(false)
 
-  const handleSendMessage = () => {
+  async function getChatRooms() {
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/chat`;
+    const response = await request(url, "GET", null);
+    console.log(response);
+    if(response && response.success) {
+      setChatRooms(response.body);
+      setMessages(response.body[0].messages);
+      setSelectedParticipant(response.body[0].participants[0].user)
+    }
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    getChatRooms();
+  },[]);
+
+  useEffect(() => {
+    if(chatRooms.length > 0) {
+      setSelectedParticipant(chatRooms[selected].participants[0].user);
+    }
+  },[selected]);
+
+  useEffect(() => {
+    if(!loading) {
+      for(let i = 0; i < chatRooms.length; i++) {
+        socket.emit("join_room", { room:chatRooms[i].id });
+      }
+      setJoined(true)
+    }
+  },[loading]);
+
+  useEffect(() => {
+    if(joined) {
+      socket.on("recieve_message", (data) => {
+        setMessages((list) => [...list, { id: list.length + 1, senderId: 'Them', content: data.message}]);
+      });
+    }
+  },[joined]);
+
+
+
+  const handleSendMessage = async () => {
     if (newMessage.trim()) {
-      setMessages([...messages, { id: messages.length + 1, sender: 'You', content: newMessage.trim() }])
-      setNewMessage('')
+      socket.emit("send_message", {room: chatRooms[selected].id, message: newMessage});
+      setMessages((list) => [...list, { id: list.length + 1, senderId: 'You', content: newMessage }]);
+      setNewMessage('');
+      const res = await request(`${process.env.NEXT_PUBLIC_API_URL}/chat/message`, "POST", {roomId: chatRooms[selected].id, message: newMessage});
+      console.log(res);
     }
   }
 
-  const youtubers = [
-    { name: 'TechReviewer', subscribers: '1.2M', active: true },
-    { name: 'GamingPro', subscribers: '800K', active: false },
-    { name: 'FitnessGuru', subscribers: '500K', active: false },
-    { name: 'CookingMaster', subscribers: '2M', active: false },
-  ]
+  function switchRooms(index) {
+    const msgs = [...messages];
+    const updateRooms = [...chatRooms];
+    updateRooms[selected].messages = msgs;
+    setChatRooms(updateRooms);
+    setSelected(index)
+    setMessages(updateRooms[index].messages);
+  }
 
   return (
     <div className="flex h-screen bg-black ">
       {/* Sidebar */}
       <div className={`w-64 bg-gray-900 p-4 ${showSidebar ? 'block' : 'hidden'} md:block`}>
         <h2 className="text-xl font-bold mb-4">Conversations</h2>
-        {youtubers.map((youtuber, index) => (
-          <div key={index} className={`flex items-center space-x-2 p-2 rounded ${youtuber.active ? 'bg-green-900' : 'hover:bg-gray-800'} cursor-pointer mb-2`}>
+        {chatRooms.map((room, index) => {
+          const participant = room.participants[0]
+          const name = participant.user.channel ? participant.user.channel.name : participant.user.company.orginization;
+
+          return (
+          <div key={index} onClick={() => switchRooms(index)} className={`flex items-center space-x-2 p-2 rounded ${selected === index ? 'bg-green-900' : 'hover:bg-gray-800'} cursor-pointer mb-2`}>
             <Avatar>
-              <AvatarImage src={`/placeholder-user-${index + 1}.jpg`} alt={youtuber.name} />
+              <AvatarImage src={`${(participant.user.s3ImageName || participant.user.googleImage)||""}`} alt={room.participants[0].user.name} />
               <AvatarFallback><UserIcon className="h-6 w-6" /></AvatarFallback>
             </Avatar>
             <div>
-              <p className="font-semibold">{youtuber.name}</p>
-              <p className="text-xs ">{youtuber.subscribers} subscribers</p>
+              <p className="font-semibold">{participant.user.name}</p>
+              <p className="text-xs ">{name}</p>
             </div>
           </div>
-        ))}
+          )})}
       </div>
 
       {/* Main Chat Area */}
@@ -58,12 +117,12 @@ export default function Component() {
           </Button>
           <div className="flex items-center space-x-2">
             <Avatar>
-              <AvatarImage src="/placeholder-user.jpg" alt="TechReviewer" />
+              <AvatarImage src={selectedParticipant && (selectedParticipant.s3ImageUrl || selectedParticipant.googleImage) || "/place.svg"} alt="user image" />
               <AvatarFallback><UserIcon className="h-6 w-6" /></AvatarFallback>
             </Avatar>
             <div>
-              <h2 className="font-semibold">TechReviewer</h2>
-              <p className="text-xs ">1.2M subscribers</p>
+              <h2 className="font-semibold">{selectedParticipant && selectedParticipant.name}</h2>
+              <p className="text-xs ">{selectedParticipant && (selectedParticipant.channel ? selectedParticipant.channel.name : selectedParticipant.company.orginization)}</p>
             </div>
           </div>
           <Card className="bg-gray-900 text-green-400 border-green-900">
@@ -81,8 +140,8 @@ export default function Component() {
         <main className="flex-1 overflow-hidden">
           <ScrollArea className="h-full p-4">
             {messages.map((message) => (
-              <div key={message.id} className={`flex ${message.sender === 'You' ? 'justify-end' : 'justify-start'} mb-4`}>
-                <div className={`rounded-lg p-2 max-w-[70%] ${message.sender === 'You' ? 'bg-green-700 text-white' : 'bg-gray-800 '}`}>
+              <div key={message.id} className={`flex ${message.senderId === 'You' ? 'justify-end' : 'justify-start'} mb-4`}>
+                <div className={`rounded-lg p-2 max-w-[70%] ${message.senderId === 'You' ? 'bg-green-700 text-white' : 'bg-gray-800 '}`}>
                   <p className="text-sm">{message.content}</p>
                 </div>
               </div>
