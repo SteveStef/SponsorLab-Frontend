@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -8,9 +8,7 @@ import { UserIcon, DollarSignIcon, SendIcon, MenuIcon } from "lucide-react"
 import { useState, useEffect } from "react";
 import { useAppContext } from "@/context";
 import request from "@/request";
-
-//import io from "socket.io-client";
-//const socket = io.connect(process.env.NEXT_PUBLIC_API_URL);
+import { toast } from "sonner";
 
 export default function Component() {
   const { socket } = useAppContext();
@@ -24,11 +22,12 @@ export default function Component() {
 
   const [newMessage, setNewMessage] = useState('')
   const [showSidebar, setShowSidebar] = useState(false)
+  const [wHeight, setWHeight] = useState(0);
 
   async function getChatRooms() {
     const url = `${process.env.NEXT_PUBLIC_API_URL}/chat`;
     const response = await request(url, "GET", null);
-    console.log(response);
+    //console.log(response);
     if(response && response.success) {
       setChatRooms(response.body);
       setMessages(response.body[0].messages);
@@ -38,6 +37,7 @@ export default function Component() {
   }
 
   useEffect(() => {
+    if(window) setWHeight(window.innerHeight);
     getChatRooms();
   },[]);
 
@@ -48,7 +48,7 @@ export default function Component() {
   },[selected]);
 
   useEffect(() => {
-    if(!loading) {
+    if(!loading && socket) {
       for(let i = 0; i < chatRooms.length; i++) {
         socket.emit("join_room", { room:chatRooms[i].id });
       }
@@ -57,22 +57,21 @@ export default function Component() {
   },[loading]);
 
   useEffect(() => {
-    if(joined) {
+    if(joined && socket) {
       socket.on("recieve_message", (data) => {
         setMessages((list) => [...list, { id: list.length + 1, senderId: 'Them', content: data.message}]);
       });
     }
   },[joined]);
 
-
-
   const handleSendMessage = async () => {
     if (newMessage.trim()) {
       socket.emit("send_message", {room: chatRooms[selected].id, message: newMessage});
       setMessages((list) => [...list, { id: list.length + 1, senderId: 'You', content: newMessage }]);
       setNewMessage('');
-      const res = await request(`${process.env.NEXT_PUBLIC_API_URL}/chat/message`, "POST", {roomId: chatRooms[selected].id, message: newMessage});
-      console.log(res);
+      const res = await request(`${process.env.NEXT_PUBLIC_API_URL}/chat/message`, "POST", 
+        {roomId: chatRooms[selected].id, message: newMessage});
+      if(!res || !res.success) toast.error("Failed to send message, try again later");
     }
   }
 
@@ -86,7 +85,7 @@ export default function Component() {
   }
 
   return (
-    <div className="flex h-screen bg-black ">
+    <div className="flex bg-black" style={{height: `${(wHeight - 80)}px`}}>
       {/* Sidebar */}
       <div className={`w-64 bg-gray-900 p-4 ${showSidebar ? 'block' : 'hidden'} md:block`}>
         <h2 className="text-xl font-bold mb-4">Conversations</h2>

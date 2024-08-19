@@ -1,5 +1,5 @@
 
-"use client"
+"use client";
 import { createContext, useContext, useState, useEffect } from "react";
 import request from "@/request";
 import io from "socket.io-client";

@@ -8,17 +8,41 @@ import { useState, useEffect } from "react";
 import request from "@/request";
 import Image from "next/image";
 import SponsorForm from "../components/sponsorForm";
+import { PlayIcon, ThumbsUpIcon, UserIcon, VideoIcon } from "lucide-react"
 
 export default function Component({ params }) {
 
   const [listing, setListing] = useState(null);
   const [showSponsorForm, setShowSponsorForm] = useState(false);
+  const [viewRanges, setViewRanges] = useState([]);
 
   async function fetchListing() {
     const url = `${process.env.NEXT_PUBLIC_API_URL}/posts/${params.id}`;
     const response = await request(url, "GET", null);
-    if(response && response.success) setListing(response.body);
-    //console.log(response);
+    if(response && response.success) {
+      setListing(response.body);
+      let tmp = [];
+      let dev = response.body.user.channel.viewDeviations;
+      const normalDist = [2.2, 13.6, 68.2, 13.6, 2.1, 0.1];
+
+      const skips = 6 - dev.length;
+      let start = 0;
+
+      for(let i = 0; i < skips; i++) {
+        start += normalDist[i];
+      }
+
+      for(let i = 0; i < dev.length - 1; i++) {
+        let range = dev[i] + "-" + dev[i + 1];
+        tmp.push({ range, probability: (normalDist[i + skips] + start).toFixed(1)});
+        start = 0;
+      }
+
+      tmp.push({ range: ">"+dev[dev.length-1], probability: normalDist[normalDist.length-1]})
+
+      setViewRanges(tmp);
+    }
+    console.log(response);
   }
 
   useEffect(() => {
@@ -42,9 +66,7 @@ export default function Component({ params }) {
         <div className="grid gap-1">
           <h1 className="text-2xl font-bold">{listing && listing.title}</h1>
           <div className="text-xs text-muted-foreground"> 
-            Due on {listing && new Date(listing.uploadDate).toDateString()} {' | '}
-            Estimated {' '} <EyeIcon className="w-4 h-6 inline-block mr-1" />
-              {new Intl.NumberFormat().format(listing && listing.estimatedViews || 0)}
+            Due on {listing && new Date(listing.uploadDate).toDateString()}
             </div>
           <div className="text-muted-foreground">
             {listing && listing.description}
@@ -55,9 +77,16 @@ export default function Component({ params }) {
               listing && 
                 displayBadge(listing)
             }
+
             <div className="text-4xl font-bold">
-              ${listing && (listing.estimatedPrice || 0).toLocaleString()}
+              ${listing && (listing.estimatedPrice||0).toLocaleString()}
             </div>
+
+            <div className="flex items-center text-muted-foreground">
+              <Eye className="w-4 h-4 mr-1" />
+              <span>Est. {listing && (listing.estimatedViews || 0).toLocaleString()} views</span>
+            </div>
+
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -70,43 +99,61 @@ export default function Component({ params }) {
         <Button onClick={() => setShowSponsorForm(true)} className="mt-4">Sponsor this listing</Button>
       </div>
       <div className="grid gap-4">
-        <Card>
-          <CardHeader>
-            <CardTitle>Author Stats</CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-4">
-            <div className="flex items-center justify-between">
-              <div>Subscribers</div>
-              <div className="font-bold">{listing && (listing.user.channel.subscribersCount || 0).toLocaleString()
-              }</div>
-            </div>
-            <div className="flex items-center justify-between">
-              <div>Total Views</div>
-              <div className="font-bold">{listing && (listing.user.channel.totalViews || 0).toLocaleString()
-              }</div>
-            </div>
-            <div className="flex items-center justify-between">
-              <div>Total Videos</div>
-              <div className="font-bold">{listing && (listing.user.channel.videoCount || 0).toLocaleString()
-              }</div>
-            </div>
-            <div className="flex items-center justify-between">
-              <div>Avg. Views per Video</div>
-              <div className="font-bold">{listing && ((listing.user.channel.totalViews / listing.user.channel.videoCount)||0).toLocaleString()}</div>
-            </div>
-          </CardContent>
+        {/* New section: View Range Probabilities */}
+        <Card className="p-6 rounded-lg">
+          <h2 className="text-xl font-semibold mb-4">View Range Probabilities</h2>
+          <div className="space-y-2">
+            {viewRanges.map((item, index) => (
+              <div key={index} className="flex items-center">
+                <span className="w-24 text-sm">{item.range}</span>
+                <div className="flex-1 h-6 bg-gray-700 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-green-500"
+                    style={{ width: `${item.probability}%` }}
+                  ></div>
+                </div>
+                <span className="w-12 text-right text-sm">{item.probability}%</span>
+              </div>
+            ))}
+          </div>
         </Card>
         <Card>
           <CardHeader>
             <CardTitle>About the Author</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-4">
-            <div>
-              <div className="text-sm font-semibold">{listing && listing.user.name}</div>
-              <div className="text-muted-foreground text-sm">
-                {listing && listing.user.channel.description}
+          <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
+            <div className="flex items-center space-x-2">
+              <UserIcon className="h-5 w-5 text-gray-400" />
+              <div>
+                <p className="text-sm font-semibold text-gray-300">Subscribers</p>
+                <p className="text-lg font-bold text-gray-100">{listing && (listing.user.channel.subscribersCount || 0).toLocaleString()}</p>
               </div>
             </div>
+            <div className="flex items-center space-x-2">
+              <PlayIcon className="h-5 w-5 text-gray-400" />
+              <div>
+                <p className="text-sm font-semibold text-gray-300">Avg. Views</p>
+                <p className="text-lg font-bold text-gray-100">
+                    {listing && (((listing.user.channel.totalViews / listing.user.channel.videoCount) || 0).toLocaleString())}
+                  </p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <VideoIcon className="h-5 w-5 text-gray-400" />
+              <div>
+                <p className="text-sm font-semibold text-gray-300">Total Videos</p>
+                <p className="text-lg font-bold text-gray-100">{listing && (listing.user.channel.videoCount || 0).toLocaleString()}</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <ThumbsUpIcon className="h-5 w-5 text-gray-400" />
+              <div>
+                <p className="text-sm font-semibold text-gray-300">Engagement Rate</p>
+                <p className="text-lg font-bold text-gray-100">8.5%</p>
+              </div>
+            </div>
+          </div>
             <Separator />
             <div className="flex items-center gap-4">
               <Image
@@ -124,6 +171,7 @@ export default function Component({ params }) {
             </div>
           </CardContent>
         </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>Related Videos</CardTitle>
@@ -182,10 +230,16 @@ export default function Component({ params }) {
             </div>
           </CardContent>
         </Card>
+
+
       </div>
     </div>
   )
 }
+
+
+
+
 
 function StarIcon(props) {
   return (
@@ -206,7 +260,7 @@ function StarIcon(props) {
   )
 }
 
-function EyeIcon(props) {
+function Eye(props) {
   return (
     <svg
       {...props}

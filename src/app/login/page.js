@@ -10,11 +10,13 @@ import { useRef } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useAppContext } from "@/context";
+import io from "socket.io-client";
 
 export default function Component() {
   const email = useRef("");
   const password = useRef("");
-  const { setDescription, setEmail, setAccountType, setName, setRole, setOrganization, setAuth, setProfilePic } = useAppContext();
+  const { setDescription, setEmail, setAccountType, setSocket,
+    setName, setRole, setOrganization, setAuth, setProfilePic } = useAppContext();
   const router = useRouter();
 
   async function login(e) {
@@ -45,9 +47,16 @@ export default function Component() {
       setAccountType(response.body.accountType);
       setOrganization(response.body.company.orginization);
       setDescription(response.body.bio);
+      connectToSocket();
       router.push("/listings");
     }
   }
+
+  function connectToSocket() {
+    const socketConn = io.connect(process.env.NEXT_PUBLIC_API_URL);
+    setSocket(socketConn);
+  }
+
 
   const googleLoginSponsor = () => window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/google/auth/sponsor`;
   const googleLoginYoutuber = () => window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/google/auth/creator`;
