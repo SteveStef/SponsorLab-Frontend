@@ -1,3 +1,4 @@
+"use client";
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem } from "@/components/ui/dropdown-menu"
@@ -73,6 +74,7 @@ export default function Component() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="rounded-full">
+                  {/*
                   <img
                     src="/placeholder.svg"
                     width={32}
@@ -81,6 +83,8 @@ export default function Component() {
                     className="rounded-full"
                     style={{ aspectRatio: "32/32", objectFit: "cover" }}
                   />
+
+                  */}
                   <span className="sr-only">User menu</span>
                 </Button>
               </DropdownMenuTrigger>

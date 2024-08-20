@@ -3,7 +3,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { useState } from "react"; 
+import { useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge"
 import request, { axiosRequest } from "@/request";
@@ -126,7 +126,7 @@ export default function Component({listing, setSelectedListing, viewDeviations})
               <Input id="thumbnail" type="file" onChange={handleImageChange} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="tags">Tags (separate words with comma's)</Label>
+              <Label htmlFor="tags">Tags (separate words with commas)</Label>
               <Input value={tags} onChange={(e) => setTags(e.target.value)} id="tags" type="text" />
             </div>
             <div className="space-y-2">

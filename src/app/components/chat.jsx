@@ -39,7 +39,7 @@ export default function Component() {
   useEffect(() => {
     if(window) setWHeight(window.innerHeight);
     getChatRooms();
-  },[]);
+  },[chatRooms]);
 
   useEffect(() => {
     if(chatRooms.length > 0) {
@@ -69,7 +69,7 @@ export default function Component() {
       socket.emit("send_message", {room: chatRooms[selected].id, message: newMessage});
       setMessages((list) => [...list, { id: list.length + 1, senderId: 'You', content: newMessage }]);
       setNewMessage('');
-      const res = await request(`${process.env.NEXT_PUBLIC_API_URL}/chat/message`, "POST", 
+      const res = await request(`${process.env.NEXT_PUBLIC_API_URL}/chat/message`, "POST",
         {roomId: chatRooms[selected].id, message: newMessage});
       if(!res || !res.success) toast.error("Failed to send message, try again later");
     }

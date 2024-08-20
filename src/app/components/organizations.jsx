@@ -46,7 +46,7 @@ export default function Component() {
   //)
 
   return (
-    <div className="min-h-screen text-gray-100 p-4 lg:p-8">
+    <div className="text-gray-100 p-4 lg:p-8">
       <h1 className="text-3xl font-bold mb-8 text-center">Sponsor Organizations</h1>
       
       <div className="flex flex-col lg:flex-row gap-8">

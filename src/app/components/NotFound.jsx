@@ -7,7 +7,7 @@ export default function Component() {
         <TriangleAlertIcon className="mx-auto h-12 w-12 text-primary" />
         <h1 className="mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Oops, page not found!</h1>
         <p className="mt-4 text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved. Don't worry, we're here to help.
+          The page you are looking for does not exist or has been moved. Do not worry, we are here to help.
         </p>
         <div className="mt-6">
           <Link

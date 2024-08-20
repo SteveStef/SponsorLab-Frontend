@@ -135,23 +135,9 @@ export default function Component({id}) {
                     height="284"
                     style={{ aspectRatio: "576/284", objectFit: "cover" }}
                   />
-                  {
-                    listing.tags.length === 1 && 
-                      <div className={`absolute top-2 left-2 bg-primary-foreground text-primary px-2 py-1 rounded-md text-xs`}>
-                        {listing.tags[0]}
-                      </div>
-                  }
-                  {
-                    listing.tags.length === 2 && 
-                      <div className="absolute top-2 left-2 flex gap-2">
-                      <div className={`bg-primary-foreground text-primary px-2 py-1 rounded-md text-xs`}>
-                        {listing.tags[0]}
-                      </div>
-                        <div className={`bg-primary-foreground text-primary px-2 py-1 rounded-md text-xs`}>
-                        {listing.tags[1]}
-                        </div>
-                      </div>
-                  }
+              <div className={`absolute top-2 left-2 bg-primary-foreground text-primary px-2 py-1 rounded-md text-xs`}>
+              {listing.tag}
+              </div>
                 </div>
                 <div className="p-4">
                   <div className="flex items-center justify-between mb-2">

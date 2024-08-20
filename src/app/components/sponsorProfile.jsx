@@ -75,7 +75,7 @@ export default function Component() {
             <h3 className="mb-2 font-semibold">TechCorp Solutions</h3>
             <p className="mb-4">
               TechCorp Solutions is a leading technology company specializing in artificial intelligence and machine
-              learning solutions. With over a decade of experience, we've been at the forefront of innovation,
+              learning solutions. With over a decade of experience, we have been at the forefront of innovation,
               helping businesses transform their operations through cutting-edge technology.
             </p>
             <div className="grid gap-2">
@@ -88,7 +88,7 @@ export default function Component() {
                 <span className="text-sm">Founded: 2005</span>
               </div>
               <div className="flex items-center gap-2">
-                <Users className="h-4 w-4 text-muted-foreground" />
+                {/*<Users className="h-4 w-4 text-muted-foreground" />*/}
                 <span className="text-sm">Employees: 500+</span>
               </div>
             </div>

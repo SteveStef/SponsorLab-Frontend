@@ -1,6 +1,8 @@
 import { Inter } from "next/font/google";
 import { Toaster } from "sonner";
 import { AppWrapper } from "@/context";
+import { Suspense } from "react";
+
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -15,7 +17,9 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={inter.className}>
           <AppWrapper>
+            <Suspense>
             {children}
+            </Suspense>
           </AppWrapper>
         <Toaster richColors />
     </body>

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import ListingsLoad from "./listingLoad";
+import Link from "next/link";
 
 export default function FeaturedListings() {
   const featuredPosts = [];

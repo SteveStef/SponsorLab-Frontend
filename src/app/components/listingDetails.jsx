@@ -90,11 +90,12 @@ export default function Component({ params }) {
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
+
           {
-            listing && listing.tags.map((tag, idx) => {
-              return <Badge key={idx} variant="secondary">{tag}</Badge>
-            })
+            listing && listing.tag && 
+            <Badge variant="secondary">{listing.tag}</Badge>
           }
+
         </div>
         <Button onClick={() => setShowSponsorForm(true)} className="mt-4">Sponsor this listing</Button>
       </div>

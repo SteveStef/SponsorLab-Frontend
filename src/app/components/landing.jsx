@@ -1,365 +1,203 @@
-/**
- * v0 by Vercel.
- * @see https://v0.dev/t/WZWdYxiHhlz
- * Documentation: https://v0.dev/docs#integrating-generated-code-into-your-nextjs-app
- */
-
-import Image from "next/image"
 import Link from "next/link"
-import Footer from "./footer";
-import cuphead from "../../../public/black.png"
-import SponsorLabLogo from "../../../public/SponsorLab.png"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { PlayCircle, DollarSign, Search, TrendingUp, Users, CheckCircle, BarChart } from "lucide-react"
+import Black from "../../../public/connect.jpg";
+import Image from "next/image"
 
 export default function Component() {
   return (
-    <div className="flex flex-col min-h-dvh">
-      <header className="relative w-full h-[65vh] overflow-hidden">
-        <Image
-          src={cuphead}
-          alt="Banner"
-          width={1920}
-          height={1080}
-          className="absolute inset-0 w-full h-full object-cover object-center"
-          style={{ aspectRatio: "1920/1080", objectFit: "cover" }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
-        <div className="relative z-10 flex flex-col items-center justify-center h-full px-4 text-center text-primary-foreground">
-          <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl" style={{color: "white"}}>
-<Image src={SponsorLabLogo} alt="LOGO" style={{ width: '700px' }} />
-            </h1>
-          <Link
-            href="./signup"
-            className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 mt-8"
-            prefetch={false}
-          >
-            Get Started
-          </Link>
-        </div>
-      </header>
-      <section className="py-12 md:py-24 lg:py-32">
-        <div className="container px-4 md:px-6">
-          <div className="grid gap-8 md:grid-cols-2 lg:gap-16">
-            <div className="space-y-4">
-              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">About Us</h2>
-              <p className="text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                We are a team of passionate individuals dedicated to empowering people to reach their full potential.
-                Our mission is to provide the tools, resources, and support you need to achieve your goals and live your
-                best life.
-              </p>
-              <Link
-                href="#"
-                className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-                prefetch={false}
-              >
-                Learn More
-              </Link>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="rounded-lg bg-muted p-4">
-                <UsersIcon className="h-8 w-8 text-muted-foreground" />
-                <h3 className="mt-2 text-lg font-medium">Community</h3>
-                <p className="text-sm text-muted-foreground">
-                  Connect with like-minded individuals and share your journey.
+    <div className="flex flex-col min-h-screen text-gray-100">
+      <br></br>
+      <main className="flex-1">
+        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 relative overflow-hidden">
+          <div className="absolute inset-0 z-0">
+            <Image
+              src={Black}
+              alt="YouTube creators collaborating"
+              className="object-cover w-full h-full opacity-20"
+            />
+          </div>
+          <div className="container px-4 md:px-6 relative z-10">
+            <div className="flex flex-col items-center space-y-4 text-center">
+              <div className="space-y-2">
+                <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none">
+                  Connect YouTubers with Sponsors
+                </h1>
+                <p className="mx-auto max-w-[700px] text-gray-400 md:text-xl">
+                  SponsorLab is the platform where YouTubers showcase future content and sponsors find their perfect match.
                 </p>
               </div>
-              <div className="rounded-lg bg-muted p-4">
-                <RocketIcon className="h-8 w-8 text-muted-foreground" />
-                <h3 className="mt-2 text-lg font-medium">Resources</h3>
-                <p className="text-sm text-muted-foreground">Explore our library of guides, tutorials, and tools.</p>
-              </div>
-              <div className="rounded-lg bg-muted p-4">
-                <BriefcaseIcon className="h-8 w-8 text-muted-foreground" />
-                <h3 className="mt-2 text-lg font-medium">Coaching</h3>
-                <p className="text-sm text-muted-foreground">Get personalized guidance from our team of experts.</p>
-              </div>
-              <div className="rounded-lg bg-muted p-4">
-                <LayersIcon className="h-8 w-8 text-muted-foreground" />
-                <h3 className="mt-2 text-lg font-medium">Workshops</h3>
-                <p className="text-sm text-muted-foreground">Attend our interactive workshops to learn new skills.</p>
+              <div className="space-x-4">
+                <Button className="bg-green-500 text-gray-900 hover:bg-green-600 transition-colors">Get Started</Button>
+                <Button variant="outline" className="border-green-500 text-green-500 hover:bg-green-500 hover:text-gray-900 transition-colors">
+                  Learn More
+                </Button>
               </div>
             </div>
           </div>
-        </div>
-      </section>
-
- <section className="w-full py-12 md:py-24 lg:py-32 bg-muted">
+        </section>
+        <section className="w-full py-12 md:py-24 lg:py-32 ">
           <div className="container px-4 md:px-6">
-            <div className="flex flex-col items-center justify-center space-y-4 text-center">
-              <div className="space-y-2">
-                <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">Seamless Sponsorship Matching</h2>
-                <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                  SponsorLab's advanced algorithm analyzes your YouTube channel and matches you with the perfect brand
-                  partners. Our vetting process ensures high-quality collaborations that benefit both creators and
-                  brands.
-                </p>
+            <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3" >
+              <div className="flex flex-col items-center space-y-4 text-center p-6 bg-gray-700 rounded-lg transition-transform hover:scale-105" style={{backgroundColor: "#171717"}}>
+                <DollarSign className="h-10 w-10 text-green-500" />
+                <h2 className="text-xl font-bold">Monetize Future Content</h2>
+                <p className="text-gray-400">YouTubers can secure sponsorships for videos before they are even created.</p>
+              </div>
+              <div className="flex flex-col items-center space-y-4 text-center p-6 bg-gray-700 rounded-lg transition-transform hover:scale-105" style={{backgroundColor: "#171717"}}>
+                <Search className="h-10 w-10 text-green-500" />
+                <h2 className="text-xl font-bold">Discover Opportunities</h2>
+                <p className="text-gray-400">Sponsors can browse and find content creators that align with their brand.</p>
+              </div>
+              <div className="flex flex-col items-center space-y-4 text-center p-6 bg-gray-700 rounded-lg transition-transform hover:scale-105" style={{backgroundColor: "#171717"}}>
+                <TrendingUp className="h-10 w-10 text-green-500" />
+                <h2 className="text-xl font-bold">Grow Your Reach</h2>
+                <p className="text-gray-400">Both parties benefit from increased exposure and targeted collaborations.</p>
               </div>
             </div>
-            <div className="mx-auto grid max-w-5xl items-center gap-6 py-12 lg:grid-cols-2 lg:gap-12">
-              <img
-                src="/placeholder.svg"
-                width="550"
-                height="310"
-                alt="Matching"
-                className="mx-auto aspect-video overflow-hidden rounded-xl object-cover object-center sm:w-full lg:order-last"
-              />
+          </div>
+        </section>
+        <section className="w-full py-12 md:py-24 lg:py-32" style={{backgroundColor: "#171717"}}>
+          <div className="container px-4 md:px-6">
+            <div className="grid gap-10 lg:grid-cols-2">
               <div className="flex flex-col justify-center space-y-4">
-                <ul className="grid gap-6">
-                  <li>
-                    <div className="grid gap-1">
-                      <h3 className="text-xl font-bold">Personalized Matching</h3>
-                      <p className="text-muted-foreground">
-                        Our algorithm analyzes your channel data to find the perfect brand partners for your audience.
-                      </p>
-                    </div>
+                <div className="space-y-2">
+                  <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">For YouTubers</h2>
+                  <p className="max-w-[600px] text-gray-400 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                    Showcase your upcoming content and attract sponsors before you even hit record.
+                  </p>
+                </div>
+                <ul className="grid gap-2 py-4">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    <span>Post future video ideas</span>
                   </li>
-                  <li>
-                    <div className="grid gap-1">
-                      <h3 className="text-xl font-bold">Vetting Process</h3>
-                      <p className="text-muted-foreground">
-                        We thoroughly vet both YouTubers and brands to ensure high-quality collaborations.
-                      </p>
-                    </div>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    <span>Get discovered by relevant sponsors</span>
                   </li>
-                  <li>
-                    <div className="grid gap-1">
-                      <h3 className="text-xl font-bold">Analytics and Reporting</h3>
-                      <p className="text-muted-foreground">
-                        Track the performance of your sponsorship campaigns with detailed analytics and reporting.
-                      </p>
-                    </div>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    <span>Secure funding for your content</span>
+                  </li>
+                </ul>
+              </div>
+              <div className="flex flex-col justify-center space-y-4">
+                <div className="space-y-2">
+                  <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">For Sponsors</h2>
+                  <p className="max-w-[600px] text-gray-400 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                    Find and collaborate with content creators that align perfectly with your brand.
+                  </p>
+                </div>
+                <ul className="grid gap-2 py-4">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    <span>Browse upcoming video ideas</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    <span>Connect with relevant YouTubers</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    <span>Secure sponsorships early</span>
                   </li>
                 </ul>
               </div>
             </div>
           </div>
         </section>
-        <section className="w-full py-12 md:py-24 lg:py-32 border-t">
-          <div className="container grid items-center gap-6 px-4 md:px-6 lg:grid-cols-2 lg:gap-10">
-            <div className="space-y-2">
-              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">Ready to Grow Your Channel?</h2>
-              <p className="max-w-[600px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                Sign up with SponsorLab today and start connecting with brands that align with your content and
-                audience.
-              </p>
-            </div>
-            <div className="flex flex-col gap-2 min-[400px]:flex-row lg:justify-end">
-              <Link
-                href="#"
-                className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-                prefetch={false}
-              >
-                Sign Up
-              </Link>
-              <Link href="#" className="inline-flex h-10 items-center" prefetch={false} />
+        <section className="w-full py-12 md:py-24 lg:py-32 ">
+          <div className="container px-4 md:px-6">
+            <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl mb-8 text-center">SponsorLab by the Numbers</h2>
+            <div className="grid gap-10 lg:grid-cols-2">
+              <div className="space-y-8">
+                <div className="flex justify-between items-center">
+                  <span className="text-lg font-medium">Active YouTubers</span>
+                  <span className="text-2xl font-bold text-green-500">10,000+</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-lg font-medium">Sponsor Brands</span>
+                  <span className="text-2xl font-bold text-green-500">500+</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-lg font-medium">Successful Matches</span>
+                  <span className="text-2xl font-bold text-green-500">25,000+</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-lg font-medium">Avg. Sponsorship Value</span>
+                  <span className="text-2xl font-bold text-green-500">$2,500</span>
+                </div>
+              </div>
+              <div className="flex items-center justify-center">
+                <svg className="w-full h-64" viewBox="0 0 300 200">
+                  <g className="grid">
+                    <line x1="0" y1="0" x2="300" y2="0" stroke="#4B5563" strokeWidth="1" />
+                    <line x1="0" y1="50" x2="300" y2="50" stroke="#4B5563" strokeWidth="1" />
+                    <line x1="0" y1="100" x2="300" y2="100" stroke="#4B5563" strokeWidth="1" />
+                    <line x1="0" y1="150" x2="300" y2="150" stroke="#4B5563" strokeWidth="1" />
+                  </g>
+                  <g className="bars">
+                    <rect x="45" y="150" width="30" height="50" fill="#10B981" />
+                    <rect x="115" y="100" width="30" height="100" fill="#10B981" />
+                    <rect x="185" y="50" width="30" height="150" fill="#10B981" />
+                    <rect x="255" y="0" width="30" height="200" fill="#10B981" />
+                  </g>
+                  <g className="labels" fill="#D1D5DB" fontSize="12">
+                    <text x="60" y="170" textAnchor="middle">Q1</text>
+                    <text x="130" y="170" textAnchor="middle">Q2</text>
+                    <text x="200" y="170" textAnchor="middle">Q3</text>
+                    <text x="270" y="170" textAnchor="middle">Q4</text>
+                  </g>
+                </svg>
+              </div>
             </div>
           </div>
         </section>
-
-      <section className="py-12 md:py-14 lg:py-22 bg-muted">
-        <div className="container px-4 md:px-6">
-          <div className="flex flex-col items-center justify-center space-y-4 text-center">
-            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Featured Posts</h2>
-            <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-              Explore our latest blog posts and articles.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mt-8">
-        <div className="cursor-pointer bg-background rounded-lg overflow-hidden shadow-lg transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
-          <div className="relative h-48 sm:h-46 md:h-54 lg:h-52 overflow-hidden">
-            <Image
-              src={cuphead}
-              alt="Post Thumbnail"
-              className="w-full h-full object-cover"
-              width="576"
-              height="284"
-              style={{ aspectRatio: "576/284", objectFit: "cover" }}
-            />
-            <div className="absolute top-2 left-2 bg-primary-foreground text-primary px-2 py-1 rounded-md text-xs">
-              Tech
-            </div>
-            <div className="absolute bottom-2 right-2 bg-primary-foreground text-primary px-2 py-1 rounded-md text-xs">
-              Available
-            </div>
-          </div>
-          <div className="p-4">
-            <div className="flex items-center justify-between mb-2">
-              <div className="text-sm text-muted-foreground">
-                <EyeIcon className="w-4 h-4 inline-block mr-1" />
-                50K views
+        <section className="w-full py-12 md:py-24 lg:py-32" style={{backgroundColor: "#171717"}}>
+          <div className="container px-4 md:px-6">
+            <div className="flex flex-col items-center justify-center space-y-4 text-center">
+              <div className="space-y-2">
+                <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">Join SponsorLab Today</h2>
+                <p className="max-w-[900px] text-gray-400 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                  Whether you are a content creator looking to monetize your ideas or a brand seeking the perfect partnership,
+                  SponsorLab is your gateway to successful collaborations.
+                </p>
               </div>
-              <div className="flex items-center gap-1">
-                <StarIcon className="w-4 h-4 fill-primary" />
-                <StarIcon className="w-4 h-4 fill-primary" />
-                <StarIcon className="w-4 h-4 fill-primary" />
-                <StarIcon className="w-4 h-4 fill-primary" />
-                <StarIcon className="w-4 h-4 fill-muted stroke-muted-foreground" />
+              <div className="w-full max-w-sm space-y-2">
+                <form className="flex space-x-2">
+                  <Input
+                    className="max-w-lg flex-1 bg-gray-700 text-gray-100 border-gray-600"
+                    placeholder="Enter your email"
+                    type="email"
+                  />
+                  <Button className="bg-green-500 text-gray-900 hover:bg-green-600 transition-colors" type="submit">
+                    Sign Up
+                  </Button>
+                </form>
+                <p className="text-xs text-gray-400">
+                  By signing up, you agree to our{" "}
+                  <Link className="underline underline-offset-2 hover:text-green-500 transition-colors" href="#">
+                    Terms & Conditions
+                  </Link>
+                </p>
               </div>
             </div>
-            <h3 className="text-lg font-semibold mb-2">Mastering the Latest AI Trends</h3>
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-muted-foreground">
-                <CalendarIcon className="w-4 h-4 inline-block mr-1" />
-                November 20, 2023
-              </div>
-              <div className="text-primary font-semibold">$29.99</div>
-            </div>
           </div>
-        </div>
-          </div>
-        </div>
-      </section>
-      <Footer />
+        </section>
+      </main>
+      <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t border-gray-700">
+        <p className="text-xs text-gray-400">© 2024 SponsorLab. All rights reserved.</p>
+        <nav className="sm:ml-auto flex gap-4 sm:gap-6">
+          <Link className="text-xs hover:underline underline-offset-4 text-gray-400 hover:text-green-500 transition-colors" href="#">
+            Terms of Service
+          </Link>
+          <Link className="text-xs hover:underline underline-offset-4 text-gray-400 hover:text-green-500 transition-colors" href="#">
+            Privacy
+          </Link>
+        </nav>
+      </footer>
     </div>
-  )
-}
-
-function BriefcaseIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
-      <rect width="20" height="14" x="2" y="6" rx="2" />
-    </svg>
-  )
-}
-
-
-function EyeIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-      <circle cx="12" cy="12" r="3" />
-    </svg>
-  )
-}
-
-
-function LayersIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z" />
-      <path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65" />
-      <path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65" />
-    </svg>
-  )
-}
-
-
-function RocketIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" />
-      <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" />
-      <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" />
-      <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
-    </svg>
-  )
-}
-
-function CalendarIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M8 2v4" />
-      <path d="M16 2v4" />
-      <rect width="18" height="18" x="3" y="4" rx="2" />
-      <path d="M3 10h18" />
-    </svg>
-  )
-}
-
-
-
-function StarIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-    </svg>
-  )
-}
-
-function UsersIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-      <circle cx="9" cy="7" r="4" />
-      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-    </svg>
   )
 }
