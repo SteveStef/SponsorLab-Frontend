@@ -84,7 +84,7 @@ export default function Signup() {
       setName(n);
       setEmail(em);
       setAccountType("EMAIL");
-      setOrganization(response.oranization);
+      setOrganization(response.oranization); // change this 
       router.push("/listings");
     }
     setLoading(false);

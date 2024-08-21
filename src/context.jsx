@@ -15,7 +15,10 @@ export function AppWrapper({children}) {
   const [auth, setAuth] = useState(false);
   const [organization, setOrganization] = useState("");
   const [description, setDescription] = useState("");
+  const [company, setCompany] = useState(null);
   const [socket, setSocket] = useState(null);
+
+  
 
   async function fetchUser() {
     const url = `${process.env.NEXT_PUBLIC_API_URL}/users/account`;
@@ -45,12 +48,14 @@ export function AppWrapper({children}) {
     }
 
     if(response.body.role === "SPONSOR") {
-      setOrganization(response.body.company.orginization);
-      localStorage.setItem("organization", response.body.company.orginization);
+      setCompany(response.body.company);
+      setOrganization(response.body.company.id);
+      localStorage.setItem("organization", response.body.company.id);
     } else {
       setOrganization(response.body.channel.name);
       localStorage.setItem("organization", response.body.channel.name);
     }
+    
     connectToSocket();
     setAuth(true);
   }
@@ -83,6 +88,7 @@ export function AppWrapper({children}) {
     organization, setOrganization,
     email, setEmail,
     description, setDescription,
+    company, setCompany,
     socket, setSocket
   }
 

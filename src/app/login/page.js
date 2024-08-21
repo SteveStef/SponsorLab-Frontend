@@ -45,7 +45,7 @@ export default function Component() {
       setEmail(email.current.value);
       setProfilePic(response.body.profileImage);
       setAccountType(response.body.accountType);
-      setOrganization(response.body.company.orginization);
+      setOrganization(response.body.company.id);
       setDescription(response.body.bio);
       connectToSocket();
       router.push("/listings");
