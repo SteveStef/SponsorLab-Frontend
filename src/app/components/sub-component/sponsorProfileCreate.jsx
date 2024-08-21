@@ -6,11 +6,15 @@ import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Progress } from "@/components/ui/progress"
 import { Building2, Globe, PackageOpen, Youtube, Users, Banknote, ArrowRight, ArrowLeft, LightbulbIcon, X } from 'lucide-react'
+import request from "@/request";
+import { toast } from "sonner";
+import { useAppContext } from '@/context'
 
 export default function Component() {
   const [step, setStep] = useState(1)
+  const { company, setCompany } = useAppContext();
+
   const [formData, setFormData] = useState({
-    companyName: '',
     website: '',
     description: '',
     productCategories: [],
@@ -21,24 +25,36 @@ export default function Component() {
   })
   const [searchTerm, setSearchTerm] = useState('')
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [load, setLoad] = useState(false);
   const dropdownRef = useRef(null)
 
   const updateFormData = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
-  const handleNext = () => {
+  const handleNext = (e) => {
+    e.preventDefault();
     setStep(prev => Math.min(prev + 1, 4))
   }
 
-  const handlePrev = () => {
+  const handlePrev = (e) => {
+    e.preventDefault();
     setStep(prev => Math.max(prev - 1, 1))
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
+    setLoad(true);
     console.log('Form submitted:', formData)
-    console.log(formData);
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/users/sponsor/create-profile`;
+    const response = await request(url, "POST", formData);
+    if(response && response.success) {
+      toast.success("Your profile has been created");
+      setCompany({...company, setup: true});
+    } else {
+      toast.error("There is a problem with creating your profile.");
+    }
+    setLoad(false);
   }
 
   const steps = [
@@ -127,25 +143,13 @@ export default function Component() {
           </div>
 
           {/* Main form */}
-          <form onSubmit={handleSubmit} className="space-y-8 w-2/3">
+          <form  className="space-y-8 w-2/3">
             {step === 1 && (
               <div className="space-y-6">
                 <h2 className="text-2xl font-semibold mb-4 flex items-center">
                   <Building2 className="w-6 h-6 mr-2" />
                   Company Information
                 </h2>
-                <div>
-                  <Label htmlFor="companyName" className="flex items-center pb-2">
-                    <Building2 className="w-4 h-4 mr-2" />
-                    Company Name
-                  </Label>
-                  <Input
-                    id="companyName"
-                    value={formData.companyName}
-                    onChange={(e) => updateFormData('companyName', e.target.value)}
-                    className="border-gray-700"
-                  />
-                </div>
                 <div>
                   <Label htmlFor="website" className="flex items-center pb-2">
                     <Globe className="w-4 h-4 mr-2" />
@@ -330,7 +334,7 @@ export default function Component() {
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               ) : (
-                <Button type="submit" className="ml-auto bg-green-600 hover:bg-green-700 flex items-center">
+                <Button disabled={load} onClick={handleSubmit} className="ml-auto bg-green-600 hover:bg-green-700 flex items-center">
                   Create Profile
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>

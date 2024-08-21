@@ -8,7 +8,7 @@ import io from "socket.io-client";
 
 export default function Authenticating({params}) {
   const router = useRouter();
-  const { setSocket, setEmail, setAccountType, setName, setRole, setOrganization, setAuth, setProfilePic } = useAppContext();
+  const { setCompany, setSocket, setEmail, setAccountType, setName, setRole, setOrganization, setAuth, setProfilePic } = useAppContext();
 
   async function authenticateUser(id) {
     const url = `${process.env.NEXT_PUBLIC_API_URL}/google/account/${id}`;
@@ -17,15 +17,17 @@ export default function Authenticating({params}) {
     if(!response.success && response.status !== 400) {
       toast.error(response.message);
     } else if(response && response.success) {
+      console.log(response);
       document.cookie = `token=${response.token}; SameSite=None; Secure; Path=/`;
       setAuth(true);
       setRole(response.body.role);
       setName(response.body.name);
       setEmail(response.body.email);
       setAccountType(response.body.accountType);
+      setCompany(response.body.company);
       if(response.body.role === "SPONSOR") {
         setProfilePic(response.body.googleImage || "");
-        setOrganization(response.body.company.orginization);
+        setOrganization(response.body.company.id);
       } else {
         setOrganization(response.body.channel.name);
         setProfilePic(response.body.googleImage || response.body.channel.imageUrl || "");
