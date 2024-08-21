@@ -77,6 +77,8 @@ export default function Component({listing, setSelectedListing, viewDeviations})
     const response = await axiosRequest(url, "PUT", formData);
     if(response.status === 200) {
       setSelectedListing(null);
+    } else if(response.status === 403){
+      toast.error(response.data.message);
     } else {
       toast.error("Something went wrong, try again later");
     }

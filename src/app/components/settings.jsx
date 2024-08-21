@@ -77,13 +77,17 @@ export default function Component() {
   const addPaymentMethod = async () => {
     setLoadingRedirect(true);
     const url = `${process.env.NEXT_PUBLIC_API_URL}/stripe/manage-customer`;
-    const body = { email: state.email || "", name: state.name };
+    const body = { email: state.email, name: state.name };
     const response = await request(url, "POST", body);
 
-    console.log(response);
     if(!response) {
       toast({ title: "Error creating customer" });
       setLoadingRedirect(false);
+      return;
+    }
+
+    if(response.url) {
+      window.location.href = response.url;
       return;
     }
 
@@ -169,9 +173,11 @@ export default function Component() {
         <div className="space-y-4">
           <div className="space-y-2">
             <h2 className="text-xl font-bold">Payment Methods</h2>
-            <Button onClick={routeToFn} variant="outline">
+            <Button disabled={load} onClick={routeToFn} variant="outline">
               <CreditCardIcon className="mr-2 h-4 w-4" />
-              Manage Credit Card/Banking Info
+              {
+                loadingRedirect ? "Redirecting..." : "Manage Credit Card/Banking Info"
+              }
             </Button>
           </div>
         </div>

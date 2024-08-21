@@ -39,7 +39,7 @@ export default function Component() {
   useEffect(() => {
     if(window) setWHeight(window.innerHeight);
     getChatRooms();
-  },[chatRooms]);
+  },[]);
 
   useEffect(() => {
     if(chatRooms.length > 0) {

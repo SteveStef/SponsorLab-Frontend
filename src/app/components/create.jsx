@@ -254,7 +254,7 @@ export default function Component() {
                       </div>
                     </RadioGroup>
                   </div>
-                  {pricingModel === 'cpm' ? (
+                  {pricingModel === 'CPM' ? (
                     <div className="space-y-2">
                       <Label htmlFor="cpmRate">CPM Rate ($)</Label>
                       <Input onChange={(e) => setPrice(e.target.value)} id="cpmRate" type="number" placeholder="Enter CPM rate" className="border-gray-600 text-gray-100" />

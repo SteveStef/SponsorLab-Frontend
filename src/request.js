@@ -17,7 +17,7 @@ const request = async (url, req_method, body) => {
         const parts = window.location.href.split("/");
         const path = "/" + parts[parts.length - 1];
         const validPaths = ["/login", "/", "/signup", "/terms-of-service", "/signup/youtuber", "signup/sponsor"];
-        //if(!validPaths.includes(path)) window.location.href = "../../../signup";
+        if(!validPaths.includes(path) && parts[parts.length-2] !== "authenticate") window.location.href = "../../../signup";
       }
 
       return data;
@@ -37,7 +37,7 @@ const request = async (url, req_method, body) => {
         const parts = window.location.href.split("/");
         const path = "/" + parts[parts.length - 1];
         const validPaths = ["/login", "/", "/signup", "/terms-of-service", "/signup/youtuber", "signup/sponsor"];
-        if(!validPaths.includes(path)) window.location.href = "../../../signup";
+        if(!validPaths.includes(path) && parts[parts.length-2] !== "authenticate") window.location.href = "../../../signup";
       }
 
       return data;

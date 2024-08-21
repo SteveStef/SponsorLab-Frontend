@@ -10,23 +10,25 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import request from "@/request";
 import { useAppContext } from "@/context";
+import { toast } from "sonner";
 
 export default function Requests() {
+  const { role } = useAppContext();
   const [requests, setRequests] = useState([]);
 
   async function getRequests() {
     let url = "";
-    url = `${process.env.NEXT_PUBLIC_API_URL}/requests/creator`;
+    url = `${process.env.NEXT_PUBLIC_API_URL}/requests/${role.toLowerCase()}`;
     const response = await request(url, "GET", null);
-    //console.log(response);
+    console.log(response);
     if(response && response.success) {
       setRequests(response.body);
     }
   }
 
   useEffect(() => {
-    getRequests();
-  },[]);
+    if(role) getRequests();
+  },[role]);
 
 
   return (
@@ -74,13 +76,23 @@ export default function Requests() {
 function PendingCard({ requestData }) {
   const router = useRouter();
 
-  async function openChat() {
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/chat`;
-    const body = { sponsorEmail: requestData.sponsor.email }
-    const response = await request(url, "POST", body);
-    //console.log(response);
+  async function acceptRequest() {
+    let url = `${process.env.NEXT_PUBLIC_API_URL}/requests/accept`;
+    let body = { requestId: requestData.id}
+    let response = await request(url, "PUT", body);
+    console.log(response);
+    if(response.status === 400 && response.message === "No payment method found") {
+      toast.error("Unable to accept the request becuase the sponsor has not setup a payment method");
+    }
+
     if(response && response.success) {
-      router.push("../chat");
+      url = `${process.env.NEXT_PUBLIC_API_URL}/chat`;
+      body = { sponsorEmail: requestData.sponsor.email }
+      response = await request(url, "POST", body);
+      console.log(response);
+      if(response && response.success) {
+        router.push("../chat");
+      }
     }
   }
 
@@ -112,7 +124,7 @@ function PendingCard({ requestData }) {
                 <Button variant="outline" size="sm">
                   Decline
                 </Button>
-                <Button onClick={openChat} size="sm">Accept</Button>
+                <Button onClick={acceptRequest} size="sm">Accept</Button>
                 <Dialog>
                   <DialogTrigger asChild>
                     <Button variant="outline" size="sm">
