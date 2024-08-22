@@ -6,32 +6,42 @@ import { Globe, Target, Video, Users, Flag } from "lucide-react"
 import { useEffect, useState } from "react";
 import request from "@/request";
 import { useAppContext } from "@/context"
+import NotFound from "./NotFound";
 
 export default function Component({params}) {
   const { id } = params;
   const [profile, setProfile] = useState({});
   const [owner, setOwner] = useState(false);
-  const { company, name, profilePic }  = useAppContext();
+  const [notFound, setNotFound] = useState(false);
+  const { role, company, name, profilePic }  = useAppContext();
 
   async function fetchProfile() {
     const url = `${process.env.NEXT_PUBLIC_API_URL}/users/sponsor/${id}`;
     const response = await request(url ,"GET", null);
-    console.log(response);
     if(response && response.success) {
       setProfile(response.body);
+    } else {
+      setNotFound(true);
     }
   }
 
   useEffect(() => {
+    if(!role) return;
+    if(role === "CREATOR") {
+      fetchProfile();
+      return;
+    }
     if(!id || !company) return;
     if(id !== company.id) fetchProfile();
     else {
       setProfile(company);
       setOwner(true);
     }
-  },[id,company]);
+  },[id,company,role]);
 
-  console.log(profile);
+  if(notFound)  {
+    return <NotFound />
+  }
 
   return (
     <div className="text-gray-100">
@@ -40,12 +50,12 @@ export default function Component({params}) {
         <div className="flex flex-col sm:flex-row items-center sm:items-end space-y-4 sm:space-y-0 sm:space-x-6">
           <Avatar className="w-20 h-20 border-4 border-gray-900">
             {
-              !owner ? 
+              !owner ?
             <AvatarImage src={profile.googleImage || profile.s3ImageName} alt="Sponsor logo" />
             :
             <AvatarImage src={profilePic} alt="Sponsor logo" />
             }
-            <AvatarFallback>SL</AvatarFallback>
+            <AvatarFallback>{name[0]}</AvatarFallback>
           </Avatar>
           <div className="text-center sm:text-left">
             <h1 className="text-3xl font-bold">{owner ? name : profile.user && profile.user.name}</h1>

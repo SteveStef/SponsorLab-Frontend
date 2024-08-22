@@ -1,14 +1,15 @@
 
+"use client";
 import Organizations from "../../components/organization";
 import EditProfileOrg from "../../components/editSponsorProfile";
 import Header from "../../components/nav"
-export default function Price() {
+import SponsorProfile from "@/app/components/sponsorProfile";
+
+export default function ListingDetail({params}) {
   return (
-    <div>
-      <Header/>
-      <br></br>
-      <br></br>
-      <Organizations />
+    <div style={{ marginTop: "5%", marginBottom: "5%" }}>
+      <Header />
+    <SponsorProfile params={params} />
     </div>
   )
 }

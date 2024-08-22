@@ -10,6 +10,7 @@ import Editor from "../components/editListing";
 import { useRouter }from "next/navigation";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge"
+import NotFound from "./NotFound";
 
 export default function Component({id}) {
   const [user, setUser] = useState(null);
@@ -18,6 +19,7 @@ export default function Component({id}) {
   const { organization, description } = useAppContext();
   const [owner, setOwner] = useState(false);
   const [selectedListing, setSelectedListing] = useState(null);
+  const [notFound, setNotFound] = useState(false);
   const router = useRouter();
 
   async function fetchUser(id) {
@@ -26,8 +28,9 @@ export default function Component({id}) {
     if(response && response.success) {
       setUser(response.body);
       setListings(response.body.posts);
-      console.log(response.body);
       setOwner(response.body.owner);
+    } else {
+      setNotFound(true);
     }
     setLoading(false);
   }
@@ -38,10 +41,14 @@ export default function Component({id}) {
     }
   },[id]);
 
+
   function handleListingClick(listing) {
     router.push(`../../listings/${listing.id}`);
   } // Date object being wrong, and add banner change in settings
 
+  if(notFound) {
+    return <NotFound />
+  }
   if(selectedListing) return <Editor listing={selectedListing} viewDeviations={user.channel.viewDeviations} setSelectedListing={setSelectedListing}/>
 
   return (

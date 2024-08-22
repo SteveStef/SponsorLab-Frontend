@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { UserIcon, DollarSignIcon, SendIcon, MenuIcon } from "lucide-react"
+import { MessageSquareX, UserIcon, DollarSignIcon, SendIcon, MenuIcon } from "lucide-react"
 import { useState, useEffect } from "react";
 import { useAppContext } from "@/context";
 import request from "@/request";
@@ -22,22 +22,19 @@ export default function Component() {
 
   const [newMessage, setNewMessage] = useState('')
   const [showSidebar, setShowSidebar] = useState(false)
-  const [wHeight, setWHeight] = useState(0);
 
   async function getChatRooms() {
     const url = `${process.env.NEXT_PUBLIC_API_URL}/chat`;
     const response = await request(url, "GET", null);
-    //console.log(response);
     if(response && response.success) {
       setChatRooms(response.body);
-      setMessages(response.body[0].messages);
+      if(response.body.length !== 0) setMessages(response.body[0].messages);
       setSelectedParticipant(response.body[0].participants[0].user)
     }
     setLoading(false);
   }
 
   useEffect(() => {
-    if(window) setWHeight(window.innerHeight);
     getChatRooms();
   },[]);
 
@@ -84,9 +81,14 @@ export default function Component() {
     setMessages(updateRooms[index].messages);
   }
 
+  if(loading) return <div></div>
+  if(!loading && chatRooms.length === 0) {
+    return <NotDirectMessages />
+  }
+
   return (
-    <div className="flex bg-black" style={{height: `${(wHeight - 80)}px`}}>
-      {/* Sidebar */}
+      <div className="flex min-h-[93dvh] bg-black" >
+        {/* Sidebar */}
       <div className={`w-64 bg-gray-900 p-4 ${showSidebar ? 'block' : 'hidden'} md:block`}>
         <h2 className="text-xl font-bold mb-4">Conversations</h2>
         {chatRooms.map((room, index) => {
@@ -166,6 +168,22 @@ export default function Component() {
           </div>
         </footer>
       </div>
+    </div>
+  )
+}
+
+function NotDirectMessages() {
+  return (
+    <div className="flex items-center justify-center text-gray-200"style={{marginTop: "20%"}}>
+      <Card className="w-full max-w-md border-green-500">
+        <CardContent className="flex flex-col items-center justify-center p-6 text-center">
+          <MessageSquareX className="w-16 h-16 text-green-500 mb-4" />
+          <h1 className="text-2xl font-bold mb-2">No Direct Messages</h1>
+          <p className="text-gray-400">
+            You currently have no direct messages. When you receive messages, they will appear here.
+          </p>
+        </CardContent>
+      </Card>
     </div>
   )
 }

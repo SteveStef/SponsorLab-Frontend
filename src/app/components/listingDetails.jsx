@@ -42,14 +42,13 @@ export default function Component({ params }) {
 
       setViewRanges(tmp);
     }
-    console.log(response);
   }
 
   useEffect(() => {
     if(params.id) fetchListing();
   }, [params]);
 
-  if(listing && showSponsorForm) return <SponsorForm listing={listing} />
+  if(listing && showSponsorForm) return <SponsorForm listing={listing} setShowSponsorForm={setShowSponsorForm}/>
 
   return (
     <div className="grid md:grid-cols-2 gap-6 lg:gap-12 items-start max-w-7xl px-4 mx-auto py-6">

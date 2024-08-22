@@ -67,7 +67,7 @@ export default function Navbar() {
           }
 
           {
-            auth && 
+            auth &&
               <>
 
         <div className="relative">
@@ -104,13 +104,13 @@ export default function Navbar() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               {
-                role === "CREATOR" && 
+                role === "CREATOR" &&
               <DropdownMenuItem>
                 <Link href={`../../create`} className="flex items-center gap-2" prefetch={false}>Create Listing</Link>
               </DropdownMenuItem>
               }
-              <DropdownMenuItem>  
-                <Link href={`../../profile/${organization}`} className="flex items-center gap-2" prefetch={false}>My Profile</Link>
+              <DropdownMenuItem>
+                <Link href={`../../${role==="CREATOR"?"profile":"organizations"}/${organization}`} className="flex items-center gap-2" prefetch={false}>My {role==="CREATOR"?"Profile" : "Organization"}</Link>
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <Link href={`../../settings`} className="flex items-center gap-2" prefetch={false}>Settings</Link>

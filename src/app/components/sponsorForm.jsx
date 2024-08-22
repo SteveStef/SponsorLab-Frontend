@@ -13,7 +13,7 @@ import { useAppContext } from "@/context";
 import { useRouter } from "next/navigation";
 
 
-export default function Component({listing}) {
+export default function Component({listing, setShowSponsorForm}) {
   const { email, name } = useAppContext();
   const titleRef = useRef("");
   const timeStampRef = useRef("");
@@ -24,6 +24,7 @@ export default function Component({listing}) {
   const [load, setLoad] = useState(false);
   const descriptionRef = useRef("");
   const speechRef = useRef("");
+  const proposalRef = useRef("");
   const [agreed, setAgreed] = useState(false);
 
   const router = useRouter();
@@ -35,6 +36,8 @@ export default function Component({listing}) {
     else if((parseInt(body.duration) <= 0)) error = "duration must be creater than 0 seconds";
     else if((parseFloat(body.price <= 0))) error = "Price must be creater than $0.00";
     else if(!agreed) error = "Please accept the terms of service";
+    else if(!body.proposal) error = "Please enter something for the proposal";
+    else if(!body.adType) error = "Please enter something for Ad Type";
 
     if(error) {
       toast.error(error);
@@ -56,6 +59,9 @@ export default function Component({listing}) {
       duration: durationRef.current.value,
       price: estPriceRef.current.value,
       creatorName: listing.user.channel.name,
+      adType: adTypeRef.current.value,
+      proposal: proposalRef.current.value,
+      sendingProduct: sendingProduct,
       postId: listing.id,
       pricingModel: listing.pricingModel
     };
@@ -81,36 +87,6 @@ export default function Component({listing}) {
     setLoad(false);
   }
 
-  const addPaymentMethod = async () => {
-    setLoad(true);
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/stripe/manage-customer`;
-    const body = { email, name };
-    const response = await request(url, "POST", body);
-
-    console.log(response);
-    if(!response) {
-      toast({ title: "Error creating customer" });
-      setLoad(false);
-      return;
-    }
-
-    if(!response.sessionId) {
-      toast({ title: response.message || "Error creating customer" });
-      setLoad(false);
-      return;
-    }
-
-    const stripe = await stripePromise;
-    const data = await stripe.redirectToCheckout({ sessionId: response.sessionId });
-    if(data.error) {
-      toast.error("Error redirecting to checkout");
-      setLoad(false);
-      return;
-    }
-  };
-
-
-
   return (
     <div className="grid md:grid-cols-[1fr_300px] gap-8 w-full max-w-6xl mx-auto py-12 px-4 md:px-6">
     <div>
@@ -120,6 +96,7 @@ export default function Component({listing}) {
     href="#"
     className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
               prefetch={false}
+              onClick={() => setShowSponsorForm(false)}
             >
               <ChevronLeftIcon className="w-4 h-4" />
               Back
@@ -137,7 +114,7 @@ export default function Component({listing}) {
               <Input ref={titleRef} id="name" placeholder="Enter product/service title" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="ad">Timestamp of advertisement</Label>
+              <Label htmlFor="ad">Timestamp of advertisement (optional)</Label>
               <Input ref={timeStampRef} id="penguins" type="text" placeholder="First 2 minutes of the video" />
             </div>
             <div className="space-y-2">
@@ -166,12 +143,16 @@ export default function Component({listing}) {
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="feedback">Description of Product/Service</Label>
-            <Textarea ref={descriptionRef} id="desc" placeholder="" rows={4} />
+            <Label htmlFor="feedback">Product/Service</Label>
+              <Input ref={descriptionRef} id="price" type="text" placeholder="Short Description of Product/Service" />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="feedback">Request Proposal</Label>
+            <Textarea ref={proposalRef} id="feedback" placeholder="Dear Youtuber, I would like to sponsor you..." rows={4} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="feedback">Advertisement Speech Requirements</Label>
-            <Textarea ref={speechRef} id="feedback" placeholder="" rows={4} />
+            <Textarea ref={speechRef} id="feedback" placeholder="" rows={1} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="newsletter">
