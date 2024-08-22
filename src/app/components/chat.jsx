@@ -9,9 +9,10 @@ import { useState, useEffect } from "react";
 import { useAppContext } from "@/context";
 import request from "@/request";
 import { toast } from "sonner";
+import { format } from "date-fns"
 
 export default function Component() {
-  const { socket } = useAppContext();
+  const { socket, name } = useAppContext();
   const [chatRooms, setChatRooms] = useState([]);
 
   const [selected, setSelected] = useState(0);
@@ -142,9 +143,7 @@ export default function Component() {
           <ScrollArea className="h-full p-4">
             {messages.map((message) => (
               <div key={message.id} className={`flex ${message.senderId === 'You' ? 'justify-end' : 'justify-start'} mb-4`}>
-                <div className={`rounded-lg p-2 max-w-[70%] ${message.senderId === 'You' ? 'bg-green-700 text-white' : 'bg-gray-800 '}`}>
-                  <p className="text-sm">{message.content}</p>
-                </div>
+                <ChatMessage messageData={message} name={message.senderId === "You" ? name : selectedParticipant.name} />
               </div>
             ))}
           </ScrollArea>
@@ -184,6 +183,36 @@ function NotDirectMessages() {
           </p>
         </CardContent>
       </Card>
+    </div>
+  )
+}
+
+
+function ChatMessage({ messageData, name }) {
+  const message = {
+    name,
+    content: messageData.content,
+    time: new Date(),
+    isSender: false
+  }
+
+  return (
+    <div className={`flex ${message.isSender ? 'justify-end' : 'justify-start'} mb-4`}>
+      <div className={`flex items-end space-x-2 ${message.isSender ? 'flex-row-reverse space-x-reverse' : ''}`}>
+        <Avatar className="w-8 h-8">
+          <AvatarImage src={`https://api.dicebear.com/6.x/initials/svg?seed=${message.name}`} />
+          <AvatarFallback>{message.name.charAt(0)}</AvatarFallback>
+        </Avatar>
+        <div className={`flex flex-col ${message.isSender ? 'items-end' : 'items-start'}`}>
+          <div className={`rounded-lg p-3 max-w-[240px] ${message.isSender ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+            <p className="text-sm break-words">{message.content}</p>
+          </div>
+          <div className="flex items-center mt-1 space-x-2">
+            <p className="text-xs text-muted-foreground">{message.name}</p>
+            <p className="text-xs text-muted-foreground">{format(message.time, 'HH:mm')}</p>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
