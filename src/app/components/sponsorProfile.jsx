@@ -2,11 +2,12 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Globe, Target, Video, Users, Flag } from "lucide-react"
+import { Globe, Target, Video, Flag } from "lucide-react"
 import { useEffect, useState } from "react";
 import request from "@/request";
 import { useAppContext } from "@/context"
 import NotFound from "./NotFound";
+import CreateSponsorFlow from "./sub-component/sponsorProfileCreate.jsx";
 
 export default function Component({params}) {
   const { id } = params;
@@ -14,6 +15,7 @@ export default function Component({params}) {
   const [owner, setOwner] = useState(false);
   const [notFound, setNotFound] = useState(false);
   const { role, company, name, profilePic }  = useAppContext();
+  const [showCreateFlow, setShowCreateFlow] = useState(false);
 
   async function fetchProfile() {
     const url = `${process.env.NEXT_PUBLIC_API_URL}/users/sponsor/${id}`;
@@ -35,9 +37,15 @@ export default function Component({params}) {
     if(id !== company.id) fetchProfile();
     else {
       setProfile(company);
+      console.log(company);
+      if(!company.setup) setShowCreateFlow(true);
       setOwner(true);
     }
   },[id,company,role]);
+
+  if(showCreateFlow) {
+    return <CreateSponsorFlow refresh={fetchProfile} setShowCreateFlow={setShowCreateFlow}/>
+  }
 
   if(notFound)  {
     return <NotFound />

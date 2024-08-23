@@ -2,15 +2,17 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { User, Search,FileCheck, DollarSign, 
+import { User, Search,FileCheck, DollarSign, InfoIcon, Video,
   Clock, CheckCircle, XCircle, Eye, FileText, Check, X, Calendar } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import Request from "@/request";
+import { toast } from "sonner";
 
 const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('en-US', {
@@ -79,17 +81,18 @@ export default function Component() {
     setRefreshing(false);
   }
 
-  async function acceptRequest(requestId, sponsorEmail) {
+  async function acceptRequest(requestId) {
     setLoad(true);
     const url = `${process.env.NEXT_PUBLIC_API_URL}/requests/accept`;
     const response = await Request(url, "PUT", {requestId});
     console.log(response);
     if(response && response.success) {
       toast.success("Request was accepted");
-      await openChat(sponsorEmail);
+      getRequests();
     } else {
       toast.error("There was a problem when declining request");
     }
+    setLoad(false);
   }
 
   async function declineRequest(requestId) {
@@ -105,15 +108,6 @@ export default function Component() {
     }
   }
 
-  async function openChat(email) {
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/chat`;
-    const body = { sponsorEmail: email }
-    const response = await Request(url, "POST", body);
-    if(response && response.success) {
-      router.push("../chat");
-    }
-  }
-
   useEffect(() => {
     getRequests();
   },[]);
@@ -122,6 +116,14 @@ export default function Component() {
     let tmp = {...activeTab};
     tmp[requestId] = value;
     setActiveTab(tmp);
+  }
+
+  async function sendVideoUrl(requestId) {
+    url = `${process.env.NEXT_PUBLIC_API_URL}/requests/post-video`;
+    const response = await Request(url, "PUT", {requestId, videoUrl});
+    if(response && response.success) {
+      toast.success("Send the video url to the sponsor!");
+    }
   }
 
   return (
@@ -166,7 +168,7 @@ export default function Component() {
                   <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="request">Request</TabsTrigger>
                     <TabsTrigger disabled={!request.transaction} value="ongoing">Connection</TabsTrigger>
-                    <TabsTrigger disabled={!request.transaction} value="receipt">Receipt</TabsTrigger>
+                    <TabsTrigger disabled={(!request.transaction) || (request.transaction.status!=="COMPLETED")} value="receipt">Receipt</TabsTrigger>
                   </TabsList>
                   {Object.entries(tabContent).map(([key, { title, content }]) => (
                     <TabsContent key={key} value={key}>
@@ -215,14 +217,34 @@ export default function Component() {
                   </ScrollArea>
                 </CardContent>
                 <CardFooter className="flex justify-between">
-                  <Button onClick={() => acceptRequest(request.id, request.sponsor.email)} variant="outline" className="bg-green-900 text-green-100 hover:bg-green-800 border-green-700 flex items-center">
+                    {
+                      !request.transaction ? <>
+                    {
+                      request.status === "PENDING" && <>
+                  <Button disabled={load} onClick={() => acceptRequest(request.id)} variant="outline" className="bg-green-900 text-green-100 hover:bg-green-800 border-green-700 flex items-center">
                     <Check className="w-4 h-4 mr-2" />
                     Accept
                   </Button>
-                  <Button onClick={() => declineRequest(request.id)} variant="outline" className="bg-red-900 text-red-100 hover:bg-red-800 border-red-700 flex items-center">
-                    <X className="w-4 h-4 mr-2" />
-                    Decline
-                  </Button>
+                      </>
+                    }
+
+                  {
+                    (request.status !== "CANCELED") && (request.status !== "DECLINED") &&
+                      <Button disabled={load} onClick={() => declineRequest(request.id)} variant="outline" className="bg-red-900 text-red-100 hover:bg-red-800 border-red-700 flex items-center">
+                      <X className="w-4 h-4 mr-2" />
+                      Decline
+                      </Button>
+                  }
+
+                      </> : activeTab[request.id] === "ongoing" && 
+                      <Button disabled={load} onClick={() => declineRequest(request.id)} variant="outline" className="bg-red-900 text-red-100 hover:bg-red-800 border-red-700 flex items-center">
+                      <X className="w-4 h-4 mr-2" />
+                        Cancel
+                      </Button>
+
+                    }
+                  {
+                    activeTab[request.id] === "requests" ?
                   <Button
                     variant="outline"
                     className="bg-gray-800 text-gray-300 hover:bg-gray-700 border-gray-600 flex items-center"
@@ -230,7 +252,17 @@ export default function Component() {
                   >
                     <Eye className="w-4 h-4 mr-2" />
                     View Proposal
+                  </Button> : activeTab[request.id] === "ongoing" && 
+                  <Button
+                    variant="outline"
+                    className="bg-green-800 text-gray-300 hover:bg-green-700 border-gray-600 flex items-center"
+                    onClick={() => handleViewProposal(request)}
+                  >
+                    <Video className="w-4 h-4 mr-2" />
+                      Send Video Url
                   </Button>
+
+                  }
                 </CardFooter>
                 </TabsContent>
                 ))}
@@ -251,10 +283,8 @@ export default function Component() {
             <>
               <div className="grid gap-4">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-100">Sender Information</h3>
                   <p><strong>Name:</strong> {selectedRequest.sponsor.name}</p>
-                  <p><strong>Email:</strong> {selectedRequest.sponsor.email}</p>
-                  <p><strong>Company:</strong> {selectedRequest.sponsor.company.orginization}</p>
+                  <p><strong>Company:</strong> {selectedRequest.sponsor.company.orginization.indexOf(".") > 0 ? selectedRequest.sponsor.company.orginization : "individual"}</p>
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-100">Proposal</h3>
@@ -262,13 +292,9 @@ export default function Component() {
                 </div>
               </div>
               <div className="flex justify-end gap-4 mt-4">
-                <Button variant="outline" className="bg-green-900 text-green-100 hover:bg-green-800 border-green-700 flex items-center">
-                  <Check className="w-4 h-4 mr-2" />
-                  Accept
-                </Button>
-                <Button variant="outline" className="bg-red-900 text-red-100 hover:bg-red-800 border-red-700 flex items-center">
+                <Button onClick={() => setIsModalOpen(false)}variant="outline" className="bg-red-900 text-red-100 hover:bg-red-800 border-red-700 flex items-center">
                   <X className="w-4 h-4 mr-2" />
-                  Decline
+                  Close
                 </Button>
               </div>
             </>
@@ -330,7 +356,7 @@ const tabContent = {
         <p className="text-sm text-gray-400 flex items-center">
           <User className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
           <span className="font-semibold mr-2">{request.sponsor.name}</span>
-          <span className="text-gray-500">{request.sponsor.email}</span>
+          <span className="text-gray-500">({request.sponsor.company.orginization.indexOf(".") > 0 ? request.sponsor.company.orginization : "individual"})</span>
         </p>
         <p className="text-sm text-gray-400 flex items-center">
           <FileText className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
@@ -349,15 +375,17 @@ const tabContent = {
           Sponsor: {request.sponsor.name}
         </p>
         <p className="text-sm text-gray-400 flex items-center">
-          <FileText className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
-          Current progress: In progress
-        </p>
-
-        <p className="text-sm text-gray-400 flex items-center">
           <Calendar className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
-          Upload Deadline: {formatDate(new Date().toDateString())}
+          Upload Deadline: {formatDate(new Date(request.transaction.createdAt).toDateString())}
         </p>
-        <p className="text-sm text-gray-300">Transaction is currently being processed. Please check back later for updates.</p>
+        <div className="flex text-green-400">
+        <InfoIcon className="w-5 h-5 mr-1"/>
+        <p className="text-sm ">Send the video url by the deadline for review</p>
+      </div>
+            <div className="space-y-2 px-1">
+              <Label htmlFor="name">Final Youtube Video Url</Label>
+              <Input id="name" placeholder="https://youtube.com/..." />
+            </div>
       </div>
     )
   },

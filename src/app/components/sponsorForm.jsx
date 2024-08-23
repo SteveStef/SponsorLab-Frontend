@@ -9,17 +9,14 @@ import { toast } from "sonner";
 import request from "@/request";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge";
-import { useAppContext } from "@/context";
 import { useRouter } from "next/navigation";
 
 
 export default function Component({listing, setShowSponsorForm}) {
-  const { email, name } = useAppContext();
   const titleRef = useRef("");
   const timeStampRef = useRef("");
   const estPriceRef = useRef("");
   const durationRef = useRef(0);
-  const adTypeRef = useRef("");
   const [sendingProduct, setSendingProduct] = useState("NO");
   const [load, setLoad] = useState(false);
   const descriptionRef = useRef("");
@@ -37,7 +34,6 @@ export default function Component({listing, setShowSponsorForm}) {
     else if((parseFloat(body.price <= 0))) error = "Price must be creater than $0.00";
     else if(!agreed) error = "Please accept the terms of service";
     else if(!body.proposal) error = "Please enter something for the proposal";
-    else if(!body.adType) error = "Please enter something for Ad Type";
 
     if(error) {
       toast.error(error);
@@ -59,7 +55,6 @@ export default function Component({listing, setShowSponsorForm}) {
       duration: durationRef.current.value,
       price: estPriceRef.current.value,
       creatorName: listing.user.channel.name,
-      adType: adTypeRef.current.value,
       proposal: proposalRef.current.value,
       sendingProduct: sendingProduct,
       postId: listing.id,
@@ -75,7 +70,7 @@ export default function Component({listing, setShowSponsorForm}) {
         return ;
       }
 
-      console.log(response);
+      //console.log(response);
       if(response && response.success) {
         toast.success("Request Sent");
         router.push("../../requests");
@@ -126,10 +121,6 @@ export default function Component({listing, setShowSponsorForm}) {
               <Input ref={durationRef} id="ad-duration" type="number" placeholder="Enter ad duration in seconds" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="ad-type">Ad Type</Label>
-              <Input ref={adTypeRef} id="ad-type" placeholder="Enter type of advertisement" />
-            </div>
-            <div className="space-y-2">
               <Label htmlFor="sample">Are you sending the Youtuber a sample product/service</Label>
                 <Select value={sendingProduct} onValueChange={setSendingProduct}>
                       <SelectTrigger className="border-gray-600 text-gray-100">
@@ -156,8 +147,12 @@ export default function Component({listing, setShowSponsorForm}) {
           </div>
           <div className="space-y-2">
             <Label htmlFor="newsletter">
-              <div onClick={() => setAgreed(!agreed)} className="flex items-center gap-2">
-                <Checkbox id="newsletter" />
+              <div className="flex items-center gap-2">
+                <Checkbox 
+                  id="newsletter" 
+                  checked={agreed}
+                  onCheckedChange={(agree) => setAgreed(agree)}
+                />
                 <span>I have read and accept the <Link href="../../terms-of-service" style={{color: "lightgreen"}}>Terms of Service</Link></span>
               </div>
             </Label>

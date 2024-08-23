@@ -29,8 +29,10 @@ export default function Component() {
     const response = await request(url, "GET", null);
     if(response && response.success) {
       setChatRooms(response.body);
-      if(response.body.length !== 0) setMessages(response.body[0].messages);
-      setSelectedParticipant(response.body[0].participants[0].user)
+      if(response.body.length !== 0) {
+        setMessages(response.body[0].messages);
+        setSelectedParticipant(response.body[0].participants[0].user)
+      }
     }
     setLoading(false);
   }

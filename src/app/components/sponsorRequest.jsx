@@ -14,6 +14,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useAppContext } from '@/context';
 import Request from "@/request";
 import {toast} from "sonner";
+import {useRouter} from "next/navigation";
 
 const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('en-US', {
@@ -31,6 +32,7 @@ export default function Component() {
   const [refreshing, setRefreshing] = useState(true);
   const [load, setLoad] = useState(true);
   const {name, email, company} = useAppContext();
+  const router = useRouter();
 
   const getStatusIcon = (status) => {
     switch (status) {
@@ -68,6 +70,7 @@ export default function Component() {
 
   async function getRequests() {
     setRefreshing(true);
+    setLoad(true);
     let url = "";
     url = `${process.env.NEXT_PUBLIC_API_URL}/requests/sponsor`;
     const response = await Request(url, "GET", null);
@@ -85,6 +88,7 @@ export default function Component() {
   }
 
   async function cancelRequest(requestId) {
+    setLoad(true);
     const url = `${process.env.NEXT_PUBLIC_API_URL}/requests/cancel`;
     const body = { requestId };
     const response = await Request(url, "PUT", body);
@@ -110,26 +114,15 @@ export default function Component() {
 
   }
 
-  async function declineRequest(requestId) {
-    setLoad(true);
-    let url = "";
-    url = `${process.env.NEXT_PUBLIC_API_URL}/requests/decline`;
-    const response = await Request(url, "PUT", {requestId});
-    if(response && response.success) {
-      toast.success("Request was declined");
-      getRequests();
-    } else {
-      toast.error("There was a problem when declining request");
-    }
-  }
-
   async function openChat(email) {
+    setLoad(true);
     const url = `${process.env.NEXT_PUBLIC_API_URL}/chat`;
     const body = { otherUserEmail: email }
     const response = await Request(url, "POST", body);
     if(response && response.success) {
       router.push("../chat");
     }
+    setLoad(false);
   }
 
   useEffect(() => {
@@ -184,7 +177,7 @@ export default function Component() {
                   <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="request">Request</TabsTrigger>
                     <TabsTrigger disabled={!request.transaction} value="ongoing">Connection</TabsTrigger>
-                    <TabsTrigger disabled={!request.transaction} value="receipt">Receipt</TabsTrigger>
+                    <TabsTrigger disabled={(!request.transaction) || (request.transaction.status!=="COMPLETED")} value="receipt">Receipt</TabsTrigger>
                   </TabsList>
                   {Object.entries(tabContent).map(([key, { title, content }]) => (
                     <TabsContent key={key} value={key}>
@@ -234,26 +227,26 @@ export default function Component() {
                 </CardContent>
                 <CardFooter className="flex justify-between">
                   {
+                    !request.transaction && <>
+                  {
                     request.status==="ACCEPTED" && !request.confirmPayment &&
                             <>
-                            <Button onClick={() => confirmRequest(request.id, request.creator.email)} variant="outline" className="bg-green-900 text-green-100 hover:bg-green-800 border-green-700 flex items-center">
+                            <Button disabled={load} onClick={() => confirmRequest(request.id, request.creator.email)} variant="outline" className="bg-green-900 text-green-100 hover:bg-green-800 border-green-700 flex items-center">
                               <Check className="w-4 h-4 mr-2" />
                               Confirm Request
                               </Button>
-                              <Button onClick={() => declineRequest(request.id)} variant="outline" className="bg-red-900 text-red-100 hover:bg-red-800 border-red-700 flex items-center">
-                                <X className="w-4 h-4 mr-2" />
-                                Decline Request
-                              </Button>
                             </>
                         }
-
                         {
-                          request.status==="PENDING" && 
-                              <Button onClick={() => cancelRequest(request.id)} variant="outline" className="bg-red-900 text-red-100 hover:bg-red-800 border-red-700 flex items-center">
+                          (request.status==="PENDING" || request.status === "ACCEPTED") && 
+                              <Button disabled={load} onClick={() => cancelRequest(request.id)} variant="outline" className="bg-red-900 text-red-100 hover:bg-red-800 border-red-700 flex items-center">
                                 <X className="w-4 h-4 mr-2" />
                                 Cancel
                               </Button>
                         }
+
+                    </>
+                  }
                         <Button
                           variant="outline"
                           className="bg-gray-800 text-gray-300 hover:bg-gray-700 border-gray-600 flex items-center"
@@ -284,8 +277,7 @@ export default function Component() {
                 <div>
                   <h3 className="text-lg font-semibold text-gray-100">Sender Information</h3>
                   <p><strong>Name:</strong> {name}</p>
-                  <p><strong>Email:</strong> {email}</p>
-                  <p><strong>Company:</strong> {company.orginization}</p>
+                  <p><strong>Company:</strong> {company.orginization.indexOf(".") > 0 ? company.orginization : "individual"}</p>
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-100">Proposal</h3>
@@ -293,13 +285,9 @@ export default function Component() {
                 </div>
               </div>
               <div className="flex justify-end gap-4 mt-4">
-                <Button variant="outline" className="bg-green-900 text-green-100 hover:bg-green-800 border-green-700 flex items-center">
-                  <Check className="w-4 h-4 mr-2" />
-                  Accept
-                </Button>
-                <Button variant="outline" className="bg-red-900 text-red-100 hover:bg-red-800 border-red-700 flex items-center">
+                <Button onClick={() => setIsModalOpen(false)}variant="outline" className="bg-red-900 text-red-100 hover:bg-red-800 border-red-700 flex items-center">
                   <X className="w-4 h-4 mr-2" />
-                  Decline
+                  Close
                 </Button>
               </div>
             </>
@@ -361,7 +349,7 @@ const tabContent = {
         <p className="text-sm text-gray-400 flex items-center">
           <User className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
           <span className="font-semibold mr-2">{request.creator.name}</span>
-          <span className="text-gray-500">{request.creator.email}</span>
+          <span className="text-gray-500">(Youtuber)</span>
         </p>
         <p className="text-sm text-gray-400 flex items-center">
           <FileText className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />

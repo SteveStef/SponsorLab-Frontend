@@ -5,12 +5,12 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Progress } from "@/components/ui/progress"
-import { Building2, Globe, PackageOpen, Youtube, Users, Banknote, ArrowRight, ArrowLeft, LightbulbIcon, X } from 'lucide-react'
+import { Building2, Globe, PackageOpen, Youtube, Users, Banknote, ArrowRight, ArrowLeft, LightbulbIcon, X } from 'lucide-react';
 import request from "@/request";
 import { toast } from "sonner";
 import { useAppContext } from '@/context'
 
-export default function Component() {
+export default function Component(props) {
   const [step, setStep] = useState(1)
   const { company, setCompany } = useAppContext();
 
@@ -45,12 +45,13 @@ export default function Component() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoad(true);
-    console.log('Form submitted:', formData)
     const url = `${process.env.NEXT_PUBLIC_API_URL}/users/sponsor/create-profile`;
     const response = await request(url, "POST", formData);
     if(response && response.success) {
       toast.success("Your profile has been created");
       setCompany({...company, setup: true});
+      await props.refresh();
+      props.setShowCreateFlow(false);
     } else {
       toast.error("There is a problem with creating your profile.");
     }
