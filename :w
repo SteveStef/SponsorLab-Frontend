@@ -1,0 +1,231 @@
+import { useState } from 'react'
+import Link from 'next/link'
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Search, Filter, DollarSign, Clock, CheckCircle, XCircle, Eye, FileText, RefreshCw, Check, X, Calendar } from 'lucide-react'
+
+export default function Component() {
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedRequest, setSelectedRequest] = useState(null)
+return (
+    <div className="min-h-screen bg-gray-900 text-gray-100 flex justify-center">
+      <div className="max-w-7xl w-full flex">
+        {/* Side Panel */}
+        <div className="w-64 bg-gray-800 p-6 hidden lg:block">
+          <h2 className="text-xl font-bold text-green-400 mb-4">Request Stages</h2>
+          <ul className="space-y-4">
+            <li className="flex items-center">
+              <Clock className="w-5 h-5 mr-2 text-yellow-500" />
+              <span>Pending: Awaiting your response</span>
+            </li>
+            <li className="flex items-center">
+              <CheckCircle className="w-5 h-5 mr-2 text-green-500" />
+              <span>Accepted: Collaboration confirmed</span>
+            </li>
+            <li className="flex items-center">
+              <XCircle className="w-5 h-5 mr-2 text-red-500" />
+              <span>Declined: Offer not accepted</span>
+            </li>
+          </ul>
+        </div>
+
+        {/* Main Content */}
+        <div className="flex-1 p-8 max-w-3xl mx-auto">
+          <header className="mb-8">
+            <div className="flex justify-between items-center mb-4">
+              <h1 className="text-3xl font-bold text-green-400">Incoming Sponsor Requests</h1>
+              <Button onClick={handleRefresh} variant="outline" className="bg-gray-700 hover:bg-gray-600">
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Refresh
+              </Button>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-4 items-center">
+              <div className="relative flex-1 w-full">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <Input
+                  type="text"
+                  placeholder="Search requests..."
+                  className="pl-10 bg-gray-800 border-gray-700 text-gray-100 w-full"
+                />
+              </div>
+              <Select defaultValue="all">
+                <SelectTrigger className="w-full sm:w-[180px] bg-gray-800 border-gray-700 text-gray-100">
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-800 border-gray-700 text-gray-100">
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="accepted">Accepted</SelectItem>
+                  <SelectItem value="declined">Declined</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select defaultValue="requests">
+                <SelectTrigger className="w-full sm:w-[180px] bg-gray-800 border-gray-700 text-gray-100">
+                  <SelectValue placeholder="View" />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-800 border-gray-700 text-gray-100">
+                  <SelectItem value="requests">Requests</SelectItem>
+                  <SelectItem value="transactions">Transactions</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </header>
+          <div className="space-y-6">
+            {requests.map((request) => (
+              <Card key={request.id} className="bg-gray-800 border-gray-700">
+                <CardHeader className="relative pb-2">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <CardTitle className="text-xl font-bold text-green-400 flex items-center">
+                        <DollarSign className="w-5 h-5 mr-2" />
+                        {request.title}
+                      </CardTitle>
+                      <p className="text-sm text-gray-400 mt-1">Created on {formatDate(request.createdAt)}</p>
+                    </div>
+                    <Badge className={`${getStatusColor(request.status)} flex items-center`}>
+                      {getStatusIcon(request.status)}
+                      {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <ScrollArea className="h-[200px] pr-4">
+                    <div className="space-y-4">
+                      <p className="text-sm text-gray-400 flex items-center">
+                        <FileText className="w-4 h-4 mr-2 flex-shrink-0" />
+                        Product: {request.productName}
+                      </p>
+                      <p className="text-sm text-gray-400 flex items-center">
+                        <Link href={request.listingUrl} className="text-green-400 hover:underline flex items-center">
+                          <Eye className="w-4 h-4 mr-2 flex-shrink-0" />
+                          Listing: {request.listingTitle}
+                        </Link>
+                      </p>
+                      <p className="text-sm">{request.description}</p>
+                      <p className="text-lg font-bold text-green-400 flex items-center">
+                        <DollarSign className="w-5 h-5 mr-1 flex-shrink-0" />
+                        {request.price}
+                      </p>
+                      <p className="text-sm text-gray-400 flex items-center">
+                        <Calendar className="w-4 h-4 mr-2 flex-shrink-0" />
+                        Upload Deadline: {formatDate(request.uploadDeadline)}
+                      </p>
+                    </div>
+                  </ScrollArea>
+                </CardContent>
+                <CardFooter className="flex justify-between">
+                  <Button variant="outline" className="bg-green-600 text-white hover:bg-green-700 flex items-center">
+                    <Check className="w-4 h-4 mr-2" />
+                    Accept
+                  </Button>
+                  <Button variant="outline" className="bg-red-600 text-white hover:bg-red-700 flex items-center">
+                    <X className="w-4 h-4 mr-2" />
+                    Decline
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="bg-blue-600 text-white hover:bg-blue-700 flex items-center"
+                    onClick={() => handleViewProposal(request)}
+                  >
+                    <Eye className="w-4 h-4 mr-2" />
+                    View Proposal
+                  </Button>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Proposal Modal */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="bg-gray-800 text-gray-100 border-gray-700 max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-green-400">Sponsor Proposal</DialogTitle>
+          </DialogHeader>
+          {selectedRequest && (
+            <>
+              <div className="grid gap-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-green-400">Sender Information</h3>
+                  <p><strong>Name:</strong> {selectedRequest.sender.name}</p>
+                  <p><strong>Email:</strong> {selectedRequest.sender.email}</p>
+                  <p><strong>Company:</strong> {selectedRequest.sender.company}</p>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-green-400">Proposal</h3>
+                  <p>{selectedRequest.proposal}</p>
+                </div>
+              </div>
+              <div className="flex justify-end gap-4 mt-4">
+                <Button variant="outline" className="bg-green-600 text-white hover:bg-green-700 flex items-center">
+                  <Check className="w-4 h-4 mr-2" />
+                  Accept
+                </Button>
+                <Button variant="outline" className="bg-red-600 text-white hover:bg-red-700 flex items-center">
+                  <X className="w-4 h-4 mr-2" />
+                  Decline
+                </Button>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  )
+}
+
+function Refresh({animate}) {
+  let classname="";
+  if(animate) {
+    classname = "h-5 w-5 animate-spin";
+  } else {
+    classname = "h-5 w-5";
+  }
+  return (
+    <Button variant="ghost" size="icon" className="rounded-full">
+      <RefreshCwIcon className={classname}/>
+      <span className="sr-only">Refresh</span>
+    </Button>
+  )
+}
+
+function RefreshCwIcon(props) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+      <path d="M21 3v5h-5" />
+      <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+      <path d="M8 16H3v5" />
+    </svg>
+  )
+}
+/*
+                <div className="flex justify-between mt-4">
+                  <Button onClick={() => acceptRequest(req.id, req.sponsor.email)}size="sm" variant="outline" className="text-green-400 border-green-400 hover:bg-green-400 hover:text-gray-900" disabled={req.status !== "PENDING"||load}>
+                    <CheckIcon className="w-4 h-4 mr-1" /> Accept
+                  </Button>
+                  <Button onClick={() => declineRequest(req.id)}size="sm" variant="outline" className="text-red-400 border-red-400 hover:bg-red-400 hover:text-gray-900" disabled={req.status !== "PENDING"||load}>
+                    <XIcon className="w-4 h-4 mr-1" /> Decline
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => handleViewDetails(req)}>
+                    <EyeIcon className="w-4 h-4 mr-1" /> View Proposal
+                  </Button>
+                </div>
+*/
