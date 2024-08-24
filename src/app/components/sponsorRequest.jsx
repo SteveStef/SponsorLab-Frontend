@@ -1,5 +1,6 @@
 "use client";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { Label } from "@/components/ui/label";
 import Link from 'next/link';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { User, Search,FileCheck, DollarSign, 
-  Clock, CheckCircle, XCircle, Eye, FileText, Check, X, Calendar } from 'lucide-react';
+  Clock, InfoIcon, CheckCircle, Copy, XCircle, Eye, FileText, Check, X, Calendar } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useAppContext } from '@/context';
 import Request from "@/request";
@@ -31,14 +32,20 @@ export default function Component() {
   const [requests, setRequests] = useState([]);
   const [refreshing, setRefreshing] = useState(true);
   const [load, setLoad] = useState(true);
-  const {name, email, company} = useAppContext();
+  const { name, company } = useAppContext();
+  const [videoUrls, setVideoUrls] = useState({});
+
   const router = useRouter();
 
   const getStatusIcon = (status) => {
     switch (status) {
       case 'PENDING':
         return <Clock className="w-4 h-4 mr-1" />
+      case 'SPONSOR_REVIEW':
+        return <Eye className="w-4 h-4 mr-1" />
       case 'ACCEPTED':
+        return <CheckCircle className="w-4 h-4 mr-1" />
+      case 'COMPLETED':
         return <CheckCircle className="w-4 h-4 mr-1" />
       case 'DECLINED':
         return <XCircle className="w-4 h-4 mr-1" />
@@ -57,7 +64,11 @@ export default function Component() {
     switch (status) {
       case 'PENDING':
         return 'bg-yellow-900 text-yellow-300'
+      case 'SPONSOR_REVIEW':
+        return 'bg-yellow-900 text-yellow-300'
       case 'ACCEPTED':
+        return 'bg-green-900 text-green-300'
+      case 'COMPLETED':
         return 'bg-green-900 text-green-300'
       case 'DECLINED':
         return 'bg-red-900 text-red-300'
@@ -71,17 +82,24 @@ export default function Component() {
   async function getRequests() {
     setRefreshing(true);
     setLoad(true);
-    let url = "";
-    url = `${process.env.NEXT_PUBLIC_API_URL}/requests/sponsor`;
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/requests/sponsor`;
     const response = await Request(url, "GET", null);
     console.log(response);
     if(response && response.success) {
+      response.body.sort((a,b) =>  new Date(b.createdAt) - new Date(a.createdAt));
       setRequests(response.body);
       let obj = {};
+      let vurls = {};
       for(let i = 0; i < response.body.length; i++) {
-        obj[response.body[i].id] = response.body[i].transaction ? "ongoing" : "request";
+        const req = response.body[i];
+        console.log(req.transaction)
+        obj[req.id] = (req.transaction && req.transaction.status === "COMPLETED") ? "receipt" : req.transaction ? "ongoing" : "request";
+        if(req.transaction && req.transaction.videoUrl) {
+          vurls[req.transaction.id] = req.transaction.videoUrl;
+        }
       }
       setActiveTab(obj);
+      setVideoUrls(vurls);
     }
     setLoad(false);
     setRefreshing(false);
@@ -139,12 +157,28 @@ export default function Component() {
   }
 
   async function approveVideo(transactionId) {
-
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/transactions/sponsor/approve-video`;
+    const body = { transactionId }
+    const response = await Request(url, "PUT", body);
+    if(response && response.success) {
+      toast.success("Video has been approved");
+      getRequests();
+    } else {
+      toast.error("Failed to approve video, try again later");
+    }
   }
 
   async function refuteVideo(transactionId) {
 
   }
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = useCallback((url) => {
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000) // Reset after 2 seconds
+    })
+  }, [])
 
   return (
     <div className="text-gray-300 flex justify-center">
@@ -233,7 +267,7 @@ export default function Component() {
                 </CardHeader>
                 <CardContent>
                   <ScrollArea className="h-[200px] pr-4">
-                  {content(request)}
+                  {key === "ongoing" ? content(request, videoUrls, copied, handleCopy) : content(request)}
                   </ScrollArea>
                 </CardContent>
                 <CardFooter className="flex justify-between">
@@ -323,7 +357,7 @@ function RefreshCwIcon(props) {
 const tabContent = {
     request: {
     title: "Request Details",
-    content: request => (
+    content: (request) => (
       <div className="space-y-2">
         <p className="text-sm text-green-400 flex items-center">
           <Link href={`../../listings/${request.post.id}`} className="text-green-500 hover:text-green-300 flex items-center">
@@ -345,48 +379,67 @@ const tabContent = {
     )
   },
   ongoing: {
-    title: "You have partnered with a sponsor!",
-    content: request => (
+    title: "You have partnered with a youtuber!",
+    content: (request, videoUrls, copied, handleCopy) => (
       <div className="space-y-2">
         <p className="text-sm text-gray-400 flex items-center">
           <User className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
           Youtuber: {request.creator.name}
-        </p>
-        <p className="text-sm text-gray-400 flex items-center">
-          <FileText className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
-          Current progress: In progress
         </p>
 
         <p className="text-sm text-gray-400 flex items-center">
           <Calendar className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
           Upload Deadline: {formatDate(new Date().toDateString())}
         </p>
-        <p className="text-sm text-gray-300">Transaction is currently being processed. Please check back later for updates.</p>
+      <div className="flex">
+        <InfoIcon 
+      className="w-4 h-4 mr-2 flex-shrink-0 text-green-500" />
+        <p className="text-sm text-green-300">{request.transaction && request.transaction.videoUrl ? "Please review this url and approve or refute it" : "Waiting for the youtuber to post the video url by the deadline"}</p>
+      </div>
+
+      {
+        request.transaction && request.transaction.videoUrl &&
+            <div className="space-y-2 px-1">
+              <Label htmlFor="name">Final Youtube Video Url</Label>
+      <div className="flex items-center space-x-2">
+            <Input 
+      style={{cursor: "pointer"}}
+      onClick={() => handleCopy(videoUrls[request.transaction.id])}
+      id="bananan"
+      readOnly
+      value={`${videoUrls[request.transaction.id]}`}
+            />
+      <Button 
+      size="icon"
+      onClick={() => handleCopy(videoUrls[request.transaction.id])}
+      aria-label="Copy to clipboard">
+      {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+      </Button>
+
+      </div>
+      </div>
+      }
       </div>
     )
   },
   receipt: {
     title: "Transaction Receipt",
-    content: request => (
-      <>
-        <p className="text-sm text-gray-400 flex items-center">
+    content: (request)=> (
+      <div className="space-y-6">
+        <p className="text-sm text-gray-400 flex items-center ">
           <FileCheck className="w-4 h-4 mr-2 flex-shrink-0 text-green-500" />
           Completed on: {formatDate(new Date())}
         </p>
           <p className="text-sm text-gray-400 flex items-center">
-            <DollarSign className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
-            Total Amount: $25
-          </p>
-          <p className="text-sm text-gray-400 flex items-center">
             <User className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
-            Buyer: name
+            Buyer: {request.creator.name}
           </p>
           <p className="text-sm text-gray-400 flex items-center">
             <FileText className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
-            Product: name of pruct
+            Product: {request.title}
           </p>
           <p className="text-sm text-gray-300">Thank you for your purchase. This serves as your official receipt.</p>
-        </>
+        </div>
       )
     }
   }
@@ -465,8 +518,8 @@ function ShowButtons(props) {
       Cancel
     </Button>
 
-  const approve = <Button disabled={load} onClick={map["approveVideo"]} variant="outline" className="bg-red-900 text-red-100 hover:bg-red-800 border-red-700 flex items-center">
-      <X className="w-4 h-4 mr-2" />
+  const approve = <Button disabled={load} onClick={map["approveVideo"]} variant="outline" className="bg-green-900 text-green-100 hover:bg-green-800 border-green-700 flex items-center">
+      <Check className="w-4 h-4 mr-2" />
       Approve Video
     </Button>
   const refute = <Button disabled={load} onClick={map["refuteVideo"]} variant="outline" className="bg-red-900 text-red-100 hover:bg-red-800 border-red-700 flex items-center">
@@ -487,7 +540,7 @@ function ShowButtons(props) {
         return viewProposal
       }
     } else { // there is a transaciton
-      if(request.transaction.videoUrl && activeTab === "ongoing") {
+      if(request.transaction.videoUrl && activeTab === "ongoing" && request.transaction.status === "SPONSOR_REVIEW") {
         return <>{approve}{refute}</>
       } else if(activeTab === "request") return viewProposal
     }

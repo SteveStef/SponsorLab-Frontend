@@ -6,9 +6,9 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogTrigger, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { User, Search,FileCheck, DollarSign, InfoIcon, Video,
+import { User, Search,FileCheck, DollarSign, InfoIcon, Video, Link2,
   Clock, CheckCircle, XCircle, Eye, FileText, Check, X, Calendar } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import Request from "@/request";
@@ -29,11 +29,17 @@ export default function Component() {
   const [refreshing, setRefreshing] = useState(true);
   const [load, setLoad] = useState(true);
 
+  const [videoUrls, setVideoUrls] = useState({});
+
   const getStatusIcon = (status) => {
     switch (status) {
       case 'PENDING':
         return <Clock className="w-4 h-4 mr-1" />
+      case 'SPONSOR_REVIEW':
+        return <Eye className="w-4 h-4 mr-1" />
       case 'ACCEPTED':
+        return <CheckCircle className="w-4 h-4 mr-1" />
+      case 'COMPLETED':
         return <CheckCircle className="w-4 h-4 mr-1" />
       case 'DECLINED':
         return <XCircle className="w-4 h-4 mr-1" />
@@ -52,7 +58,11 @@ export default function Component() {
     switch (status) {
       case 'PENDING':
         return 'bg-yellow-900 text-yellow-300'
+      case 'SPONSOR_REVIEW':
+        return 'bg-yellow-900 text-yellow-300'
       case 'ACCEPTED':
+        return 'bg-green-900 text-green-300'
+      case 'COMPLETED':
         return 'bg-green-900 text-green-300'
       case 'DECLINED':
         return 'bg-red-900 text-red-300'
@@ -69,11 +79,18 @@ export default function Component() {
     const response = await Request(url, "GET", null);
     console.log(response);
     if(response && response.success) {
+      response.body.sort((a,b) =>  new Date(b.createdAt) - new Date(a.createdAt));
       setRequests(response.body);
       let obj = {};
+      let vurls = {};
       for(let i = 0; i < response.body.length; i++) {
-        obj[response.body[i].id] = response.body[i].transaction ? "ongoing" : "request";
+        const req = response.body[i];
+        obj[req.id] = (req.transaction && req.transaction.status === "COMPLETED") ? "receipt" : req.transaction ? "ongoing" : "request";
+        if(req.transaction) {
+          vurls[req.transaction.id] = req.transaction.videoUrl || "";
+        }
       }
+      setVideoUrls(vurls);
       setActiveTab(obj);
     }
     setLoad(false);
@@ -131,10 +148,16 @@ export default function Component() {
   }
 
   async function sendVideoUrl(transactionId) {
-    url = `${process.env.NEXT_PUBLIC_API_URL}/transactions/creator/post-video`;
+    const videoUrl = videoUrls[transactionId];
+    if(!videoUrl || !videoUrl.includes("youtube.com")) {
+      toast.error("Video url must be a youtube url");
+      return;
+    }
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/transactions/creator/post-video`;
     const response = await Request(url, "PUT", {transactionId, videoUrl});
     if(response && response.success) {
       toast.success("Send the video url to the sponsor!");
+      getRequests();
     } else {
       toast.error("Something went wrong, try again later");
     }
@@ -228,7 +251,10 @@ export default function Component() {
                 </CardHeader>
                 <CardContent>
                   <ScrollArea className="h-[200px] pr-4">
-                  {content(request)}
+                    {
+                      key === "ongoing" ? 
+                  content(request, videoUrls, setVideoUrls):content(request)
+                    }
                   </ScrollArea>
                 </CardContent>
                 <CardFooter className="flex justify-between">
@@ -321,7 +347,7 @@ function RefreshCwIcon(props) {
 const tabContent = {
     request: {
     title: "Request Details",
-    content: request => (
+    content: (request)=> (
       <div className="space-y-2">
         <p className="text-sm text-green-400 flex items-center">
           <Link href={`../../listings/${request.post.id}`} className="text-green-500 hover:text-green-300 flex items-center">
@@ -344,7 +370,7 @@ const tabContent = {
   },
   ongoing: {
     title: "You have partnered with a sponsor!",
-    content: request => (
+    content: (request,videoUrls,setVideoUrls)=> (
       <div className="space-y-2">
         <p className="text-sm text-gray-400 flex items-center">
           <User className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
@@ -356,37 +382,50 @@ const tabContent = {
         </p>
         <div className="flex text-green-400">
         <InfoIcon className="w-5 h-5 mr-1"/>
-        <p className="text-sm ">Send the video url by the deadline for review</p>
+        <p className="text-sm ">{(request.transaction && request.transaction.id in videoUrls) ? "The video url was send and is being reviewed by the sponsor":"Send Video Url"}</p>
       </div>
             <div className="space-y-2 px-1">
               <Label htmlFor="name">Final Youtube Video Url</Label>
-              <Input disabled={(request.transaction && request.transaction.status !== "PENDING")} id="name" placeholder="https://youtube.com/..." />
+            <Input disabled={(request.transaction && (request.transaction.status !== "PENDING" && request.transaction.status !== "SPONSOR_REVIEW"))} 
+              id="name"
+              onChange={(e) => {
+                setVideoUrls((prev => ({
+                  ...prev, [request.transaction.id]: e.target.value
+                })))
+              }}
+              placeholder="https://youtube.com/..."
+            />
             </div>
+        <p className="text-sm text-gray-400 hover:text-gray-200 flex items-center">
+          <Link2 className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
+          <Link href={request.transaction.videoUrl} style={{cursor: "pointer"}}>{request.transaction.videoUrl || "No link uploaded"}</Link>
+        </p>
       </div>
     )
   },
   receipt: {
     title: "Transaction Receipt",
-    content: request => (
-      <>
-        <p className="text-sm text-gray-400 flex items-center">
+    content: (request)=> (
+      <div className="space-y-5">
+        <p className="text-sm text-gray-400 flex items-center ">
           <FileCheck className="w-4 h-4 mr-2 flex-shrink-0 text-green-500" />
           Completed on: {formatDate(new Date())}
         </p>
           <p className="text-sm text-gray-400 flex items-center">
-            <DollarSign className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
-            Total Amount: $25
-          </p>
-          <p className="text-sm text-gray-400 flex items-center">
             <User className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
-            Buyer: name
+            Buyer: {request.sponsor.name}
           </p>
           <p className="text-sm text-gray-400 flex items-center">
             <FileText className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
-            Product: name of pruct
+            Product: {request.title}
           </p>
-          <p className="text-sm text-gray-300">Thank you for your purchase. This serves as your official receipt.</p>
-        </>
+        <div className="flex text-green-400">
+        <InfoIcon className="w-5 h-5 mr-1"/>
+          <p className="text-sm text-green-300">The money will hit your bank account within the next 2 weeks, if there are questions or concerns, please contact support@sponsorlab.co</p>
+      </div>
+          <p className="text-sm text-gray-300">Thank you for using SponsorLab. This serves as your official receipt.</p>
+
+        </div>
       )
     }
   }
@@ -490,7 +529,7 @@ function ShowButtons(props) {
     } else { // there is a transaciton
       if(props.activeTab === "request") {
         return <>{viewProposal}</>
-      } else if(request.transaction.status === "PENDING" && props.activeTab === "ongoing") {
+      } else if((request.transaction.status === "PENDING" || request.transaction.status === "SPONSOR_REVIEW") && props.activeTab === "ongoing") {
         return <>{cancel}{videoUrl}</>
       }
     }
