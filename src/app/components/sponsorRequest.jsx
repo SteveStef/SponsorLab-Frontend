@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { User, Search,FileCheck, DollarSign, 
   Clock, CheckCircle, XCircle, Eye, FileText, Check, X, Calendar } from 'lucide-react';
@@ -100,7 +100,10 @@ export default function Component() {
     }
   }
 
-  async function confirmRequest(requestId, creatorEmail) {
+  async function confirmRequest(request) {
+    const requestId = request.id;
+    const creatorEmail = request.creator.email;
+
     setLoad(true);
     const url = `${process.env.NEXT_PUBLIC_API_URL}/requests/sponsor/confirm-payment`;
     const response = await Request(url, "POST",  { requestId });
@@ -184,7 +187,7 @@ export default function Component() {
                   className="w-full">
                   <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="request">Request</TabsTrigger>
-                    <TabsTrigger disabled={!request.transaction} value="ongoing">Connection</TabsTrigger>
+                    <TabsTrigger disabled={!request.transaction} value="ongoing">Parnership</TabsTrigger>
                     <TabsTrigger disabled={(!request.transaction) || (request.transaction.status!=="COMPLETED")} value="receipt">Receipt</TabsTrigger>
                   </TabsList>
                   {Object.entries(tabContent).map(([key, { title, content }]) => (
@@ -234,9 +237,8 @@ export default function Component() {
                   </ScrollArea>
                 </CardContent>
                 <CardFooter className="flex justify-between">
-                  {
-                  showButtons(request, load, key, confirmRequest, cancelRequest, handleViewProposal, approveVideo, refuteVideo)
-                  }
+                  <ShowButtons request={request} load={load} activeTab={key} confirmRequest={confirmRequest} cancelRequest={cancelRequest} handleViewProposal={handleViewProposal} approveVideo={approveVideo} refuteVideo={refuteVideo}
+                  />
 
                 </CardFooter>
                 </TabsContent>
@@ -389,7 +391,60 @@ const tabContent = {
     }
   }
 
-function showButtons(request, load, activeTab, confirmRequest, cancelRequest, handleViewProposal, approveVideo, refuteVideo) {
+
+function ShowButtons(props) {
+  const { request, load, activeTab, confirmRequest, cancelRequest, handleViewProposal, approveVideo, refuteVideo } = props;
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [selectedParams, setSelectedParams] = useState("");
+  const [selectedInfo, setSelectedInfo] = useState("");
+  const [fnsName, setFnsName] = useState("");
+
+  const fns = {
+    confirmRequest: confirmRequest, 
+    cancelRequest: cancelRequest,
+    approveVideo: approveVideo,
+    refuteVideo: refuteVideo,
+  }
+
+  const map = {
+    "confirmRequest": () => {
+      setShowConfirm(true);
+      setFnsName("confirmRequest");
+      setSelectedParams(request);
+      setSelectedInfo({ 
+        title: "Are you sure you want to confirm accept this request?", 
+        info: "This will move on to the second step, and you will be charged and the money will be held until the transaction is over"
+      });
+    },
+    "cancelRequest": () => {
+      setShowConfirm(true);
+      setFns("cancelRequest");
+      setSelectedParams(request.id);
+      setSelectedInfo({ 
+        title: "Are you sure you want to cancel this request?", 
+        info: "The status of this request will be CANCELED and no further action can be taken"
+      });
+    },
+    "approveVideo": () => {
+      setShowConfirm(true);
+      setFns("approveVideo");
+      setSelectedParams(request.transaction.id);
+      setSelectedInfo({ 
+        title: "Are you sure you want to approve this url?", 
+        info: "The status of this transaction will be COMPLETED and them money will be sent to the youtuber."
+      });
+    },
+    "refuteVideo": () => {
+      setShowConfirm(true);
+      setFns("refuteVideo");
+      setSelectedParams(request.transaction.id);
+      setSelectedInfo({ 
+        title: "Are you sure you want to refute video url?", 
+        info: "An admin will take a look at this transaction and determind the outcome."
+      });
+    },
+
+  }
 
   const viewProposal = <Button
     variant="outline"
@@ -399,39 +454,80 @@ function showButtons(request, load, activeTab, confirmRequest, cancelRequest, ha
     View Proposal
   </Button> 
 
-  const confirm = <Button disabled={load} onClick={() => confirmRequest(request.id, request.creator.email)} variant="outline" className="bg-green-900 text-green-100 hover:bg-green-800 border-green-700 flex items-center">
+  const confirm = <Button disabled={load} onClick={map["confirmRequest"]} variant="outline" className="bg-green-900 text-green-100 hover:bg-green-800 border-green-700 flex items-center">
     <Check className="w-4 h-4 mr-2" />
     Confirm Request
   </Button>
 
   const cancel = 
-    <Button disabled={load} onClick={() => cancelRequest(request.id)} variant="outline" className="bg-red-900 text-red-100 hover:bg-red-800 border-red-700 flex items-center">
+    <Button disabled={load} onClick={map["cancelRequest"]} variant="outline" className="bg-red-900 text-red-100 hover:bg-red-800 border-red-700 flex items-center">
       <X className="w-4 h-4 mr-2" />
       Cancel
     </Button>
 
-  const approve = <Button disabled={load} onClick={() => approveVideo(request.transaction.id)} variant="outline" className="bg-red-900 text-red-100 hover:bg-red-800 border-red-700 flex items-center">
+  const approve = <Button disabled={load} onClick={map["approveVideo"]} variant="outline" className="bg-red-900 text-red-100 hover:bg-red-800 border-red-700 flex items-center">
       <X className="w-4 h-4 mr-2" />
       Approve Video
     </Button>
-  const refute = <Button disabled={load} onClick={() => refuteVideo(request.transaction.id)} variant="outline" className="bg-red-900 text-red-100 hover:bg-red-800 border-red-700 flex items-center">
+  const refute = <Button disabled={load} onClick={map["refuteVideo"]} variant="outline" className="bg-red-900 text-red-100 hover:bg-red-800 border-red-700 flex items-center">
       <X className="w-4 h-4 mr-2" />
       Refute Video
     </Button>
 
-  if(!request.transaction) {
-    if(request.status === "PENDING") {
-      return <>{cancel}{viewProposal}</>
-    } else if(request.status === "ACCEPTED") {
-      if(request.paymentConfirmation) return viewProposal
-      else return <>{confirm}{cancel}{viewProposal}</>
-    } else {
-      return viewProposal
+
+  function getButton() {
+    const {request} = props;
+    if(!request.transaction) {
+      if(request.status === "PENDING") {
+        return <>{cancel}{viewProposal}</>
+      } else if(request.status === "ACCEPTED") {
+        if(request.paymentConfirmation) return viewProposal
+        else return <>{confirm}{cancel}{viewProposal}</>
+      } else {
+        return viewProposal
+      }
+    } else { // there is a transaciton
+      if(request.transaction.videoUrl && activeTab === "ongoing") {
+        return <>{approve}{refute}</>
+      } else if(activeTab === "request") return viewProposal
     }
-  } else { // there is a transaciton
-    if(request.transaction.videoUrl && activeTab === "ongoing") {
-      return <>{approve}{refute}</>
-    } else if(activeTab === "request") return viewProposal
+    return <></>
   }
-  return <></>
+
+  return <>
+    {getButton()}
+      <Dialog open={showConfirm} onOpenChange={setShowConfirm}>
+        <DialogContent className="sm:max-w-[600px] text-gray-100 border-gray-700">
+          <DialogHeader>
+            <DialogTitle className="text-green-400">Confirm Action</DialogTitle>
+            <DialogDescription className="text-gray-400">
+              {selectedInfo.title}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <h4 className="text-sm font-medium text-green-400 mb-2">Effect of this action</h4>
+            <DialogDescription className="text-gray-400">
+              {selectedInfo.info}
+            </DialogDescription>
+          </div>
+          <DialogFooter className="sm:justify-start">
+            <Button
+              disabled={load}
+              onClick={() => fns[fnsName](selectedParams)} 
+              className="bg-green-600 text-green-100 hover:bg-green-500 border-green-700"
+            >
+              {
+                load ? "Loading..." : "I understand and accept"
+              }
+            </Button>
+            <Button
+              onClick={() => setShowConfirm(false)}
+              className="bg-red-600 text-red-100 hover:bg-red-500 border-red-700"
+            >
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+  </>
 }
