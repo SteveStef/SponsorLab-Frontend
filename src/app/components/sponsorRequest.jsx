@@ -89,7 +89,7 @@ export default function Component() {
 
   async function cancelRequest(requestId) {
     setLoad(true);
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/requests/cancel`;
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/requests/sponsor/cancel`;
     const body = { requestId };
     const response = await Request(url, "PUT", body);
     if (response && response.success) {
@@ -102,7 +102,7 @@ export default function Component() {
 
   async function confirmRequest(requestId, creatorEmail) {
     setLoad(true);
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/requests/sponsor-confirm-payment`;
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/requests/sponsor/confirm-payment`;
     const response = await Request(url, "POST",  { requestId });
     console.log(response);
     if(response && response.success) {
@@ -133,6 +133,14 @@ export default function Component() {
     let tmp = {...activeTab};
     tmp[requestId] = value;
     setActiveTab(tmp);
+  }
+
+  async function approveVideo(transactionId) {
+
+  }
+
+  async function refuteVideo(transactionId) {
+
   }
 
   return (
@@ -227,34 +235,9 @@ export default function Component() {
                 </CardContent>
                 <CardFooter className="flex justify-between">
                   {
-                    !request.transaction && <>
-                  {
-                    request.status==="ACCEPTED" && !request.confirmPayment &&
-                            <>
-                            <Button disabled={load} onClick={() => confirmRequest(request.id, request.creator.email)} variant="outline" className="bg-green-900 text-green-100 hover:bg-green-800 border-green-700 flex items-center">
-                              <Check className="w-4 h-4 mr-2" />
-                              Confirm Request
-                              </Button>
-                            </>
-                        }
-                        {
-                          (request.status==="PENDING" || request.status === "ACCEPTED") && 
-                              <Button disabled={load} onClick={() => cancelRequest(request.id)} variant="outline" className="bg-red-900 text-red-100 hover:bg-red-800 border-red-700 flex items-center">
-                                <X className="w-4 h-4 mr-2" />
-                                Cancel
-                              </Button>
-                        }
-
-                    </>
+                  showButtons(request, load, key, confirmRequest, cancelRequest, handleViewProposal, approveVideo, refuteVideo)
                   }
-                        <Button
-                          variant="outline"
-                          className="bg-gray-800 text-gray-300 hover:bg-gray-700 border-gray-600 flex items-center"
-                          onClick={() => handleViewProposal(request)}
-                        >
-                          <Eye className="w-4 h-4 mr-2" />
-                    View Proposal
-                  </Button>
+
                 </CardFooter>
                 </TabsContent>
                 ))}
@@ -406,3 +389,49 @@ const tabContent = {
     }
   }
 
+function showButtons(request, load, activeTab, confirmRequest, cancelRequest, handleViewProposal, approveVideo, refuteVideo) {
+
+  const viewProposal = <Button
+    variant="outline"
+    className="bg-gray-800 text-gray-300 hover:bg-gray-700 border-gray-600 flex items-center"
+    onClick={() => handleViewProposal(request)}>
+    <Eye className="w-4 h-4 mr-2" />
+    View Proposal
+  </Button> 
+
+  const confirm = <Button disabled={load} onClick={() => confirmRequest(request.id, request.creator.email)} variant="outline" className="bg-green-900 text-green-100 hover:bg-green-800 border-green-700 flex items-center">
+    <Check className="w-4 h-4 mr-2" />
+    Confirm Request
+  </Button>
+
+  const cancel = 
+    <Button disabled={load} onClick={() => cancelRequest(request.id)} variant="outline" className="bg-red-900 text-red-100 hover:bg-red-800 border-red-700 flex items-center">
+      <X className="w-4 h-4 mr-2" />
+      Cancel
+    </Button>
+
+  const approve = <Button disabled={load} onClick={() => approveVideo(request.transaction.id)} variant="outline" className="bg-red-900 text-red-100 hover:bg-red-800 border-red-700 flex items-center">
+      <X className="w-4 h-4 mr-2" />
+      Approve Video
+    </Button>
+  const refute = <Button disabled={load} onClick={() => refuteVideo(request.transaction.id)} variant="outline" className="bg-red-900 text-red-100 hover:bg-red-800 border-red-700 flex items-center">
+      <X className="w-4 h-4 mr-2" />
+      Refute Video
+    </Button>
+
+  if(!request.transaction) {
+    if(request.status === "PENDING") {
+      return <>{cancel}{viewProposal}</>
+    } else if(request.status === "ACCEPTED") {
+      if(request.paymentConfirmation) return viewProposal
+      else return <>{confirm}{cancel}{viewProposal}</>
+    } else {
+      return viewProposal
+    }
+  } else { // there is a transaciton
+    if(request.transaction.videoUrl && activeTab === "ongoing") {
+      return <>{approve}{refute}</>
+    } else if(activeTab === "request") return viewProposal
+  }
+  return <></>
+}

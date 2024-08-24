@@ -65,8 +65,7 @@ export default function Component() {
 
   async function getRequests() {
     setRefreshing(true);
-    let url = "";
-    url = `${process.env.NEXT_PUBLIC_API_URL}/requests/creator`;
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/requests/creator`;
     const response = await Request(url, "GET", null);
     console.log(response);
     if(response && response.success) {
@@ -83,7 +82,7 @@ export default function Component() {
 
   async function acceptRequest(requestId) {
     setLoad(true);
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/requests/accept`;
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/requests/creator/accept`;
     const response = await Request(url, "PUT", {requestId});
     console.log(response);
     if(response && response.success) {
@@ -97,9 +96,20 @@ export default function Component() {
 
   async function declineRequest(requestId) {
     setLoad(true);
-    let url = "";
-    url = `${process.env.NEXT_PUBLIC_API_URL}/requests/decline`;
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/requests/creator/decline`;
     const response = await Request(url, "PUT", {requestId});
+    if(response && response.success) {
+      toast.success("Request was declined");
+      getRequests();
+    } else {
+      toast.error("There was a problem when declining request");
+    }
+  }
+
+  async function cancelTransaction(transactionId) {
+    setLoad(true);
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/transactions/creator/cancel`;
+    const response = await Request(url, "PUT", { transactionId });
     if(response && response.success) {
       toast.success("Request was declined");
       getRequests();
@@ -118,11 +128,13 @@ export default function Component() {
     setActiveTab(tmp);
   }
 
-  async function sendVideoUrl(requestId) {
-    url = `${process.env.NEXT_PUBLIC_API_URL}/requests/post-video`;
-    const response = await Request(url, "PUT", {requestId, videoUrl});
+  async function sendVideoUrl(transactionId) {
+    url = `${process.env.NEXT_PUBLIC_API_URL}/transactions/creator/post-video`;
+    const response = await Request(url, "PUT", {transactionId, videoUrl});
     if(response && response.success) {
       toast.success("Send the video url to the sponsor!");
+    } else {
+      toast.error("Something went wrong, try again later");
     }
   }
 
@@ -217,52 +229,7 @@ export default function Component() {
                   </ScrollArea>
                 </CardContent>
                 <CardFooter className="flex justify-between">
-                    {
-                      !request.transaction ? <>
-                    {
-                      request.status === "PENDING" && <>
-                  <Button disabled={load} onClick={() => acceptRequest(request.id)} variant="outline" className="bg-green-900 text-green-100 hover:bg-green-800 border-green-700 flex items-center">
-                    <Check className="w-4 h-4 mr-2" />
-                    Accept
-                  </Button>
-                      </>
-                    }
-
-                  {
-                    (request.status !== "CANCELED") && (request.status !== "DECLINED") &&
-                      <Button disabled={load} onClick={() => declineRequest(request.id)} variant="outline" className="bg-red-900 text-red-100 hover:bg-red-800 border-red-700 flex items-center">
-                      <X className="w-4 h-4 mr-2" />
-                      Decline
-                      </Button>
-                  }
-
-                      </> : activeTab[request.id] === "ongoing" && 
-                      <Button disabled={load} onClick={() => declineRequest(request.id)} variant="outline" className="bg-red-900 text-red-100 hover:bg-red-800 border-red-700 flex items-center">
-                      <X className="w-4 h-4 mr-2" />
-                        Cancel
-                      </Button>
-
-                    }
-                  {
-                    activeTab[request.id] === "requests" ?
-                  <Button
-                    variant="outline"
-                    className="bg-gray-800 text-gray-300 hover:bg-gray-700 border-gray-600 flex items-center"
-                    onClick={() => handleViewProposal(request)}
-                  >
-                    <Eye className="w-4 h-4 mr-2" />
-                    View Proposal
-                  </Button> : activeTab[request.id] === "ongoing" && 
-                  <Button
-                    variant="outline"
-                    className="bg-green-800 text-gray-300 hover:bg-green-700 border-gray-600 flex items-center"
-                    onClick={() => handleViewProposal(request)}
-                  >
-                    <Video className="w-4 h-4 mr-2" />
-                      Send Video Url
-                  </Button>
-
-                  }
+                  {showButtons(request, load, key, sendVideoUrl, cancelTransaction, handleViewProposal, declineRequest, acceptRequest)}
                 </CardFooter>
                 </TabsContent>
                 ))}
@@ -414,4 +381,56 @@ const tabContent = {
       )
     }
   }
+
+function showButtons(request, load, activeTab, sendVideoUrl, cancelTransaction, handleViewProposal, declineRequest, acceptRequest) {
+
+  const viewProposal = <Button
+    variant="outline"
+    className="bg-gray-800 text-gray-300 hover:bg-gray-700 border-gray-600 flex items-center"
+    onClick={() => handleViewProposal(request)}>
+    <Eye className="w-4 h-4 mr-2" />
+    View Proposal
+  </Button> 
+  const videoUrl = <Button
+    variant="outline"
+    className="bg-green-800 text-gray-300 hover:bg-green-700 border-gray-600 flex items-center"
+    onClick={() => sendVideoUrl(request.transaction.id)}
+  >
+    <Video className="w-4 h-4 mr-2" />
+    Send Video Url
+  </Button>
+
+  const cancel = 
+    <Button disabled={load} onClick={() => cancelTransaction(request.transaction.id)} variant="outline" className="bg-red-900 text-red-100 hover:bg-red-800 border-red-700 flex items-center">
+      <X className="w-4 h-4 mr-2" />
+      Cancel
+    </Button>
+
+  const accept = <Button disabled={load} onClick={() => acceptRequest(request.id)} variant="outline" className="bg-green-900 text-green-100 hover:bg-green-800 border-green-700 flex items-center">
+    <Check className="w-4 h-4 mr-2" />
+    Accept
+  </Button>
+
+  const decline = <Button disabled={load} onClick={() => declineRequest(request.id)} variant="outline" className="bg-red-900 text-red-100 hover:bg-red-800 border-red-700 flex items-center">
+    <X className="w-4 h-4 mr-2" />
+    Decline
+  </Button>
+
+  if(!request.transaction) {
+    if(request.status === "PENDING") {
+      return <>{accept}{decline}{viewProposal}</>
+    } else if(request.status === "CANCELED" || request.status === "DECLINED") {
+      return <>{viewProposal}</>
+    } else if(request.status === "ACCEPTED") {
+      return <>{decline}</>
+    }
+  } else { // there is a transaciton
+    if(activeTab === "request") {
+      return <>{viewProposal}</>
+    } else if(activeTab === "ongoing") {
+      return <>{cancel}{videoUrl}</>
+    }
+  }
+  return <></>
+}
 
