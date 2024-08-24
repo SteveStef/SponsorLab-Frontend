@@ -418,7 +418,7 @@ function ShowButtons(props) {
     },
     "cancelRequest": () => {
       setShowConfirm(true);
-      setFns("cancelRequest");
+      setFnsName("cancelRequest");
       setSelectedParams(request.id);
       setSelectedInfo({ 
         title: "Are you sure you want to cancel this request?", 
@@ -427,7 +427,7 @@ function ShowButtons(props) {
     },
     "approveVideo": () => {
       setShowConfirm(true);
-      setFns("approveVideo");
+      setFnsName("approveVideo");
       setSelectedParams(request.transaction.id);
       setSelectedInfo({ 
         title: "Are you sure you want to approve this url?", 
@@ -436,7 +436,7 @@ function ShowButtons(props) {
     },
     "refuteVideo": () => {
       setShowConfirm(true);
-      setFns("refuteVideo");
+      setFnsName("refuteVideo");
       setSelectedParams(request.transaction.id);
       setSelectedInfo({ 
         title: "Are you sure you want to refute video url?", 
@@ -513,7 +513,10 @@ function ShowButtons(props) {
           <DialogFooter className="sm:justify-start">
             <Button
               disabled={load}
-              onClick={() => fns[fnsName](selectedParams)} 
+              onClick={() => {
+                fns[fnsName](selectedParams);
+                setShowConfirm(false);
+              }} 
               className="bg-green-600 text-green-100 hover:bg-green-500 border-green-700"
             >
               {

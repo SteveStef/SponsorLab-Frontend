@@ -352,7 +352,7 @@ const tabContent = {
         </p>
         <p className="text-sm text-gray-400 flex items-center">
           <Calendar className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
-          Upload Deadline: {formatDate(new Date(request.transaction.createdAt).toDateString())}
+          Upload Deadline: {formatDate(new Date(request.transaction && request.transaction.createdAt).toDateString())}
         </p>
         <div className="flex text-green-400">
         <InfoIcon className="w-5 h-5 mr-1"/>
@@ -360,7 +360,7 @@ const tabContent = {
       </div>
             <div className="space-y-2 px-1">
               <Label htmlFor="name">Final Youtube Video Url</Label>
-              <Input disabled={request.transaction && request.transaction.satus !== "PENDING"} id="name" placeholder="https://youtube.com/..." />
+              <Input disabled={(request.transaction && request.transaction.status !== "PENDING")} id="name" placeholder="https://youtube.com/..." />
             </div>
       </div>
     )
@@ -416,7 +416,7 @@ function ShowButtons(props) {
     },
     "accept": () => {
       setShowConfirm(true);
-      setFns("accept");
+      setFnsName("accept");
       setSelectedParams(props.request.id);
       setSelectedInfo({ 
         title: "Are you sure you want to accept this request?", 
@@ -425,16 +425,16 @@ function ShowButtons(props) {
     },
     "cancelTransaction": () => {
       setShowConfirm(true);
-      setFns("cancelTransaction");
+      setFnsName("cancelTransaction");
       setSelectedParams(props.request.transaction.id);
       setSelectedInfo({ 
         title: "Are you sure you want to cancel this transaction?", 
-        info: "The status of this transaction will be CANCELED and not further actions can be taken"
+        info: "The status of this transaction will be CANCELED, the sponsor will be refunded and not further actions can be taken"
       });
     },
     "sendVideoUrl": () => {
       setShowConfirm(true);
-      setFns("sendVideoUrl");
+      setFnsName("sendVideoUrl");
       setSelectedParams(props.request.transaction.id);
       setSelectedInfo({ 
         title: "Are you sure you want to send this url?", 
@@ -489,8 +489,8 @@ function ShowButtons(props) {
       }
     } else { // there is a transaciton
       if(props.activeTab === "request") {
-        return <>{viewProposal}{decline}</>
-      } else if(request.transaction.status === "PENDING" && activeTab === "ongoing") {
+        return <>{viewProposal}</>
+      } else if(request.transaction.status === "PENDING" && props.activeTab === "ongoing") {
         return <>{cancel}{videoUrl}</>
       }
     }
@@ -515,7 +515,10 @@ function ShowButtons(props) {
           <DialogFooter className="sm:justify-start">
             <Button
               disabled={props.load}
-              onClick={() => fns[fnsName](selectedParams)} 
+              onClick={() => {
+                fns[fnsName](selectedParams);
+                setShowConfirm(false);
+              }} 
               className="bg-green-600 text-green-100 hover:bg-green-500 border-green-700"
             >
               {
