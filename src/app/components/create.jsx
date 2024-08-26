@@ -5,7 +5,8 @@ import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { InfoIcon, DollarSignIcon, TrendingUpIcon, ImageIcon, CalendarIcon, EyeIcon, TypeIcon, ListIcon, MessageSquareIcon } from 'lucide-react'
+import { InfoIcon, DollarSignIcon, TrendingUpIcon, ImageIcon, CalendarIcon, EyeIcon, TypeIcon, ListIcon, MessageSquareIcon } from 'lucide-react';
+import { addLocalTimezone } from "@/utils";
 
 import { useState, useLayoutEffect } from "react";
 import { axiosRequest } from "@/request";
@@ -81,9 +82,10 @@ export default function Component() {
 
     const url = `${process.env.NEXT_PUBLIC_API_URL}/posts`;
     const formData = new FormData();
+
     formData.append("tag", selectedCategory);
     formData.append("estimatedPrice", price);
-    formData.append("uploadDate", selectedDate);
+    formData.append("uploadDate", addLocalTimezone(selectedDate));
     formData.append("estimatedViews", estimatedViews);
     formData.append("caption", caption);
     formData.append("title", title);

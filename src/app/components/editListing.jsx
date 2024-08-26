@@ -7,13 +7,14 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge"
 import request, { axiosRequest } from "@/request";
+import { addLocalTimezone, convertFromUtcToLocal } from "@/utils";
 
 export default function Component({listing, setSelectedListing, viewDeviations}) {
   const [title, setTitle] = useState(listing.title);
   const [estimatedPrice, setEstimatedPrice] = useState(listing.estimatedPrice);
   const [estimatedViews, setEstimatedViews] = useState(listing.estimatedViews);
   const [description, setDescription] = useState(listing.description);
-  const [uploadDate, setUploadDate] = useState(formatDate(new Date(listing.uploadDate)));
+  const [uploadDate, setUploadDate] = useState(formatDate(new Date(convertFromUtcToLocal(listing.uploadDate))));
   const [published, setPublished] = useState(listing.published);
   const [image, setImage] = useState(null);
   const [load, setLoad] = useState(false);
@@ -67,7 +68,7 @@ export default function Component({listing, setSelectedListing, viewDeviations})
     const formData = new FormData();
     formData.append("tags", tags);
     formData.append("estimatedPrice", estimatedPrice);
-    formData.append("uploadDate", uploadDate);
+    formData.append("uploadDate", addLocalTimezone(uploadDate));
     formData.append("estimatedViews", estimatedViews);
     formData.append("description", description);
     formData.append("title", title);

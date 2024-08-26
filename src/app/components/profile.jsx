@@ -11,6 +11,7 @@ import { useRouter }from "next/navigation";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge"
 import NotFound from "./NotFound";
+import { convertFromUtcToLocal } from "@/utils";
 
 export default function Component({id}) {
   const [user, setUser] = useState(null);
@@ -40,6 +41,7 @@ export default function Component({id}) {
       fetchUser(id);
     }
   },[id]);
+
 
 
   function handleListingClick(listing) {
@@ -74,7 +76,7 @@ export default function Component({id}) {
               <div className="text-sm text-muted-foreground">{id.replace("%40","@")}</div>
             </div>
             {
-              organization === id.replace("%40", "@") && 
+              organization === id.replace("%40", "@") &&
                 <Link  href="../../settings">
                   <Button variant="outline" className="shrink-0">
                     Edit Profile
@@ -123,7 +125,7 @@ export default function Component({id}) {
       <div className="w-full bg-gray-500 h-0.5"></div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-8">
         {
-          listings.length === 0 && organization === id.replace("%40", "@") ? 
+          listings.length === 0 && organization === id.replace("%40", "@") ?
           <Link href="../../create">
           <Button style={{marginLeft: "140%"}}>Create Listing</Button>
           </Link> : listings.length === 0 && <div className="font-semibold" style={{marginLeft: "140%"}} >No Listings Yet...</div>
@@ -154,7 +156,7 @@ export default function Component({id}) {
                     </div>
 
                   {
-                    owner && 
+                    owner &&
                         <Badge
                           variant="solid"
                           className="px-3 py-1 rounded-md text-xs font-medium"
@@ -170,13 +172,13 @@ export default function Component({id}) {
                   <div className="flex items-center justify-between">
                     <div className="text-sm text-muted-foreground">
                       <CalendarIcon className="w-4 h-4 inline-block mr-1" />
-                      {new Date(listing.uploadDate).toDateString()}
+                      {convertFromUtcToLocal(listing.uploadDate)}
                     </div>
                     <div className="text-primary font-semibold">${listing.estimatedPrice}
                       {
-                        owner && 
+                        owner &&
                       <Button onClick={() => setSelectedListing(listing)} variant="outline" className="shrink-0 ml-4">
-                        Edit  Listing 
+                        Edit  Listing
                       </Button>
                       }
                     </div>
