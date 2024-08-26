@@ -164,6 +164,7 @@ export default function Component() {
     setLoad(false);
   }
 
+  console.log(videoUrls);
   return (
     <div className="text-gray-300 flex justify-center">
       <div className="max-w-7xl w-full flex">
@@ -276,8 +277,8 @@ export default function Component() {
       </div>
 
       {/* Proposal Modal */}
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="text-gray-300 border-gray-800 max-w-lg">
+<Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="text-gray-300 border-gray-800 max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold text-gray-100">Sponsor Proposal</DialogTitle>
           </DialogHeader>
@@ -286,15 +287,15 @@ export default function Component() {
               <div className="grid gap-4">
                 <div>
                   <p><strong>Name:</strong> {selectedRequest.sponsor.name}</p>
-                  <p><strong>Company:</strong> {selectedRequest.sponsor.company.orginization.indexOf(".") > 0 ? selectedRequest.sponsor.company.orginization : "individual"}</p>
+                  <p className="break-words"><strong>Company:</strong> {selectedRequest.sponsor.company.orginization.indexOf(".") > 0 ? selectedRequest.sponsor.company.orginization : "individual"}</p>
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-100">Proposal</h3>
-                  <p>{selectedRequest.proposal}</p>
+                  <p className="whitespace-normal break-words">{selectedRequest.proposal}</p>
                 </div>
               </div>
               <div className="flex justify-end gap-4 mt-4">
-                <Button onClick={() => setIsModalOpen(false)}variant="outline" className="bg-red-900 text-red-100 hover:bg-red-800 border-red-700 flex items-center">
+                <Button onClick={() => setIsModalOpen(false)} variant="outline" className="bg-red-900 text-red-100 hover:bg-red-800 border-red-700 flex items-center">
                   <X className="w-4 h-4 mr-2" />
                   Close
                 </Button>
@@ -382,7 +383,7 @@ const tabContent = {
         </p>
         <div className="flex text-green-400">
         <InfoIcon className="w-5 h-5 mr-1"/>
-        <p className="text-sm ">{(request.transaction && request.transaction.id in videoUrls) ? "The video url was send and is being reviewed by the sponsor":"Send Video Url"}</p>
+        <p className="text-sm ">{(request.transaction && request.transaction.videoUrl) ? "The video url was send and is being reviewed by the sponsor":"Send Video Url"}</p>
       </div>
             <div className="space-y-2 px-1">
               <Label htmlFor="name">Final Youtube Video Url</Label>
@@ -398,7 +399,7 @@ const tabContent = {
             </div>
         <p className="text-sm text-gray-400 hover:text-gray-200 flex items-center">
           <Link2 className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
-          <Link href={request.transaction.videoUrl} style={{cursor: "pointer"}}>{request.transaction.videoUrl || "No link uploaded"}</Link>
+          <Link href={request.transaction && request.transaction.videoUrl || "#"} style={{cursor: "pointer"}}>{(request.transaction && request.transaction.videoUrl) || "No link uploaded"}</Link>
         </p>
       </div>
     )
