@@ -10,7 +10,7 @@ import request from "@/request";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge";
 import { useRouter } from "next/navigation";
-
+import { convertFromUtcToLocal } from "@/utils";
 
 export default function Component({listing, setShowSponsorForm}) {
   const titleRef = useRef("");
@@ -113,7 +113,10 @@ export default function Component({listing, setShowSponsorForm}) {
               <Input ref={timeStampRef} id="penguins" type="text" placeholder="First 2 minutes of the video" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="price">How much are you willing to pay?</Label>
+              <Label htmlFor="price">
+                {listing.pricingModel === "FLAT" ? "How much are you willing to pay?"
+                : "How much are you willing to pay per 1,000 views?"}
+              </Label>
               <Input ref={estPriceRef} id="price" type="number" placeholder="$" />
             </div>
             <div className="space-y-2">
@@ -166,11 +169,18 @@ export default function Component({listing, setShowSponsorForm}) {
         <h2 className="text-xl font-bold mb-4">Summary</h2>
         <div className="grid gap-4">
           <div className="flex items-center justify-between">
-            <div className="text-muted-foreground">Price</div>
+            <div className="text-muted-foreground">Pricing</div>
             <div className="font-medium">
     ${listing.estimatedPrice}{listing.pricingModel === "FLAT"? " flat rate" : " / 1K views"}
     </div>
           </div>
+          {
+            listing.pricingModel === "CPM" && 
+              <div className="flex items-center justify-between">
+                <div className="text-muted-foreground">Estimated Price</div>
+                <div className="font-medium">${(listing.estimatedViews / 1000 * listing.estimatedPrice).toLocaleString()}</div>
+              </div>
+          }
           <div className="flex items-center justify-between">
             <div className="text-muted-foreground">Risk</div>
             {displayBadge(listing)}
@@ -188,7 +198,7 @@ export default function Component({listing, setShowSponsorForm}) {
           </div>
           <div className="flex items-center justify-between">
             <div className="text-muted-foreground">Upload date</div>
-            <div className="font-medium">{new Date(listing.uploadDate).toDateString()}</div>
+            <div className="font-medium">{convertFromUtcToLocal(listing.uploadDate)}</div>
           </div>
         </div>
       </div>

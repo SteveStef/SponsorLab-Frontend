@@ -9,6 +9,7 @@ import request from "@/request";
 import Image from "next/image";
 import SponsorForm from "../components/sponsorForm";
 import { PlayIcon, ThumbsUpIcon, UserIcon, VideoIcon } from "lucide-react"
+import { convertFromUtcToLocal } from "@/utils";
 
 export default function Component({ params }) {
 
@@ -24,25 +25,19 @@ export default function Component({ params }) {
       let tmp = [];
       let dev = response.body.user.channel.viewDeviations;
       const normalDist = [2.2, 13.6, 68.2, 13.6, 2.1, 0.1];
-
       const skips = 6 - dev.length;
       let start = 0;
-
-      for(let i = 0; i < skips; i++) {
-        start += normalDist[i];
-      }
-
+      for(let i = 0; i < skips; i++) start += normalDist[i];
       for(let i = 0; i < dev.length - 1; i++) {
         let range = dev[i] + "-" + dev[i + 1];
         tmp.push({ range, probability: (normalDist[i + skips] + start).toFixed(1)});
         start = 0;
       }
-
       tmp.push({ range: ">"+dev[dev.length-1], probability: normalDist[normalDist.length-1]})
-
       setViewRanges(tmp);
     }
   }
+  console.log(listing);
 
   useEffect(() => {
     if(params.id) fetchListing();
@@ -65,7 +60,7 @@ export default function Component({ params }) {
         <div className="grid gap-1">
           <h1 className="text-2xl font-bold">{listing && listing.title}</h1>
           <div className="text-xs text-muted-foreground"> 
-            Due on {listing && new Date(listing.uploadDate).toDateString()}
+            Due on {listing && convertFromUtcToLocal(listing.uploadDate)}
             </div>
           <div className="text-muted-foreground">
             {listing && listing.description}
@@ -78,12 +73,23 @@ export default function Component({ params }) {
             }
 
             <div className="text-4xl font-bold">
-              ${listing && (listing.estimatedPrice||0).toLocaleString()}
+              {
+                listing && listing.pricingModel === "FLAT" ?
+                <span>${(listing.estimatedPrice||0).toLocaleString()}</span>
+                : listing && <span className="text-3xl flex">${(listing.estimatedPrice||0).toLocaleString()} 
+                    {" "}/ {" "}
+                    1K
+                    <Eye className="w-5 h-5 mr-1 ml-1 mt-2" />
+                  </span>
+              }
             </div>
 
             <div className="flex items-center text-muted-foreground">
-              <Eye className="w-4 h-4 mr-1" />
               <span>Est. {listing && (listing.estimatedViews || 0).toLocaleString()} views</span>
+              {
+                listing && listing.pricingModel === "CPM" &&
+                  <span className="ml-1"> for ${listing && (listing.estimatedViews / 1000 * listing.estimatedPrice).toLocaleString()}</span>
+              }
             </div>
 
           </div>

@@ -14,8 +14,9 @@ import { User, Search,FileCheck, DollarSign,
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useAppContext } from '@/context';
 import Request from "@/request";
-import {toast} from "sonner";
-import {useRouter} from "next/navigation";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { convertFromUtcToLocal } from '@/utils';
 
 const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('en-US', {
@@ -389,7 +390,7 @@ const tabContent = {
 
         <p className="text-sm text-gray-400 flex items-center">
           <Calendar className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
-          Upload Deadline: {formatDate(new Date().toDateString())}
+          Upload Deadline: {convertFromUtcToLocal(request.transaction.deadline)}
         </p>
       <div className="flex">
         <InfoIcon 

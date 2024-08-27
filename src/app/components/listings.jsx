@@ -1,7 +1,7 @@
 "use client";
 import Black from "../../../public/connect.jpg";
 import Image from "next/image";
-
+import { convertFromUtcToLocal } from "@/utils";
 import { SearchIcon, FilterIcon, InfoIcon , ChevronRightIcon, AlertTriangleIcon, CheckCircleIcon, TrendingUpIcon } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -139,8 +139,9 @@ export default function Component() {
                     </div>
                     <div className="grid grid-cols-2 gap-2 text-sm">
                       <p className="text-gray-400">Views: {listing.estimatedViews.toLocaleString()}</p>
-                      <p className="text-gray-400">Price: ${listing.estimatedPrice.toLocaleString()}</p>
-                      <p className="text-gray-400">Upload: {new Date(listing.uploadDate).toLocaleDateString()}</p>
+                      <p className="text-gray-400">Price: ${listing.estimatedPrice.toLocaleString()}
+                        {listing.pricingModel ==="CPM"&&<span className=""> / 1K</span>}</p>
+                      <p className="text-gray-400">{convertFromUtcToLocal(listing.uploadDate)}</p>
                       <p className="text-gray-400">
                 <span
                 className={`font-semibold ${listing.riskEvaluation === 'Low' ? 'text-green-400' : listing.riskEvaluation === "Medium" ? 'text-yellow-400' : 'text-red-400'}`}>
@@ -194,3 +195,22 @@ function determindRisk(listing) {
 
 }
 
+function Eye(props) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  )
+}

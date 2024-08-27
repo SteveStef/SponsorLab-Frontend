@@ -13,6 +13,7 @@ import { User, Search,FileCheck, DollarSign, InfoIcon, Video, Link2,
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import Request from "@/request";
 import { toast } from "sonner";
+import { convertFromUtcToLocal } from '@/utils';
 
 const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('en-US', {
@@ -28,6 +29,7 @@ export default function Component() {
   const [requests, setRequests] = useState([]);
   const [refreshing, setRefreshing] = useState(true);
   const [load, setLoad] = useState(true);
+  console.log(requests);
 
   const [videoUrls, setVideoUrls] = useState({});
 
@@ -379,7 +381,7 @@ const tabContent = {
         </p>
         <p className="text-sm text-gray-400 flex items-center">
           <Calendar className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
-          Upload Deadline: {formatDate(new Date(request.transaction && request.transaction.createdAt).toDateString())}
+          Upload Deadline: {request.transaction && convertFromUtcToLocal(request.transaction.deadline)}
         </p>
         <div className="flex text-green-400">
         <InfoIcon className="w-5 h-5 mr-1"/>
