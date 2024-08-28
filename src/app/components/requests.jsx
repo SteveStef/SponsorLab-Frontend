@@ -151,8 +151,8 @@ export default function Component() {
 
   async function sendVideoUrl(transactionId) {
     const videoUrl = videoUrls[transactionId];
-    if(!videoUrl || !videoUrl.includes("youtube.com")) {
-      toast.error("Video url must be a youtube url");
+    if(!videoUrl || !videoUrl.includes("youtube.com/watch?v=")) {
+      toast.error("Video url must be a youtube url in the form https://www.youtube.com/watch?v=...");
       return;
     }
     const url = `${process.env.NEXT_PUBLIC_API_URL}/transactions/creator/post-video`;
@@ -166,7 +166,6 @@ export default function Component() {
     setLoad(false);
   }
 
-  console.log(videoUrls);
   return (
     <div className="text-gray-300 flex justify-center">
       <div className="max-w-7xl w-full flex">
@@ -236,6 +235,9 @@ export default function Component() {
                             <p className="text-lg font-bold text-gray-100 flex items-center">
                               <DollarSign className="w-5 h-5 mr-1 flex-shrink-0 text-gray-400" />
                         {request.requestedPrice}
+                        {
+                          request.pricingModel=== "CPM" && " / 1K"
+                        }
                       </p>
                       {
                         activeTab[request.id] === "request" ? 
@@ -396,7 +398,7 @@ const tabContent = {
                   ...prev, [request.transaction.id]: e.target.value
                 })))
               }}
-              placeholder="https://youtube.com/..."
+              placeholder="https://www.youtube.com/watch?v=..."
             />
             </div>
         <p className="text-sm text-gray-400 hover:text-gray-200 flex items-center">
