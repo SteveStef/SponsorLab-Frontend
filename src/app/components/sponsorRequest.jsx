@@ -35,6 +35,7 @@ export default function Component() {
   const [load, setLoad] = useState(true);
   const { name, company } = useAppContext();
   const [videoUrls, setVideoUrls] = useState({});
+  console.log(requests);
 
   const router = useRouter();
 
@@ -249,7 +250,7 @@ export default function Component() {
                           <div className="flex items-center space-x-2">
                             <p className="text-lg font-bold text-gray-100 flex items-center">
                               <DollarSign className="w-5 h-5 mr-1 flex-shrink-0 text-gray-400" />
-                        {request.requestedPrice}
+                        {request.requestedPrice} {request.pricingModel === "CPM" && " / 1K"}
                       </p>
                       {
                         activeTab[request.id] === "request" ? 
@@ -390,7 +391,7 @@ const tabContent = {
 
         <p className="text-sm text-gray-400 flex items-center">
           <Calendar className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
-          Upload Deadline: {convertFromUtcToLocal(request.transaction.deadline)}
+          Upload Deadline: {request.transaction && convertFromUtcToLocal(request.transaction.deadline)}
         </p>
       <div className="flex">
         <InfoIcon 
@@ -467,7 +468,7 @@ function ShowButtons(props) {
       setSelectedParams(request);
       setSelectedInfo({ 
         title: "Are you sure you want to confirm accept this request?", 
-        info: "This will move on to the second step, and you will be charged and the money will be held until the transaction is over"
+        info: `This will will take you and the youtuber to the partnership step. You will be charged $${(request.post.estimatedViews * request.requestedPrice/ 1000).toLocaleString()} and the money will be held until the transaction is over`
       });
     },
     "cancelRequest": () => {
@@ -510,7 +511,7 @@ function ShowButtons(props) {
 
   const confirm = <Button disabled={load} onClick={map["confirmRequest"]} variant="outline" className="bg-green-900 text-green-100 hover:bg-green-800 border-green-700 flex items-center">
     <Check className="w-4 h-4 mr-2" />
-    Confirm Request
+    Proceed to checkout
   </Button>
 
   const cancel = 
