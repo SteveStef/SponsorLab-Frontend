@@ -234,9 +234,9 @@ export default function Component() {
                           <div className="flex items-center space-x-2">
                             <p className="text-lg font-bold text-gray-100 flex items-center">
                               <DollarSign className="w-5 h-5 mr-1 flex-shrink-0 text-gray-400" />
-                        {request.requestedPrice}
+                        {(request.requestedPrice / 100).toLocaleString()}
                         {
-                          request.pricingModel=== "CPM" && " / 1K"
+                          request.pricingModel=== "CPM" && " CPM"
                         }
                       </p>
                       {

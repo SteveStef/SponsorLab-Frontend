@@ -24,7 +24,7 @@ export default function Component() {
   async function fetchListings() {
     const url = `${process.env.NEXT_PUBLIC_API_URL}/posts/page/1`;
     const response = await request(url, "GET", null);
-    //console.log(response);
+    console.log(response);
     if(response && response.success) {
       for(let i = 0; i < response.body.length; i++) {
         response.body[i].riskEvaluation = determindRisk(response.body[i]);
@@ -139,8 +139,8 @@ export default function Component() {
                     </div>
                     <div className="grid grid-cols-2 gap-2 text-sm">
                       <p className="text-gray-400">Views: {listing.estimatedViews.toLocaleString()}</p>
-                      <p className="text-gray-400">Price: ${listing.estimatedPrice.toLocaleString()}
-                        {listing.pricingModel ==="CPM"&&<span className=""> / 1K</span>}</p>
+                      <p className="text-gray-400">Price: ${(listing.estimatedPrice / 100).toLocaleString()}
+                        {listing.pricingModel ==="CPM"&&<span className=""> CPM</span>}</p>
                       <p className="text-gray-400">{convertFromUtcToLocal(listing.uploadDate)}</p>
                       <p className="text-gray-400">
                 <span

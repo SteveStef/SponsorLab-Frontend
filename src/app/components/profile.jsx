@@ -174,7 +174,7 @@ export default function Component({id}) {
                       <CalendarIcon className="w-4 h-4 inline-block mr-1" />
                       {convertFromUtcToLocal(listing.uploadDate)}
                     </div>
-                    <div className="text-primary font-semibold">${listing.estimatedPrice}
+                    <div className="text-primary font-semibold">${(listing.estimatedPrice / 100).toLocaleString() }
                       {
                         owner &&
                       <Button onClick={() => setSelectedListing(listing)} variant="outline" className="shrink-0 ml-4">

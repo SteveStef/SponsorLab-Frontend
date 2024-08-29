@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import request from "@/request";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge";
+import { InfoIcon , CheckCircleIcon, TrendingUpIcon } from "lucide-react"
 import { useRouter } from "next/navigation";
 import { convertFromUtcToLocal } from "@/utils";
 
@@ -171,14 +172,14 @@ export default function Component({listing, setShowSponsorForm}) {
           <div className="flex items-center justify-between">
             <div className="text-muted-foreground">Pricing</div>
             <div className="font-medium">
-    ${listing.estimatedPrice}{listing.pricingModel === "FLAT"? " flat rate" : " / 1K views"}
+    ${listing.estimatedPrice/100}{listing.pricingModel === "FLAT"? " flat rate" : " / 1K views"}
     </div>
           </div>
           {
             listing.pricingModel === "CPM" && 
               <div className="flex items-center justify-between">
                 <div className="text-muted-foreground">Estimated Price</div>
-                <div className="font-medium">${(listing.estimatedViews / 1000 * listing.estimatedPrice).toLocaleString()}</div>
+                <div className="font-medium">${(listing.estimatedViews / 1000 * listing.estimatedPrice/100).toLocaleString()}</div>
               </div>
           }
           <div className="flex items-center justify-between">
@@ -199,6 +200,13 @@ export default function Component({listing, setShowSponsorForm}) {
           <div className="flex items-center justify-between">
             <div className="text-muted-foreground">Upload date</div>
             <div className="font-medium">{convertFromUtcToLocal(listing.uploadDate)}</div>
+          </div>
+          <div className="flex items-center justify-between">
+
+            <div className="font-small flex"style={{fontSize:"12px"}}>
+
+            <InfoIcon className="w-4 h-4 mr-2 mt-1 text-green-400 flex-shrink-0" />
+              Keep in mind you will not be charged after sending a request! Only after the request is accepted and you confirm the accept will you be charged.</div>
           </div>
         </div>
       </div>

@@ -11,7 +11,7 @@ import { addLocalTimezone, convertFromUtcToLocal } from "@/utils";
 
 export default function Component({listing, setSelectedListing, viewDeviations}) {
   const [title, setTitle] = useState(listing.title);
-  const [estimatedPrice, setEstimatedPrice] = useState(listing.estimatedPrice);
+  const [estimatedPrice, setEstimatedPrice] = useState(listing.estimatedPrice / 100);
   const [estimatedViews, setEstimatedViews] = useState(listing.estimatedViews);
   const [description, setDescription] = useState(listing.description);
   const [uploadDate, setUploadDate] = useState(formatDate(new Date(convertFromUtcToLocal(listing.uploadDate))));

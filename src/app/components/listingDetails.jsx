@@ -37,7 +37,7 @@ export default function Component({ params }) {
       setViewRanges(tmp);
     }
   }
-  console.log(listing);
+//  console.log(listing);
 
   useEffect(() => {
     if(params.id) fetchListing();
@@ -76,10 +76,9 @@ export default function Component({ params }) {
               {
                 listing && listing.pricingModel === "FLAT" ?
                 <span>${(listing.estimatedPrice||0).toLocaleString()}</span>
-                : listing && <span className="text-3xl flex">${(listing.estimatedPrice||0).toLocaleString()} 
-                    {" "}/ {" "}
-                    1K
-                    <Eye className="w-5 h-5 mr-1 ml-1 mt-2" />
+                : listing && <span className="text-2xl flex">${(listing.estimatedPrice / 100 ||0).toLocaleString()} 
+                    {" "} 
+                      CPM
                   </span>
               }
             </div>
@@ -88,7 +87,7 @@ export default function Component({ params }) {
               <span>Est. {listing && (listing.estimatedViews || 0).toLocaleString()} views</span>
               {
                 listing && listing.pricingModel === "CPM" &&
-                  <span className="ml-1"> for ${listing && (listing.estimatedViews / 1000 * listing.estimatedPrice).toLocaleString()}</span>
+                  <span className="ml-1"> for ${listing && (listing.estimatedViews / 1000 * listing.estimatedPrice/100).toLocaleString()}</span>
               }
             </div>
 
