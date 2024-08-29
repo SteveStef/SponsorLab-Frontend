@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { DollarSign, Search, TrendingUp, Users, CheckCircle, BarChart } from "lucide-react";
+import { DollarSign, Search, TrendingUp, CheckCircle } from "lucide-react";
 import Black from "../../../public/connect.jpg";
 import Image from "next/image";
 
