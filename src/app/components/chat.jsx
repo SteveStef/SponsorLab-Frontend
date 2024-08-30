@@ -1,9 +1,9 @@
 "use client"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef} from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { MessageSquareX, Send, Calendar, Upload, DollarSign, Menu, Info, X, Clock, Target, CheckCircle } from "lucide-react"
+import { MessageSquareX, Send, Calendar, Upload, DollarSign, Menu, Info, X, Clock, Target, UserIcon, CheckCircle } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
@@ -12,36 +12,8 @@ import request from "@/request";
 import { toast } from "sonner";
 
 export default function Component() {
-  const [activeConversation, setActiveConversation] = useState(0)
   const [leftPanelOpen, setLeftPanelOpen] = useState(false)
   const [rightPanelOpen, setRightPanelOpen] = useState(false)
-  const [inputMessage, setInputMessage] = useState("")
-
-  const [messages2, setMessages2] = useState([
-    { id: 1, sender: "TechReviewer", content: "Hi there! I'm interested in your sponsorship offer.", time: "10:30 AM", avatar: "/placeholder.svg?height=40&width=40" },
-    { id: 2, sender: "SponsorLab", content: "Great to hear from you! We'd love to work with you on this campaign.", time: "10:35 AM", avatar: "/placeholder.svg?height=40&width=40" },
-    { id: 3, sender: "TechReviewer", content: "Sounds great! When can we start?", time: "10:40 AM", avatar: "/placeholder.svg?height=40&width=40" },
-  ])
-
-  const conversations = [
-    { id: 1, name: "TechReviewer", lastMessage: "Sounds great! When can we start?", avatar: "/placeholder.svg?height=40&width=40" },
-    { id: 2, name: "GamingPro", lastMessage: "Can you provide more details about the sponsorship?", avatar: "/placeholder.svg?height=40&width=40" },
-    { id: 3, name: "TravelVlogger", lastMessage: "I'm interested in your offer.", avatar: "/placeholder.svg?height=40&width=40" },
-  ]
-
-  const handleSendMessage2 = () => {
-    if (inputMessage.trim() !== "") {
-      const newMessage = {
-        id: messages.length + 1,
-        sender: "SponsorLab",
-        content: inputMessage,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        avatar: "/placeholder.svg?height=40&width=40"
-      }
-      setMessages([...messages, newMessage])
-      setInputMessage("")
-    }
-  }
 
   const { socket, name } = useAppContext();
   const [chatRooms, setChatRooms] = useState([]);
@@ -53,11 +25,20 @@ export default function Component() {
   const [messages, setMessages] = useState([]);
 
   const [newMessage, setNewMessage] = useState('')
-  const [showSidebar, setShowSidebar] = useState(false)
+  const messagesEndRef = useRef(null)
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages]);
 
   async function getChatRooms() {
     const url = `${process.env.NEXT_PUBLIC_API_URL}/chat`;
     const response = await request(url, "GET", null);
+    console.log(response);
     if(response && response.success) {
       setChatRooms(response.body);
       if(response.body.length !== 0) {
@@ -121,9 +102,9 @@ export default function Component() {
   }
 
   return (
-    <div className="flex h-[91vh] text-gray-100 relative">
+    <div className="flex h-[93vh] text-gray-100 relative">
       <div
-        className={`w-full md:w-1/4 border-r border-gray-800 absolute md:relative left-0 top-0 h-full transition-transform duration-300 ease-in-out z-20 ${
+        className={`w-full md:w-1/6 border-r border-gray-800 absolute md:relative left-0 top-0 h-full transition-transform duration-300 ease-in-out z-20 ${
           leftPanelOpen ? "translate-x-0 bg-black" : "-translate-x-full md:translate-x-0"
         }`}
       >
@@ -150,36 +131,11 @@ export default function Component() {
                   <AvatarFallback><UserIcon className="h-6 w-6" /></AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="font-semibold">{participant.user.name}</p>
-                  <p className="text-xs ">{name}</p>
+              <h3 className="font-semibold">{participant.user.name}</h3>
+                  <p className="text-sm text-gray-400">{name}</p>
                 </div>
               </div>
             )})}
-          {/*
-          {conversations.map((conversation, index) => (
-            <div
-              key={conversation.id}
-              className={`p-4 cursor-pointer hover:bg-gray-800 ${
-                index === activeConversation ? "bg-gray-800" : ""
-              }`}
-              onClick={() => {
-                setActiveConversation(index)
-                setLeftPanelOpen(false)
-              }}
-            >
-              <div className="flex items-center space-x-3">
-                <Avatar>
-                  <AvatarImage src={conversation.avatar} alt={conversation.name} />
-                  <AvatarFallback>{conversation.name.slice(0, 2)}</AvatarFallback>
-                </Avatar>
-                <div>
-                  <h3 className="font-semibold">{conversation.name}</h3>
-                  <p className="text-sm text-gray-400">{conversation.lastMessage}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-          */}
         </ScrollArea>
       </div>
 
@@ -194,7 +150,7 @@ export default function Component() {
           >
             <Menu className="h-6 w-6" />
           </Button>
-          <h2 className="text-xl font-bold">Chat with {conversations[activeConversation].name}</h2>
+          <h2 className="text-xl font-bold">Chat with {selectedParticipant.name}</h2>
           <Button
             variant="ghost"
             size="icon"
@@ -208,36 +164,38 @@ export default function Component() {
           {messages.map((message) => (
             <div
               key={message.id}
-              className={`mb-4 flex ${message.isSender ? "justify-end" : "justify-start"}`}
+              className={`mb-4 flex ${message.senderId === "You" ? "justify-end" : "justify-start"}`}
             >
-              <div className={`flex ${message.isSender ? "flex-row-reverse" : "flex-row"} items-end space-x-2`}>
-                <Avatar className="w-8 h-8">
-                  <AvatarImage src={message.avatar} alt={message.sender} />
-                  <AvatarFallback>{message.sender.slice(0, 2)}</AvatarFallback>
-                </Avatar>
-                <div className={`flex flex-col ${message.isSender ? "items-end" : "items-start"}`}>
+              <div className={`flex ${message.senderId === "You" ? "flex-row-reverse" : "flex-row"} items-end space-x-2`}>
+        <Avatar className="w-7 h-7 mr-1 ml-1">
+          <AvatarImage src={`https://api.dicebear.com/6.x/initials/svg?seed=${message.senderId === "You" ? name : selectedParticipant.name}`} />
+          <AvatarFallback>{message.senderId === "You" ? name : selectedParticipant.name}</AvatarFallback>
+        </Avatar>
+                <div className={`flex flex-col ${message.senderId === "You" ? "items-end" : "items-start"}`}>
                   <div
+                    style={{fontSize: "15px", }}
                     className={`p-2 rounded-lg ${
-                      message.isSender 
+                      message.senderId === "You"
                         ? "bg-green-600 text-white"
                         : "bg-gray-800 text-gray-100"
                     }`}
                   >
                     {message.content}
                   </div>
-                  <span className="text-xs text-gray-500 mt-1">{message.time}</span>
+                  <span className="text-xs text-gray-500 mt-1">10am</span>
                 </div>
               </div>
             </div>
           ))}
+    <div ref={messagesEndRef}> </div>
         </ScrollArea>
         <div className="p-4 border-t border-gray-800 ">
           <div className="flex space-x-2">
             <Input
               className="flex-1 border-gray-700 text-gray-100"
               placeholder="Type your message..."
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
               onKeyPress={(e) => {
                 if (e.key === 'Enter') {
                   handleSendMessage()
