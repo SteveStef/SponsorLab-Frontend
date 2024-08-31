@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { User, Search,FileCheck, DollarSign, InfoIcon, Video, Link2,
-  Clock, CheckCircle, XCircle, Eye, FileText, Check, X, Calendar } from 'lucide-react';
+  Clock, CheckCircle, XCircle, Eye, FileText, Check, X, Calendar, PlusIcon, FileIcon } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import Request from "@/request";
 import { toast } from "sonner";
@@ -29,7 +29,6 @@ export default function Component() {
   const [requests, setRequests] = useState([]);
   const [refreshing, setRefreshing] = useState(true);
   const [load, setLoad] = useState(true);
-  console.log(requests);
 
   const [videoUrls, setVideoUrls] = useState({});
 
@@ -201,6 +200,9 @@ export default function Component() {
             </div>
           </header>
           <div className="space-y-6">
+            {
+              !refreshing && requests.length === 0 && <NoRequests />
+            }
             {requests.map((request) => (
               <Card key={request.id} className="w-full max-w-4xl">
                 <Tabs defaultValue="request" value={activeTab[request.id]} onValueChange={(val) => changeTab(request.id, val)} 
@@ -580,4 +582,21 @@ function ShowButtons(props) {
       </Dialog>
   </>
 }
+
+
+function NoRequests() {
+return <main className="flex items-center justify-center bg-background p-4 md:p-8">
+      <div className="text-center">
+        <div className="mb-4 flex justify-center">
+          <FileIcon className="h-16 w-16 text-muted-foreground" />
+        </div>
+        <h1 className="mb-2 text-2xl font-semibold tracking-tight">No requests found</h1>
+        <p className="mb-4 text-muted-foreground">You don't have any requests at the moment.</p>
+      </div>
+    </main>
+}
+
+
+
+
 

@@ -6,7 +6,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { InfoIcon, DollarSignIcon, TrendingUpIcon, ImageIcon, CalendarIcon, EyeIcon, TypeIcon, ListIcon, MessageSquareIcon } from 'lucide-react';
-import { addLocalTimezone } from "@/utils";
+import { addLocalTimezone, inPast } from "@/utils";
 
 import { useState, useLayoutEffect } from "react";
 import { axiosRequest } from "@/request";
@@ -49,29 +49,29 @@ export default function Component() {
   };
 
   function validate() {
-    let error = false;
     let message = "";
 
     if (!title) {
       message = "Listing must have a title";
-      error = true;
     } else if (!caption) {
       message = "Listing must have a caption";
-      error = true;
 
     } else if(price <= 0) {
       message = "Price must be greater than $0.00";
-      error = true;
 
     } else if(estimatedViews < 0) {
       message = "Estimated views can not be negative";
-      error = true;
+
+    } else if(inPast(selectedDate)) {
+      message = "Upload date must be in the future";
     }
-    if(error) {
+
+    if(message) {
       toast.error(message);
       setLoad(false);
       return false;
     }
+
     return true;
   }
 

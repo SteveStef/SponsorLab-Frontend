@@ -6,8 +6,10 @@ import { Switch } from "@/components/ui/switch";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import request, { axiosRequest } from "@/request";
-import { addLocalTimezone, convertFromUtcToLocal } from "@/utils";
+import { InfoIcon, DollarSignIcon, TrendingUpIcon, ImageIcon, TypeIcon, ListIcon, MessageSquareIcon } from 'lucide-react';
+import { addLocalTimezone, convertFromUtcToLocal, inPast } from "@/utils";
 
 export default function Component({listing, setSelectedListing, viewDeviations}) {
   const [title, setTitle] = useState(listing.title);
@@ -18,7 +20,7 @@ export default function Component({listing, setSelectedListing, viewDeviations})
   const [published, setPublished] = useState(listing.published);
   const [image, setImage] = useState(null);
   const [load, setLoad] = useState(false);
-  const [tags, setTags] = useState(listing.tags);
+  const [selectedCategory, setSelectedCategory] = useState(listing.tag);
 
   const handleImageChange = (event) => {
     if (event.target.files && event.target.files[0]) {
@@ -35,27 +37,26 @@ export default function Component({listing, setSelectedListing, viewDeviations})
   }
 
   function validate() {
-    let error = false;
     let message = "";
 
     if (!title) {
       message = "Listing must have a title";
-      error = true;
     } else if (!description) {
       message = "Listing must have a caption";
-      error = true;
     } else if(estimatedPrice <= 0) {
       message = "Price must be greater than $0.00";
-      error = true;
     } else if(estimatedViews < 0) {
       message = "Estimated views can not be negative";
-      error = true;
+    } else if(inPast(uploadDate)) {
+      message = "Upload date must be in the future";
     }
-    if(error) {
+
+    if(message) {
       toast.error(message);
       setLoad(false);
       return false;
     }
+
     return true;
   }
 
@@ -66,7 +67,7 @@ export default function Component({listing, setSelectedListing, viewDeviations})
 
     const url = `${process.env.NEXT_PUBLIC_API_URL}/posts/${listing.id}`;
     const formData = new FormData();
-    formData.append("tags", tags);
+    formData.append("tag", selectedCategory);
     formData.append("estimatedPrice", estimatedPrice);
     formData.append("uploadDate", addLocalTimezone(uploadDate));
     formData.append("estimatedViews", estimatedViews);
@@ -77,7 +78,7 @@ export default function Component({listing, setSelectedListing, viewDeviations})
 
     const response = await axiosRequest(url, "PUT", formData);
     if(response.status === 200) {
-      setSelectedListing(null);
+      window.location.href = "";
     } else if(response.status === 403){
       toast.error(response.data.message);
     } else {
@@ -91,7 +92,7 @@ export default function Component({listing, setSelectedListing, viewDeviations})
     const url = `${process.env.NEXT_PUBLIC_API_URL}/posts/${listing.id}`;
     const response = await request(url, "DELETE", null);
     if(response && response.success) {
-      setSelectedListing(null);
+      window.location.href = "";
     } else {
       toast.error("Something went wrong");
     }
@@ -128,10 +129,24 @@ export default function Component({listing, setSelectedListing, viewDeviations})
               <Label htmlFor="thumbnail">Change Thumbnail</Label>
               <Input id="thumbnail" type="file" onChange={handleImageChange} />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="tags">Tags (separate words with commas)</Label>
-              <Input value={tags} onChange={(e) => setTags(e.target.value)} id="tags" type="text" />
-            </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="category" className="flex items-center">
+                      <ListIcon className="mr-2 text-green-400" />
+                      Category
+                    </Label>
+
+                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                      <SelectTrigger className="border-gray-600 text-gray-100">
+                        <SelectValue placeholder="Select a category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="tech">Technology</SelectItem>
+                        <SelectItem value="gaming">Gaming</SelectItem>
+                        <SelectItem value="lifestyle">Lifestyle</SelectItem>
+                        <SelectItem value="education">Education</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
             <div className="space-y-2">
               <Label htmlFor="upload-date">Upload Date</Label>
               <Input value={uploadDate} onChange={(e) => setUploadDate(e.target.value)} id="upload-date" type="date" />

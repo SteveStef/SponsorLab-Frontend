@@ -9,7 +9,7 @@ export default function Listings() {
   const { role } = useAppContext();
 
   return (
-    <div className="py-10">
+    <div className="py-20">
       <Header />
       {
         role === "CREATOR" ?

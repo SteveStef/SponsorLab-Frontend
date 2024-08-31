@@ -46,7 +46,7 @@ export default function Component({id}) {
 
   function handleListingClick(listing) {
     router.push(`../../listings/${listing.id}`);
-  } // Date object being wrong, and add banner change in settings
+  }
 
   if(notFound) {
     return <NotFound />
@@ -160,9 +160,9 @@ export default function Component({id}) {
                         <Badge
                           variant="solid"
                           className="px-3 py-1 rounded-md text-xs font-medium"
-                          style={{ backgroundColor: listing.published ? "green" : "gray", color: "white" }}
+                          style={{ backgroundColor: listing.purchased ? "green" : listing.expired ? "darkred" : listing.published ? "green" : "gray", color: "white" }}
                         >
-                          {listing.published ? "Public" : "Private"}
+                          {listing.purchased ? "Purchased" : listing.expired ? "Expired" : listing.published ? "Public" : "Private"}
                         </Badge>
                   }
                   </div>

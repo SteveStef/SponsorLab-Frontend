@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { User, Search,FileCheck, DollarSign, 
-  Clock, InfoIcon, CheckCircle, Copy, XCircle, Eye, FileText, Check, X, Calendar } from 'lucide-react';
+  Clock, InfoIcon, CheckCircle, Copy, XCircle, Eye, FileText, Check, X, Calendar, FileIcon, PlusIcon } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useAppContext } from '@/context';
 import Request from "@/request";
@@ -217,6 +217,9 @@ export default function Component() {
             </div>
           </header>
           <div className="space-y-6">
+            {
+              !refreshing && requests.length === 0 && <NoRequests />
+            }
             {requests.map((request) => (
               <Card key={request.id} className="w-full max-w-4xl">
                 <Tabs defaultValue="request" value={activeTab[request.id]} onValueChange={(val) => changeTab(request.id, val)} 
@@ -588,4 +591,23 @@ function ShowButtons(props) {
         </DialogContent>
       </Dialog>
   </>
+}
+
+function NoRequests() {
+return <main className="flex items-center justify-center bg-background p-4 md:p-8">
+      <div className="text-center">
+        <div className="mb-4 flex justify-center">
+          <FileIcon className="h-16 w-16 text-muted-foreground" />
+        </div>
+        <h1 className="mb-2 text-2xl font-semibold tracking-tight">No requests found</h1>
+        <p className="mb-4 text-muted-foreground">You have not made any requests yet.</p>
+    <Link href="../listings">
+    <Button>
+          <PlusIcon className="mr-2 h-4 w-4" />
+          Find a listing and make request
+
+    </Button>
+        </Link>
+      </div>
+    </main>
 }

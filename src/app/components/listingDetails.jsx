@@ -75,7 +75,7 @@ export default function Component({ params }) {
             <div className="text-4xl font-bold">
               {
                 listing && listing.pricingModel === "FLAT" ?
-                <span>${(listing.estimatedPrice||0).toLocaleString()}</span>
+                <span>${(listing.estimatedPrice/100||0).toLocaleString()}</span>
                 : listing && <span className="text-2xl flex">${(listing.estimatedPrice / 100 ||0).toLocaleString()} 
                     {" "} 
                       CPM
