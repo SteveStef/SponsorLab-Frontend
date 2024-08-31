@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useAppContext } from "@/context";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu"
 import Image from "next/image";
-import Beaker from "../../../public/Beaker.png"
+import Beaker from "../../../public/Beaker.png";
 
 export default function Navbar() {
   const { organization, auth, role, name, profilePic } = useAppContext();

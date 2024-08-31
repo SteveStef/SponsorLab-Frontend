@@ -1,12 +1,12 @@
-"use client"
-import { useState, useEffect, useRef} from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { MessageSquareX, Send, Calendar, Upload, DollarSign, Menu, Info, X, Clock, Target, UserIcon, CheckCircle } from "lucide-react"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Card, CardContent } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
+"use client";
+import { useState, useEffect, useRef} from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { MessageSquareX, Send, Calendar,Upload, DollarSign, Menu, Info, X, Clock, Target, UserIcon, CheckCircle } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { useAppContext } from "@/context";
 import request from "@/request";
 import { toast } from "sonner";

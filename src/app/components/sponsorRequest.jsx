@@ -130,17 +130,17 @@ export default function Component() {
     console.log(response);
     if(response && response.success) {
       toast.success("Request was accepted");
-      await openChat(creatorEmail);
+      await openChat(creatorEmail, requestId);
     } else {
       toast.error("There was a problem when declining request");
     }
 
   }
 
-  async function openChat(email) {
+  async function openChat(email, requestId) {
     setLoad(true);
     const url = `${process.env.NEXT_PUBLIC_API_URL}/chat`;
-    const body = { otherUserEmail: email }
+    const body = { otherUserEmail: email, requestId }
     const response = await Request(url, "POST", body);
     if(response && response.success) {
       router.push("../chat");
@@ -173,8 +173,8 @@ export default function Component() {
   async function refuteVideo(transactionId) {
 
   }
-  const [copied, setCopied] = useState(false);
 
+  const [copied, setCopied] = useState(false);
   const handleCopy = useCallback((url) => {
     navigator.clipboard.writeText(url).then(() => {
       setCopied(true)

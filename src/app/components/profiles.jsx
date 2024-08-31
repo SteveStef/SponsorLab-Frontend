@@ -78,13 +78,6 @@ export default function Component() {
           >
             Sort by Average Views
           </Button>
-          <Button
-            variant="outline"
-            onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-            className={sortOrder === "asc" ? "bg-primary text-primary-foreground" : ""}
-          >
-            {sortOrder === "asc" ? "Ascending" : "Descending"}
-          </Button>
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -151,12 +144,6 @@ export default function Component() {
             </PaginationItem>
           </PaginationContent>
         </Pagination>
-      </div>
-      <div className="mt-12">
-        <h2 className="text-2xl font-bold mb-4">Featured Posts</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          <FeaturedListings />
-        </div>
       </div>
     </div>
   )
