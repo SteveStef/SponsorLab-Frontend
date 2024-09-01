@@ -1,6 +1,7 @@
 "use client";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card"
 import black from "../../../public/black.png";
 import { useState, useEffect } from "react";
 import request from "@/request";
@@ -9,9 +10,12 @@ import { useAppContext } from "@/context";
 import Editor from "../components/editListing";
 import { useRouter }from "next/navigation";
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge"
 import NotFound from "./NotFound";
 import { convertFromUtcToLocal } from "@/utils";
+import { Badge } from "@/components/ui/badge"
+import { Users, Eye, ThumbsUp, PlaySquare, DollarSign, Clock, TrendingUp, Award, Share2, Edit } from "lucide-react"
+
+
 
 export default function Component({id}) {
   const [user, setUser] = useState(null);
@@ -86,8 +90,25 @@ export default function Component({id}) {
           </div>
         </div>
       </div>
-      <div className="bg-background p-6 sm:p-8 rounded-b-lg">
 
+      {/* Statistics Section */}
+      <div className="container mx-auto px-4 py-6">
+        <h2 className="text-xl font-semibold mb-4">Channel Statistics</h2>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <StatCard icon={<Users />} title="Subscribers" value="111M" />
+          <StatCard icon={<Eye />} title="Avg. Views" value="5.2M" />
+          <StatCard icon={<ThumbsUp />} title="Avg. Likes" value="412K" />
+          <StatCard icon={<PlaySquare />} title="Total Videos" value="4,572" />
+          <StatCard icon={<DollarSign />} title="Est. Earnings" value="$52M" />
+          <StatCard icon={<Clock />} title="Watch Time" value="1.2B hrs" />
+          <StatCard icon={<TrendingUp />} title="Growth Rate" value="2.5%/mo" />
+          <StatCard icon={<Award />} title="Awards" value="14" />
+          <StatCard icon={<Share2 />} title="Shares/Video" value="105K" />
+          <StatCard icon={<Eye />} title="Total Views" value="26B" />
+        </div>
+      </div>
+
+      <div className="bg-background p-6 sm:p-8 rounded-b-lg">
         <div className="grid gap-6">
           <div>
             <h3 className="text-lg font-semibold">About Me</h3>
@@ -97,6 +118,7 @@ export default function Component({id}) {
           </div>
 
       <div className="w-full bg-gray-500 h-0.5"></div>
+
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
             <div className="flex flex-col items-center">
               <div className="text-2xl font-bold">{user && user.channel.subscribersCount.toLocaleString()
@@ -122,7 +144,9 @@ export default function Component({id}) {
           </div>
         </div>
       </div>
+
       <div className="w-full bg-gray-500 h-0.5"></div>
+
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-8">
         {
           listings.length === 0 && organization === id.replace("%40", "@") ?
@@ -253,5 +277,51 @@ function StarIcon(props) {
     >
       <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
     </svg>
+  )
+}
+function StatCard({ icon, title, value }) {
+  return (
+    <Card className="w-150">
+      <CardContent className="flex items-center p-3">
+        <div className="mr-3 text-green-500">{icon}</div>
+        <div>
+          <p className="text-xs text-gray-400">{title}</p>
+          <p className="text-sm font-bold">{value}</p>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+function SponsorLogo({ name, logo }) {
+  return (
+    <div className="flex flex-col items-center">
+      <img src={logo} alt={`${name} logo`} className="h-12 w-24 object-contain" />
+      <span className="text-xs text-gray-400 mt-1">{name}</span>
+    </div>
+  )
+}
+
+function VideoCard({ title, views, timestamp, thumbnail, category }) {
+  return (
+    <Card className="border-gray-700 overflow-hidden">
+      <img src={thumbnail} alt={title} className="w-full h-40 object-cover" />
+      <CardContent className="p-3">
+        <div className="flex justify-between items-start mb-2">
+          <h3 className="font-semibold text-sm">{title}</h3>
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-white">
+            <Edit className="h-4 w-4" />
+            <span className="sr-only">Edit listing</span>
+          </Button>
+        </div>
+        <div className="flex justify-between items-center text-xs text-gray-400">
+          <span>{views}</span>
+          <span>{timestamp}</span>
+        </div>
+        <Badge variant="secondary" className="mt-2 bg-green-800 text-green-100">
+          {category}
+        </Badge>
+      </CardContent>
+    </Card>
   )
 }
