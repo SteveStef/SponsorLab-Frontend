@@ -31,10 +31,24 @@ export default function Component() {
   }, [state]);
 
   const handleImageChange = (event) => {
-    if (event.target.files && event.target.files[0]) {
-      setImage(event.target.files[0]);
-      setSelectedImage(URL.createObjectURL(event.target.files[0]));
+    const validImageTypes = ["image/png", "image/jpg", "image/jpeg"];
+    if(!event.target.files || !event.target.files[0]) return;
+
+    if(!validImageTypes.includes(event.target.files[0].type)) {
+      toast.error("Invalid image type, we only accept PNG/JPG/JPEG");
+      return;
     }
+
+    const file = event.target.files[0];
+    const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
+    if(sizeInMB > 5) {
+      toast.error("The image is over 5MB in size, please select an image under 5MB");
+      return;
+    }
+
+    setImage(event.target.files[0]);
+    setSelectedImage(URL.createObjectURL(event.target.files[0]));
+
   };
 
   async function updateProfile() {
@@ -48,7 +62,7 @@ export default function Component() {
     formData.append("newPassword", newPassword);
 
     const response = await axiosRequest(url, "PUT", formData);
-    console.log(response);
+    //console.log(response);
     if(response && response.status === 200) {
       toast.success("Uploaded profile");
     } else if(response.status !== 500) {

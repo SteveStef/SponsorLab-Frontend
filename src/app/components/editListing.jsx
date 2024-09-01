@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import request, { axiosRequest } from "@/request";
-import { InfoIcon, DollarSignIcon, TrendingUpIcon, ImageIcon, TypeIcon, ListIcon, MessageSquareIcon } from 'lucide-react';
+import { ListIcon } from 'lucide-react';
 import { addLocalTimezone, convertFromUtcToLocal, inPast } from "@/utils";
 
 export default function Component({listing, setSelectedListing, viewDeviations}) {
@@ -23,9 +23,22 @@ export default function Component({listing, setSelectedListing, viewDeviations})
   const [selectedCategory, setSelectedCategory] = useState(listing.tag);
 
   const handleImageChange = (event) => {
-    if (event.target.files && event.target.files[0]) {
-      setImage(event.target.files[0]);
+    const validImageTypes = ["image/png", "image/jpg", "image/jpeg"];
+    if(!event.target.files || !event.target.files[0]) return;
+
+    if(!validImageTypes.includes(event.target.files[0].type)) {
+      toast.error("Invalid image type, we only accept PNG/JPG/JPEG");
+      return;
     }
+
+    const file = event.target.files[0];
+    const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
+    if(sizeInMB > 5) {
+      toast.error("The image is over 5MB in size, please select an image under 5MB");
+      return;
+    }
+
+    setImage(event.target.files[0]);
   };
 
   function formatDate(date) {

@@ -55,7 +55,7 @@ export default function Component({id}) {
 
   return (
     <div className={`w-full max-w-6xl mx-auto ${loading ? "animate-pulse rounded" : ""}`}>
-      <div className="relative h-48 sm:h-64 md:h-70 overflow-hidden rounded-t-lg">
+      <div className="relative h-48 sm:h-64 md:h-70 lg:h-40 overflow-hidden rounded-t-lg">
         <Image
           src={user && user.channel.bannerUrl || black}
           priority={false}
