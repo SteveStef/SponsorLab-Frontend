@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { InfoIcon , CheckCircleIcon, TrendingUpIcon } from "lucide-react"
 import { useRouter } from "next/navigation";
 import { convertFromUtcToLocal } from "@/utils";
+import { useAppContext } from "@/context";
 
 export default function Component({listing, setShowSponsorForm}) {
   const titleRef = useRef("");
@@ -24,6 +25,7 @@ export default function Component({listing, setShowSponsorForm}) {
   const speechRef = useRef("");
   const proposalRef = useRef("");
   const [agreed, setAgreed] = useState(false);
+  const { name, company } = useAppContext();
 
   const router = useRouter();
 
@@ -59,7 +61,9 @@ export default function Component({listing, setShowSponsorForm}) {
       proposal: proposalRef.current.value,
       sendingProduct: sendingProduct,
       postId: listing.id,
-      pricingModel: listing.pricingModel
+      pricingModel: listing.pricingModel,
+      sponsorName: name,
+      sponsorCompany: company.orginization
     };
 
     if(validate(body)) {

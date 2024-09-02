@@ -1,7 +1,7 @@
 "use client";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card"
+import { Card } from "@/components/ui/card"
 import black from "../../../public/black.png";
 import { useState, useEffect } from "react";
 import request from "@/request";
@@ -12,10 +12,8 @@ import { useRouter }from "next/navigation";
 import Link from "next/link";
 import NotFound from "./NotFound";
 import { convertFromUtcToLocal } from "@/utils";
-import { Badge } from "@/components/ui/badge"
-import { Users, Eye, ThumbsUp, PlaySquare, DollarSign, Clock, TrendingUp, Award, Share2, Edit } from "lucide-react"
-
-
+import { Badge } from "@/components/ui/badge";
+import { FileIcon, CheckCircle2, CheckCircle,XCircle, Play, ThumbsUp, Video, Users, DollarSign, Clock, Eye, Share2, Edit, Building2 } from "lucide-react";
 
 export default function Component({id}) {
   const [user, setUser] = useState(null);
@@ -25,6 +23,9 @@ export default function Component({id}) {
   const [owner, setOwner] = useState(false);
   const [selectedListing, setSelectedListing] = useState(null);
   const [notFound, setNotFound] = useState(false);
+  const [viewRanges, setViewRanges] = useState([]);
+  const [sponsors, setSponsors] = useState([]);
+
   const router = useRouter();
 
   async function fetchUser(id) {
@@ -32,6 +33,20 @@ export default function Component({id}) {
     const response = await request(url, "GET", null);
     if(response && response.success) {
       setUser(response.body);
+      setSponsors(response.body.requestsReceived);
+      let tmp = [];
+      let dev = response.body.channel.viewDeviations;
+      const normalDist = [2.2, 13.6, 68.2, 13.6, 2.1, 0.1];
+      const skips = 6 - dev.length;
+      let start = 0;
+      for(let i = 0; i < skips; i++) start += normalDist[i];
+      for(let i = 0; i < dev.length - 1; i++) {
+        let range = dev[i] + "-" + dev[i + 1];
+        tmp.push({ range, probability: (normalDist[i + skips] + start).toFixed(1)});
+        start = 0;
+      }
+      tmp.push({ range: ">"+dev[dev.length-1], probability: normalDist[normalDist.length-1]})
+      setViewRanges(tmp);
       setListings(response.body.posts);
       setOwner(response.body.owner);
     } else {
@@ -41,12 +56,10 @@ export default function Component({id}) {
   }
 
   useEffect(() => {
-    if(id) {
-      fetchUser(id);
-    }
+    if(id) fetchUser(id);
   },[id]);
 
-
+  console.log(user);
 
   function handleListingClick(listing) {
     router.push(`../../listings/${listing.id}`);
@@ -59,26 +72,37 @@ export default function Component({id}) {
 
   return (
     <div className={`w-full max-w-6xl mx-auto ${loading ? "animate-pulse rounded" : ""}`}>
-      <div className="relative h-48 sm:h-64 md:h-70 lg:h-40 overflow-hidden rounded-t-lg">
+    <div className="relative h-32 md:h-40 lg:h-48 flex items-center justify-center overflow-hidden">
         <Image
           src={user && user.channel.bannerUrl || black}
-          priority={false}
-          alt="Banner Image"
-          className="w-full h-full object-cover"
-          width="800"
-          height="320"
-          style={{ aspectRatio: "800/320", objectFit: "cover" }}
+          alt="Channel Banner"
+          width={1280}
+          height={192}
+          className="object-cover w-full"
         />
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent p-4 text-white">
-          <div className="flex items-center gap-4">
-            <Avatar className="ring-4 ring-background">
+      </div>
+
+      {/* Profile Info */}
+      <div className="max-w-6xl mx-auto px-4 py-6">
+        <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+            <Avatar className="w-32 h-32 ring-4 ring-background">
               <AvatarImage src={user && user.googleImage || ""} alt="Profile Picture" />
               <AvatarFallback>{user && user.name[0]}</AvatarFallback>
             </Avatar>
-            <div className="flex-1">
-              <h2 className="text-xl font-bold">{user && user.name}</h2>
-              <div className="text-sm text-muted-foreground">{id.replace("%40","@")}</div>
+          <div className="flex-1 text-center md:text-left">
+            <h1 className="text-2xl font-bold flex items-center justify-center md:justify-start gap-2">
+              {user && user.name}
+              <CheckCircle2 className="w-5 h-5 text-green-500" />
+            </h1>
+            <p className="text-gray-400">{user && user.channel.name}</p>
+            <div className="flex items-center justify-center md:justify-start gap-4 mt-2">
+              <span>{user && (user.channel.subscribersCount).toLocaleString()} Subscribers</span>
+              <span>{listings.length} {listings.length == 1 ? "Listing" : "Listings"}</span>
             </div>
+            <p className="mt-2 max-w-2xl">
+              {description || (user && user.channel.description)}
+            </p>
+          </div>
             {
               organization === id.replace("%40", "@") &&
                 <Link  href="../../settings">
@@ -87,65 +111,92 @@ export default function Component({id}) {
                   </Button>
                 </Link>
             }
-          </div>
         </div>
-      </div>
 
-      {/* Statistics Section */}
-      <div className="container mx-auto px-4 py-6">
-        <h2 className="text-xl font-semibold mb-4">Channel Statistics</h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-          <StatCard icon={<Users />} title="Subscribers" value="111M" />
-          <StatCard icon={<Eye />} title="Avg. Views" value="5.2M" />
-          <StatCard icon={<ThumbsUp />} title="Avg. Likes" value="412K" />
-          <StatCard icon={<PlaySquare />} title="Total Videos" value="4,572" />
-          <StatCard icon={<DollarSign />} title="Est. Earnings" value="$52M" />
-          <StatCard icon={<Clock />} title="Watch Time" value="1.2B hrs" />
-          <StatCard icon={<TrendingUp />} title="Growth Rate" value="2.5%/mo" />
-          <StatCard icon={<Award />} title="Awards" value="14" />
-          <StatCard icon={<Share2 />} title="Shares/Video" value="105K" />
-          <StatCard icon={<Eye />} title="Total Views" value="26B" />
+
+        {/* Channel Stats */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 mt-8">
+          <Card className="p-4 text-center">
+            <Users className="w-8 h-8 mx-auto mb-2 text-green-500" />
+            <h3 className="text-xl font-bold">{user && user.channel.subscribersCount}</h3>
+            <p className="text-gray-400">Subscribers</p>
+          </Card>
+          <Card className="p-4 text-center">
+            <Play className="w-8 h-8 mx-auto mb-2 text-green-500" />
+            <h3 className="text-xl font-bold">{user && user.channel.totalViews}</h3>
+            <p className="text-gray-400">Views</p>
+          </Card>
+          <Card className="p-4 text-center">
+            <ThumbsUp className="w-8 h-8 mx-auto mb-2 text-green-500" />
+            <h3 className="text-xl font-bold">2.5M</h3>
+            <p className="text-gray-400">Likes</p>
+          </Card>
+          <Card className="p-4 text-center">
+            <Share2 className="w-8 h-8 mx-auto mb-2 text-green-500" />
+            <h3 className="text-xl font-bold">100K</h3>
+            <p className="text-gray-400">Shares</p>
+          </Card>
+          <Card className="p-4 text-center">
+            <Video className="w-8 h-8 mx-auto mb-2 text-green-500" />
+            <h3 className="text-xl font-bold">{user && user.channel.videoCount}</h3>
+            <p className="text-gray-400">Videos</p>
+          </Card>
+          <Card className="p-4 text-center">
+            <Eye className="w-8 h-8 mx-auto mb-2 text-green-500" />
+            <h3 className="text-xl font-bold">{user && (user.channel.totalViews / user.channel.videoCount).toLocaleString()}</h3>
+            <p className="text-gray-400">Average Views</p>
+          </Card>
         </div>
+        
+        <div className="flex">
+        <Card className="w-3/5 p-6 rounded-lg mt-5 mr-2">
+          <h2 className="text-xl font-semibold mb-4">View Range Probabilities</h2>
+          <div className="space-y-2">
+            {viewRanges.map((item, index) => (
+              <div key={index} className="flex items-center">
+                <span className="w-24 text-sm">{item.range}</span>
+                <div className="flex-1 h-6 bg-gray-700 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-green-500"
+                    style={{ width: `${item.probability}%` }}
+                  ></div>
+                </div>
+                <span className="w-12 text-right text-sm">{item.probability}%</span>
+              </div>
+            ))}
+          </div>
+        </Card>
+<Card className="w-full md:w-2/5 p-4 rounded-lg mt-5">
+      <h2 className="text-lg font-semibold mb-3 flex items-center">
+        <DollarSign className="w-5 h-5 mr-2 text-green-500" />
+        Recent Sponsors
+      </h2>
+        {
+          !loading && sponsors.length === 0 && <NoRequests />
+        }
+      <div className="grid grid-cols-2 gap-3">
+        {sponsors.map((sponsor, index) => (
+          <div key={index} className="border rounded-md p-2 flex flex-col justify-between text-xs">
+            <div>
+              <p className="font-medium text-gray-100 truncate dark:text-white">
+                {sponsor.sponsorName}
+              </p>
+              <p className="text-gray-500 truncate dark:text-gray-400 flex items-center mt-0.5">
+                <Building2 className="w-3 h-3 mr-1" />
+                {sponsor.sponsorCompany}
+              </p>
+            </div>
+            <div className="flex items-center justify-between mt-1">
+              <Badge variant="secondary" className={`text-[10px] px-1 py-0 my-1 ${getStatusColor(sponsor.transaction.status)}`}>
+                {getStatusIcon(sponsor.transaction.status)}
+                <span className="ml-0.5 capitalize">{sponsor.transaction.status}</span>
+              </Badge>
+            </div>
+          </div>
+        ))}
       </div>
-
-      <div className="bg-background p-6 sm:p-8 rounded-b-lg">
-        <div className="grid gap-6">
-          <div>
-            <h3 className="text-lg font-semibold">About Me</h3>
-            <p className="text-muted-foreground">
-            {user && user.channel.description || description ||  "This user has no description"}
-            </p>
-          </div>
-
-      <div className="w-full bg-gray-500 h-0.5"></div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-            <div className="flex flex-col items-center">
-              <div className="text-2xl font-bold">{user && user.channel.subscribersCount.toLocaleString()
-               || 0}</div>
-              <div className="text-sm text-muted-foreground">Subscribers</div>
-            </div>
-            <div className="flex flex-col items-center">
-              <div className="text-2xl font-bold">{user && user.channel.totalViews}</div>
-              <div className="text-sm text-muted-foreground">Total Views</div>
-            </div>
-            <div className="flex flex-col items-center">
-              <div className="text-2xl font-bold">{user && (parseInt(user.channel.totalViews / user.channel.videoCount)) || 0}</div>
-              <div className="text-sm text-muted-foreground">Avg. Views</div>
-            </div>
-            <div className="flex flex-col items-center">
-              <div className="text-2xl font-bold">{user && new Date(user.channel.joinedDate).toLocaleDateString()}</div>
-              <div className="text-sm text-muted-foreground">Joined</div>
-            </div>
-            <div className="flex flex-col items-center">
-              <div className="text-2xl font-bold">{user && user.posts.length}</div>
-              <div className="text-sm text-muted-foreground">Listings</div>
-            </div>
-          </div>
+    </Card>
         </div>
-      </div>
-
-      <div className="w-full bg-gray-500 h-0.5"></div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-8">
         {
@@ -213,6 +264,7 @@ export default function Component({id}) {
           })
         }
       </div>
+      </div>
     </div>
   )
 }
@@ -279,49 +331,42 @@ function StarIcon(props) {
     </svg>
   )
 }
-function StatCard({ icon, title, value }) {
-  return (
-    <Card className="w-150">
-      <CardContent className="flex items-center p-3">
-        <div className="mr-3 text-green-500">{icon}</div>
-        <div>
-          <p className="text-xs text-gray-400">{title}</p>
-          <p className="text-sm font-bold">{value}</p>
-        </div>
-      </CardContent>
-    </Card>
-  )
+
+const getStatusIcon = (status) => {
+  switch (status) {
+    case 'ACCEPTED':
+      return <CheckCircle className="w-4 h-4 text-green-500" />
+    case 'PENDING':
+      return <Clock className="w-4 h-4 text-yellow-500" />
+    case 'FAILED':
+      return <XCircle className="w-4 h-4 text-red-500" />
+    case 'CANCELED':
+      return <XCircle className="w-4 h-4 text-red-500" />
+    default:
+      return null
+  }
 }
 
-function SponsorLogo({ name, logo }) {
-  return (
-    <div className="flex flex-col items-center">
-      <img src={logo} alt={`${name} logo`} className="h-12 w-24 object-contain" />
-      <span className="text-xs text-gray-400 mt-1">{name}</span>
-    </div>
-  )
+const getStatusColor = (status) => {
+  switch (status) {
+    case 'ACCEPTED':
+      return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+    case 'PENDING':
+      return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
+    case 'FAILED':
+      return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+    case 'CANCELED':
+      return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+    default:
+      return ''
+  }
 }
 
-function VideoCard({ title, views, timestamp, thumbnail, category }) {
-  return (
-    <Card className="border-gray-700 overflow-hidden">
-      <img src={thumbnail} alt={title} className="w-full h-40 object-cover" />
-      <CardContent className="p-3">
-        <div className="flex justify-between items-start mb-2">
-          <h3 className="font-semibold text-sm">{title}</h3>
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-white">
-            <Edit className="h-4 w-4" />
-            <span className="sr-only">Edit listing</span>
-          </Button>
+function NoRequests() {
+  return <div className="mt-10 text-center ml-auto mr-auto">
+        <div className="mb-4 flex justify-center">
+          <FileIcon className="h-10 w-10 text-muted-foreground" />
         </div>
-        <div className="flex justify-between items-center text-xs text-gray-400">
-          <span>{views}</span>
-          <span>{timestamp}</span>
-        </div>
-        <Badge variant="secondary" className="mt-2 bg-green-800 text-green-100">
-          {category}
-        </Badge>
-      </CardContent>
-    </Card>
-  )
+        <p className="mb-2 text-md font-semibold tracking-tight">No Sponsors Yet</p>
+      </div>
 }
