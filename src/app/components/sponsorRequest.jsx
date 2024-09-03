@@ -466,12 +466,16 @@ function ShowButtons(props) {
 
   const map = {
     "confirmRequest": () => {
+      const price =
+        request.pricingModel ==="CPM" ? (request.post.estimatedViews * request.requestedPrice / 100 / 1000).toLocaleString() : (request.requestedPrice / 100).toLocaleString();
       setShowConfirm(true);
       setFnsName("confirmRequest");
       setSelectedParams(request);
       setSelectedInfo({ 
         title: "Are you sure you want to confirm accept this request?", 
-        info: `This will will take you and the youtuber to the partnership step. You will be charged $${(request.post.estimatedViews * request.requestedPrice / 100 / 1000).toLocaleString()} and the money will be held until the transaction is resolved.`
+        info: `YOU WILL BE CHARGED! This will take you and the youtuber to the partnership step. 
+        You will be charged $${price} and the money will be held until the video is published on youtube. Only after the video is reviewed by you (the sponsor) 
+        will the funds be transfered to the youtuber.`
       });
     },
     "cancelRequest": () => {
