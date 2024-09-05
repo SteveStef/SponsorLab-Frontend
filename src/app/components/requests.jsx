@@ -38,6 +38,8 @@ export default function Component() {
         return <Clock className="w-4 h-4 mr-1" />
       case 'SPONSOR_REVIEW':
         return <Eye className="w-4 h-4 mr-1" />
+      case 'ADMIN_REVIEW':
+        return <Eye className="w-4 h-4 mr-1" />
       case 'ACCEPTED':
         return <CheckCircle className="w-4 h-4 mr-1" />
       case 'COMPLETED':
@@ -63,6 +65,8 @@ export default function Component() {
         return 'bg-yellow-900 text-yellow-300'
       case 'ACCEPTED':
         return 'bg-green-900 text-green-300'
+      case 'ADMIN_REVIEW':
+        return 'bg-purple-500 text-white-300'
       case 'COMPLETED':
         return 'bg-green-900 text-green-300'
       case 'DECLINED':

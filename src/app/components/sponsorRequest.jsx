@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, act } from 'react';
 import { Label } from "@/components/ui/label";
 import Link from 'next/link';
 import { Badge } from "@/components/ui/badge";
@@ -16,7 +16,7 @@ import { useAppContext } from '@/context';
 import Request from "@/request";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { convertFromUtcToLocal } from '@/utils';
+import { convertFromUtcToLocal, inPast } from '@/utils';
 
 const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('en-US', {
@@ -35,7 +35,6 @@ export default function Component() {
   const [load, setLoad] = useState(true);
   const { name, company } = useAppContext();
   const [videoUrls, setVideoUrls] = useState({});
-  console.log(requests);
 
   const router = useRouter();
 
@@ -44,6 +43,8 @@ export default function Component() {
       case 'PENDING':
         return <Clock className="w-4 h-4 mr-1" />
       case 'SPONSOR_REVIEW':
+        return <Eye className="w-4 h-4 mr-1" />
+      case 'ADMIN_REVIEW':
         return <Eye className="w-4 h-4 mr-1" />
       case 'ACCEPTED':
         return <CheckCircle className="w-4 h-4 mr-1" />
@@ -57,6 +58,7 @@ export default function Component() {
         return null
     }
   }
+
   const handleViewProposal = (request) => {
     setSelectedRequest(request)
     setIsModalOpen(true)
@@ -68,6 +70,8 @@ export default function Component() {
         return 'bg-yellow-900 text-yellow-300'
       case 'SPONSOR_REVIEW':
         return 'bg-yellow-900 text-yellow-300'
+      case 'ADMIN_REVIEW':
+        return 'bg-purple-500 text-white-300'
       case 'ACCEPTED':
         return 'bg-green-900 text-green-300'
       case 'COMPLETED':
@@ -171,7 +175,28 @@ export default function Component() {
   }
 
   async function refuteVideo(transactionId) {
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/transactions/sponsor/refuteVideo`;
+    const body = { transactionId }
+    const response = await Request(url, "POST", body);
+    if(response && response.success) {
+      toast.success("The video url has been refuted and is now under admin review.");
+      getRequests();
+    } else {
+      toast.error("Something went wrong, please try again later.");
+    }
 
+  }
+
+  async function refund(transactionId) {
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/transactions/sponsor/refund`;
+    const body = { transactionId }
+    const response = await Request(url, "POST", body);
+    if(response && response.success) {
+      toast.success("Your money as been refunded");
+      getRequests();
+    } else {
+      toast.error("The refund failed try again later or contact this email for help support@sponsorlab.co");
+    }
   }
 
   const [copied, setCopied] = useState(false);
@@ -276,7 +301,7 @@ export default function Component() {
                   </ScrollArea>
                 </CardContent>
                 <CardFooter className="flex justify-between">
-                  <ShowButtons request={request} load={load} activeTab={key} confirmRequest={confirmRequest} cancelRequest={cancelRequest} handleViewProposal={handleViewProposal} approveVideo={approveVideo} refuteVideo={refuteVideo}
+                  <ShowButtons request={request} load={load} activeTab={key} confirmRequest={confirmRequest} cancelRequest={cancelRequest} handleViewProposal={handleViewProposal} approveVideo={approveVideo} refuteVideo={refuteVideo} refund={refund}
                   />
 
                 </CardFooter>
@@ -451,7 +476,7 @@ const tabContent = {
 
 
 function ShowButtons(props) {
-  const { request, load, activeTab, confirmRequest, cancelRequest, handleViewProposal, approveVideo, refuteVideo } = props;
+  const { request, load, activeTab, confirmRequest, cancelRequest, handleViewProposal, approveVideo, refuteVideo, refund } = props;
   const [showConfirm, setShowConfirm] = useState(false);
   const [selectedParams, setSelectedParams] = useState("");
   const [selectedInfo, setSelectedInfo] = useState("");
@@ -462,6 +487,7 @@ function ShowButtons(props) {
     cancelRequest: cancelRequest,
     approveVideo: approveVideo,
     refuteVideo: refuteVideo,
+    refund: refund
   }
 
   const map = {
@@ -505,6 +531,15 @@ function ShowButtons(props) {
         info: "An admin will take a look at this transaction and determind the outcome."
       });
     },
+    "refund": () => {
+      setShowConfirm(true);
+      setFnsName("refund");
+      setSelectedParams(request.transaction.id);
+      setSelectedInfo({ 
+        title: "Are you sure you want to refund your Partnership?", 
+        info: "You are now able to refund because the youtbuer failed to post the video url by the deadline. This action will give you your money back and terminate the transaction between you and the youtuber."
+      });
+    },
 
   }
 
@@ -536,6 +571,18 @@ function ShowButtons(props) {
       Refute Video
     </Button>
 
+  const refundBtn = <Button disabled={load} onClick={map["refund"]} variant="outline" className="bg-red-900 text-red-100 hover:bg-red-800 border-red-700 flex items-center">
+      <X className="w-4 h-4 mr-2" />
+      Get Refund
+    </Button>
+
+  function isLate() {
+    let deadlineInLocalTime = convertFromUtcToLocal(request.transaction.deadline);
+    if(inPast(deadlineInLocalTime)) {
+      return true;
+    }
+    return false;
+  }
 
   function getButton() {
     const {request} = props;
@@ -552,6 +599,9 @@ function ShowButtons(props) {
       if(request.transaction.videoUrl && activeTab === "ongoing" && request.transaction.status === "SPONSOR_REVIEW") {
         return <>{approve}{refute}</>
       } else if(activeTab === "request") return viewProposal
+      else if(request.transaction && !request.transaction.videoUrl && activeTab === "ongoing" && request.transaction.status === "PENDING" && isLate()) {
+        return <>{refundBtn}</>
+      }
     }
     return <></>
   }

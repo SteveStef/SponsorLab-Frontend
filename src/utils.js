@@ -23,3 +23,8 @@ export function inPast(date) {
   const dateObj = dayjs(date).tz(Intl.DateTimeFormat().resolvedOptions().timeZone);
   return dateObj.diff(dayjs(getTodaysDate()), 'day') < 0;
 }
+
+export function inFuture(date) {
+  const dateObj = dayjs(date).tz(Intl.DateTimeFormat().resolvedOptions().timeZone);
+  return dateObj.diff(dayjs(getTodaysDate()), 'day') > 0;
+}
