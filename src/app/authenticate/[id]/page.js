@@ -17,7 +17,7 @@ export default function Authenticating({params}) {
     if(!response.success && response.status !== 400) {
       toast.error(response.message);
     } else if(response && response.success) {
-      console.log(response);
+      //console.log(response);
       document.cookie = `token=${response.token}; SameSite=None; Secure; Path=/`;
       setAuth(true);
       setRole(response.body.role);
