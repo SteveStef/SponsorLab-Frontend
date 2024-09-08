@@ -5,7 +5,8 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Progress } from "@/components/ui/progress"
-import { Building2, Globe, PackageOpen, Youtube, Users, Banknote, ArrowRight, ArrowLeft, LightbulbIcon, X } from 'lucide-react';
+import { Building2, Globe, PackageOpen, Youtube, Users, Tag, FileText,
+  Banknote, ArrowRight, ArrowLeft, LightbulbIcon, X } from 'lucide-react';
 import request from "@/request";
 import { toast } from "sonner";
 import { useAppContext } from '@/context'
@@ -18,6 +19,7 @@ export default function Component(props) {
     website: '',
     description: '',
     productCategories: [],
+    //products: [],
     contentTypes: [],
     audienceAge: '',
     budgetRange: '',

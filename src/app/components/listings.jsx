@@ -2,7 +2,7 @@
 import Black from "../../../public/connect.jpg";
 import Image from "next/image";
 import { convertFromUtcToLocal } from "@/utils";
-import { SearchIcon, FilterIcon, InfoIcon , ChevronRightIcon, AlertTriangleIcon, CheckCircleIcon, TrendingUpIcon } from "lucide-react";
+import { ChevronLeftIcon, SearchIcon, FilterIcon, InfoIcon , ChevronRightIcon, AlertTriangleIcon, CheckCircleIcon, TrendingUpIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
@@ -11,21 +11,28 @@ import request from "@/request.js";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
+const listingsPerPage = 6;
 export default function Component() {
   const [listings, setListings] = useState([]);
   const [search, setSearch] = useState("");
   const [filteredListings, setFilteredListings] = useState([]);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
   async function fetchListings() {
     const url = `${process.env.NEXT_PUBLIC_API_URL}/posts/page/1`;
     const response = await request(url, "GET", null);
     console.log(response);
+    //response.body = [...response.body, ...response.body];
+    //response.body = [...response.body, ...response.body];
+    //response.body = [...response.body, ...response.body];
     if(response && response.success) {
       for(let i = 0; i < response.body.length; i++) {
         response.body[i].riskEvaluation = determindRisk(response.body[i]);
       }
+      setTotalPages((response.body.length % listingsPerPage));
       setListings(response.body); // this will contain all of the posts that exist
-      setFilteredListings(response.body); // this will be what the user sees
+      updateFilteredListings(response.body, page);
     }
   }
 
@@ -33,22 +40,35 @@ export default function Component() {
     fetchListings();
   },[]);
 
-
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       if (!search) {
-        setFilteredListings(listings);
+        updateFilteredListings(listings, page);
       } else {
-        const s = search.toLowerCase();
+        const s = search.toLowerCase().trim();
         const filtered = listings.filter(l => 
-          l.title.toLowerCase().includes(s) || l.user.name.toLowerCase().includes(s) || l.tag.toLowerCase().includes(s)
+          l.title.toLowerCase().includes(s) || 
+          l.user.name.toLowerCase().includes(s) || 
+          l.tag.toLowerCase().includes(s)
         );
-        setFilteredListings(filtered);
+
+        const startIndex = page * listingsPerPage;
+        const endIndex = startIndex + listingsPerPage;
+        const paginatedFiltered = filtered.slice(startIndex, endIndex); // Limit to 6 per page
+
+        setFilteredListings(paginatedFiltered);
       }
-    }, 300);
+    }, 100);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [search, listings]);
+  }, [search, listings, page]);
+
+  function updateFilteredListings(listings, page) {
+    const startIndex = page * listingsPerPage;
+    const endIndex = startIndex + listingsPerPage;
+    const paginatedListings = listings.slice(startIndex, endIndex); // Get 6 listings per page
+    setFilteredListings(paginatedListings);
+  }
 
   return (
     <div className="text-gray-100">
@@ -146,7 +166,7 @@ export default function Component() {
                 </span>
                 */}
 
-                  <div className="p-4">
+                  <div className="p-4 w-50">
                     <div className="flex justify-between items-start mb-2">
                       <h3 className="text-lg font-semibold truncate">{listing.title}</h3>
                       <span className=" bg-purple-500 text-xs font-semibold px-2 py-1 rounded-full">{listing.tag}</span>
@@ -180,14 +200,29 @@ export default function Component() {
                 </Link>
               ))}
             </div>
+    <div className="mt-8 flex items-center ml-80">
+              <Button
+                onClick={() => setPage(page - 1)}
+                disabled={page + 1 === 1}
+                className="bg-green-500 hover:bg-green-600 disabled:opacity-50 ml-50 mr-5"
+              >
+                <ChevronLeftIcon className="h-4 w-4 mr-2 ml-auto" />
+                Previous
+              </Button>
+              <span className="text-gray-300">
+                Page {page + 1} of {totalPages}
+              </span>
+              <Button
+                onClick={() => setPage(page + 1)}
+                disabled={page + 1=== totalPages}
+                className="bg-green-500 hover:bg-green-600 disabled:opacity-50 mr-50 ml-5"
+              >
+                Next
+                <ChevronRightIcon className="h-4 w-4 ml-2" />
+              </Button>
+            </div>
           </main>
         </div>
-      </div>
-      <div className="fixed right-4 top-1/2 transform -translate-y-1/2">
-        <Button className="rounded-full w-12 h-12 bg-green-500 hover:bg-green-600">
-          <ChevronRightIcon className="h-6 w-6" />
-          <span className="sr-only">Next Page</span>
-        </Button>
       </div>
     </div>
   )
