@@ -2,24 +2,19 @@
 import Black from "../../../public/connect.jpg";
 import Image from "next/image";
 import { convertFromUtcToLocal } from "@/utils";
-import { SearchIcon, FilterIcon, InfoIcon , ChevronRightIcon, AlertTriangleIcon, CheckCircleIcon, TrendingUpIcon } from "lucide-react"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Select } from "@/components/ui/select"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { SearchIcon, FilterIcon, InfoIcon , ChevronRightIcon, AlertTriangleIcon, CheckCircleIcon, TrendingUpIcon } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Select } from "@/components/ui/select";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import request from "@/request.js";
-import { useState, useEffect } from "react"
-import Link from "next/link"
+import { useState, useEffect } from "react";
+import Link from "next/link";
 
 export default function Component() {
   const [listings, setListings] = useState([]);
+  const [search, setSearch] = useState("");
+  const [filteredListings, setFilteredListings] = useState([]);
 
   async function fetchListings() {
     const url = `${process.env.NEXT_PUBLIC_API_URL}/posts/page/1`;
@@ -29,13 +24,31 @@ export default function Component() {
       for(let i = 0; i < response.body.length; i++) {
         response.body[i].riskEvaluation = determindRisk(response.body[i]);
       }
-      setListings(response.body);
+      setListings(response.body); // this will contain all of the posts that exist
+      setFilteredListings(response.body); // this will be what the user sees
     }
   }
 
   useEffect(() => {
     fetchListings();
   },[]);
+
+
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      if (!search) {
+        setFilteredListings(listings);
+      } else {
+        const s = search.toLowerCase();
+        const filtered = listings.filter(l => 
+          l.title.toLowerCase().includes(s) || l.user.name.toLowerCase().includes(s) || l.tag.toLowerCase().includes(s)
+        );
+        setFilteredListings(filtered);
+      }
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [search, listings]);
 
   return (
     <div className="text-gray-100">
@@ -44,13 +57,13 @@ export default function Component() {
           <aside className="p-6 rounded-lg">
             <h2 className="text-xl font-semibold mb-4">Risk Evaluation Guide</h2>
             <p className="text-gray-300 mb-4">
-    <span className="flex">
-    </span>
+      <span className="flex">
+      </span>
 
     <span className="flex items-start">
-    <InfoIcon className="w-5 h-5 mr-2 text-green-400 mt-1 flex-shrink-0" />
+      <InfoIcon className="w-5 h-5 mr-2 text-green-400 mt-1 flex-shrink-0" />
     <span>
-    Our risk evaluation is based on multiple factors including content type, creator history, and market trends.
+      Our risk evaluation is based on multiple factors including content type, creator history, and market trends.
     </span>
             </span>
             </p>
@@ -80,6 +93,7 @@ export default function Component() {
                   type="search"
                   placeholder="Search listings..."
                   className="text-gray-100 placeholder-gray-400 border-gray-600 focus:border-green-400"
+                  onChange={(e) => setSearch(e.target.value)}
                 />
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -115,7 +129,7 @@ export default function Component() {
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-              {listings.map((listing, idx) => (
+              {filteredListings.map((listing, idx) => (
                 <Link key={idx} href={`./listings/${listing.id}`} className="rounded-lg overflow-hidden shadow-lg transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg hover:shadow-green-500/20">
                   <Image
                     src={listing.thumbnailName || Black}
@@ -214,3 +228,4 @@ function Eye(props) {
     </svg>
   )
 }
+
