@@ -8,15 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { DollarSign, Users, Youtube, AlertCircle, CheckCircle, Clock, FileQuestion, TrendingUp, Filter, Calendar, CreditCard, Video, User, Building } from "lucide-react";
+import { convertFromUtcToLocal } from "@/utils";
 import request from "@/request";
 
-const transactions = [
-  { id: 1, type: "Payout", amount: 1000, status: "Pending", issue: "Verification needed", videoUrl: "https://youtube.com/watch?v=abc123", amountHeld: 1000, paymentType: "CPM", creator: "JohnDoe", sponsor: "TechCorp", date: "2023-06-15" },
-  { id: 2, type: "Refund", amount: 250, status: "Admin Review", issue: "Dispute resolution", videoUrl: "https://youtube.com/watch?v=def456", amountHeld: 250, paymentType: "Flat", creator: "JaneSmith", sponsor: "GameStudios", date: "2023-06-14" },
-  { id: 3, type: "Sponsorship", amount: 5000, status: "Pending", issue: "Contract review", videoUrl: "https://youtube.com/watch?v=ghi789", amountHeld: 5000, paymentType: "Flat", creator: "MikeBrown", sponsor: "FoodDelivery", date: "2023-06-13" },
-  { id: 4, type: "Payout", amount: 750, status: "Admin Review", issue: "Suspicious activity", videoUrl: "https://youtube.com/watch?v=jkl012", amountHeld: 750, paymentType: "CPM", creator: "EmilyClark", sponsor: "FashionBrand", date: "2023-06-12" },
-  { id: 5, type: "Refund", amount: 100, status: "Pending", issue: "Additional information required", videoUrl: "https://youtube.com/watch?v=mno345", amountHeld: 100, paymentType: "CPM", creator: "ChrisWilson", sponsor: "TravelAgency", date: "2023-06-11" },
-]
 
 const PieChart = ({ sponsors, youtubers }) => {
   const total = sponsors + youtubers
@@ -97,8 +91,13 @@ const LineGraph = ({ data, width }) => {
 
 export default function AdminDashboard() {
   const [selectedTransaction, setSelectedTransaction] = useState(null)
+  const [selectedTransfer, setSelectedTransfer] = useState(null)
   const [filters, setFilters] = useState({ type: 'All', status: 'All', search: '' })
-  const [transactionHistory, setTransactionHistory] = useState([]);
+  const [transfers, setTransfers] = useState([]);
+  const [transactionsHistory, setTransactionHistory] = useState([]);
+
+  console.log("transfers ", transfers);
+  console.log("transactions ", transactionsHistory);
 
   const [stats, setStats] = useState({
     totalUsers: 0,
@@ -128,6 +127,7 @@ export default function AdminDashboard() {
 
   const size = useWindowSize();
 
+  /*
   const filteredTransactions = transactions.filter(transaction => 
     (filters.type === 'All' || transaction.type === filters.type) &&
     (filters.status === 'All' || transaction.status === filters.status) &&
@@ -135,7 +135,7 @@ export default function AdminDashboard() {
       transaction.creator.toLowerCase().includes(filters.search.toLowerCase()) ||
       transaction.sponsor.toLowerCase().includes(filters.search.toLowerCase())
     : true)
-  )
+  )*/
 
   async function fetchAdminData() {
     const url = `${process.env.NEXT_PUBLIC_API_URL}/admin`;
@@ -146,6 +146,7 @@ export default function AdminDashboard() {
       youtubers: response.body.channels
     }));
     console.log(response);
+    setTransfers(response.body.transfers);
     setTransactionHistory(response.body.transactions);
   }
 
@@ -236,7 +237,7 @@ export default function AdminDashboard() {
           </CardTitle>
         </CardHeader>
         <CardContent className="overflow-x-auto">
-    { size.width && <LineGraph data={stats.profit} width={size.width} />}
+        { size.width && <LineGraph data={stats.profit} width={size.width} />}
         </CardContent>
       </Card>
       
@@ -244,7 +245,7 @@ export default function AdminDashboard() {
         <CardHeader>
           <CardTitle className="text-xl font-semibold flex items-center">
             <AlertCircle className="w-6 h-6 mr-2 text-yellow-500" />
-            History
+            Payouts
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -293,26 +294,26 @@ export default function AdminDashboard() {
                   <TableHead className="text-gray-300">Issue</TableHead>
                   <TableHead className="text-gray-300">Creator</TableHead>
                   <TableHead className="text-gray-300">Sponsor</TableHead>
-                  <TableHead className="text-gray-300">Date</TableHead>
+                  <TableHead className="text-gray-300">Payday</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {transactionHistory.map((transaction) => (
+                {transfers.map((t,idx) => (
                   <TableRow 
-                    key={transaction.id} 
+                    key={idx} 
                     className="border-gray-700 cursor-pointer hover:bg-gray-700"
-                    onClick={() => setSelectedTransaction(transaction)}
+                    onClick={() => setSelectedTransfer(t)}
                   >
-                    <TableCell>{transaction.type}</TableCell>
-                    <TableCell>${transaction.amount.toLocaleString()}</TableCell>
-                    <TableCell>{transaction.status}</TableCell>
+                    <TableCell>{t.pricingModel}</TableCell>
+                    <TableCell>${(t.price / 100).toLocaleString()}</TableCell>
+                    <TableCell>{t.status}</TableCell>
                     <TableCell className="flex items-center">
                       <AlertCircle className="w-4 h-4 text-yellow-500 mr-2" />
-                      {transaction.issue}
+                      {t.status === "PENDING" ? "Payout Needed":""}
                     </TableCell>
-                    <TableCell>{transaction.creator}</TableCell>
-                    <TableCell>{transaction.sponsor}</TableCell>
-                    <TableCell>{transaction.date}</TableCell>
+                    <TableCell>{t.transaction.request.creator.email.split("@")[0]}</TableCell>
+                    <TableCell>{t.transaction.request.sponsor.email}</TableCell>
+                    <TableCell>{convertFromUtcToLocal(t.payday)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -320,6 +321,95 @@ export default function AdminDashboard() {
           </div>
         </CardContent>
       </Card>
+
+
+
+
+
+
+
+      <Card className="border-gray-700 hover:bg-gray-750 transition-colors mt-8">
+        <CardHeader>
+          <CardTitle className="text-xl font-semibold flex items-center">
+            <AlertCircle className="w-6 h-6 mr-2 text-yellow-500" />
+              Partner Ships
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap items-center space-x-4 mb-4">
+            <Select value={filters.type} onValueChange={(value) => setFilters({...filters, type: value})}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Filter by Type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="All">All Types</SelectItem>
+                <SelectItem value="Payout">Payout</SelectItem>
+                <SelectItem value="Refund">Refund</SelectItem>
+                <SelectItem value="Sponsorship">Sponsorship</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={filters.status} onValueChange={(value) => setFilters({...filters, status: value})}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Filter by Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="All">All Statuses</SelectItem>
+                <SelectItem value="Pending">Pending</SelectItem>
+                <SelectItem value="Admin Review">Admin Review</SelectItem>
+              </SelectContent>
+            </Select>
+            <div className="flex items-center space-x-2">
+              <Input
+                type="text"
+                placeholder="Search creator or sponsor"
+                className="w-[250px]"
+                value={filters.search}
+                onChange={(e) => setFilters({...filters, search: e.target.value})}
+              />
+              <Button variant="outline" size="icon">
+                <Filter className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="border-gray-700">
+                  <TableHead className="text-gray-300">Type</TableHead>
+                  <TableHead className="text-gray-300">Amount</TableHead>
+                  <TableHead className="text-gray-300">Status</TableHead>
+                  <TableHead className="text-gray-300">Issue</TableHead>
+                  <TableHead className="text-gray-300">Creator</TableHead>
+                  <TableHead className="text-gray-300">Sponsor</TableHead>
+                  <TableHead className="text-gray-300">Created At</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {transactionsHistory.map((transaction,idx) => (
+                  <TableRow 
+                    key={idx} 
+                    className="border-gray-700 cursor-pointer hover:bg-gray-700"
+                    onClick={() => setSelectedTransaction(transaction)}
+                  >
+                    <TableCell>{transaction.request.pricingModel}</TableCell>
+                    <TableCell>${(transaction.price / 100).toLocaleString()}</TableCell>
+                    <TableCell>{transaction.status}</TableCell>
+                    <TableCell className="flex items-center">
+                      <AlertCircle className="w-4 h-4 text-yellow-500 mr-2" />
+                      {transaction.status === "ADMIN_REVIEW" ? "Sponsor Refuted Video":"NONE"}
+                    </TableCell>
+                    <TableCell>{transaction.request.creator.email.split("@")[0]}</TableCell>
+                    <TableCell>{transaction.request.sponsor.email}</TableCell>
+                    <TableCell>{convertFromUtcToLocal(transaction.createdAt)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+
+
 
       <Dialog open={!!selectedTransaction} onOpenChange={() => setSelectedTransaction(null)}>
         <DialogContent className="text-white">
@@ -330,17 +420,10 @@ export default function AdminDashboard() {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-gray-400">Type</p>
-                  <p className="flex items-center">
-                    <CreditCard className="w-4 h-4 mr-2 text-green-400" />
-                    {selectedTransaction.type}
-                  </p>
-                </div>
-                <div>
                   <p className="text-sm text-gray-400">Amount</p>
                   <p className="flex items-center">
                     <DollarSign className="w-4 h-4 mr-2 text-green-400" />
-                    ${selectedTransaction.amount.toLocaleString()}
+                    ${(selectedTransaction.price/100).toLocaleString()}
                   </p>
                 </div>
                 <div>
@@ -354,42 +437,42 @@ export default function AdminDashboard() {
                   <p className="text-sm text-gray-400">Issue</p>
                   <p className="flex items-center">
                     <AlertCircle className="w-4 h-4 mr-2 text-red-400" />
-                    {selectedTransaction.issue}
+                    {selectedTransaction.status === "ADMIN_REVIEW" ? "Review Video Url" : "NONE"}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-400">Creator</p>
                   <p className="flex items-center">
                     <User className="w-4 h-4 mr-2 text-blue-400" />
-                    {selectedTransaction.creator}
+                    {selectedTransaction.request.creator.email.split("@")[0]}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-400">Sponsor</p>
                   <p className="flex items-center">
                     <Building className="w-4 h-4 mr-2 text-purple-400" />
-                    {selectedTransaction.sponsor}
+                    {selectedTransaction.request.sponsor.email}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-400">Payment Type</p>
                   <p className="flex items-center">
                     <CreditCard className="w-4 h-4 mr-2 text-green-400" />
-                    {selectedTransaction.paymentType}
+                    {selectedTransaction.request.pricingModel}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-400">Amount Held</p>
                   <p className="flex items-center">
                     <DollarSign className="w-4 h-4 mr-2 text-yellow-400" />
-                    ${selectedTransaction.amountHeld.toLocaleString()}
+                    ${(selectedTransaction.amountHeld/100).toLocaleString()}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-400">Date</p>
+                  <p className="text-sm text-gray-400">Created At</p>
                   <p className="flex items-center">
                     <Calendar className="w-4 h-4 mr-2 text-blue-400" />
-                    {selectedTransaction.date}
+                    {convertFromUtcToLocal(selectedTransaction.createdAt)}
                   </p>
                 </div>
               </div>
@@ -398,6 +481,83 @@ export default function AdminDashboard() {
                 <a href={selectedTransaction.videoUrl} target="_blank" rel="noopener noreferrer" className="text-green-400 hover:underline flex items-center">
                   <Video className="w-4 h-4 mr-2" />
                   {selectedTransaction.videoUrl}
+                </a>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!selectedTransfer} onOpenChange={() => setSelectedTransfer(null)}>
+        <DialogContent className="text-white">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold">Payout Details</DialogTitle>
+          </DialogHeader>
+          {selectedTransfer && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-gray-400">Amount</p>
+                  <p className="flex items-center">
+                    <DollarSign className="w-4 h-4 mr-2 text-green-400" />
+                    ${(selectedTransfer.price/100).toLocaleString()}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-400">Status</p>
+                  <p className="flex items-center">
+                    <Clock className="w-4 h-4 mr-2 text-yellow-400" />
+                    {selectedTransfer.status}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-400">Issue</p>
+                  <p className="flex items-center">
+                    <AlertCircle className="w-4 h-4 mr-2 text-red-400" />
+                    {selectedTransfer.status === "PENDING" ? "Needs Payout": ""}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-400">Creator</p>
+                  <p className="flex items-center">
+                    <User className="w-4 h-4 mr-2 text-blue-400" />
+                    {selectedTransfer.transaction.request.creator.email.split("@")[0]}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-400">Sponsor</p>
+                  <p className="flex items-center">
+                    <Building className="w-4 h-4 mr-2 text-purple-400" />
+                    {selectedTransfer.transaction.request.sponsor.email}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-400">Payment Type</p>
+                  <p className="flex items-center">
+                    <CreditCard className="w-4 h-4 mr-2 text-green-400" />
+                    {selectedTransfer.pricingModel}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-400">Amount Held</p>
+                  <p className="flex items-center">
+                    <DollarSign className="w-4 h-4 mr-2 text-yellow-400" />
+                    ${(selectedTransfer.amountHeld/100).toLocaleString()}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-400">Payday</p>
+                  <p className="flex items-center">
+                    <Calendar className="w-4 h-4 mr-2 text-blue-400" />
+                    {convertFromUtcToLocal(selectedTransfer.payday)}
+                  </p>
+                </div>
+              </div>
+              <div>
+                <p className="text-sm text-gray-400">Video URL</p>
+                <a href={selectedTransfer.videoUrl} target="_blank" rel="noopener noreferrer" className="text-green-400 hover:underline flex items-center">
+                  <Video className="w-4 h-4 mr-2" />
+                  {selectedTransfer.videoUrl}
                 </a>
               </div>
             </div>
@@ -416,7 +576,7 @@ function useWindowSize() {
   useEffect(() => {
     function handleResize() {
       setWindowSize({
-        width: window.innerWidth - window.innerWidth * .1 - 50,
+        width: window.innerWidth - window.innerWidth * .1 - 25,
         height: window.innerHeight,
       });
     }
