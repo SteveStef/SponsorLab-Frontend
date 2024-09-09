@@ -76,7 +76,7 @@ export default function Component() {
   const addBankAccount = async () => {
     setLoadingRedirect(true);
     const path = `${process.env.NEXT_PUBLIC_API_URL}/stripe/manage-account`;
-    const response = await request(path, "POST", {});
+    const response = await request(path, "POST", {email: state.email});
     //console.log(response);
     if(!response || !response.body || !response.body.url) {
       toast({ title: response.message || "Error creating account" });
