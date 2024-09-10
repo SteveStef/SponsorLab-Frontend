@@ -1,6 +1,7 @@
 'use client';
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
+import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button"
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
@@ -11,6 +12,7 @@ import { useSearchParams } from 'next/navigation';
 import { UserPlus, Mail, Lock, Eye, EyeOff, CheckCircle, ArrowRight, AlertCircle, LogIn } from 'lucide-react';
 import Link from 'next/link';
 import io from "socket.io-client";
+import Header from "../../components/nav";
 
 export default function EnhancedSignUpForm() {
   const { setSocket, setCompany, setOrganization, setAuth, setName, setEmail, setRole, setAccountType } = useAppContext();
@@ -132,34 +134,62 @@ export default function EnhancedSignUpForm() {
 
   const handleGoogleSignUp = () => window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/google/auth/sponsor`;
 
+  const containerVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
+  }
+
+  const formVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.3 } }
+  }
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="w-full max-w-lg space-y-8 rounded-xl shadow-2xl overflow-hidden">
-        <div className="px-8 pt-8 pb-4">
-          <div className="flex items-center justify-center space-x-2">
-            <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
+    <>
+    <Header />
+<motion.div
+      className="min-h-screen flex items-center justify-center p-4 "
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
+      <motion.div className="w-full max-w-lg space-y-8 rounded-xl shadow-2xl overflow-hidden " variants={containerVariants}>
+        <motion.div className="px-8 pt-8 pb-4" variants={itemVariants}>
+          <motion.div className="flex items-center justify-center space-x-2" variants={itemVariants}>
+            <motion.div
+              className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+            >
               <UserPlus className="text-white" size={24} />
-            </div>
+            </motion.div>
             <h2 className="text-3xl font-bold text-white">SponsorLab</h2>
-          </div>
-          <p className="mt-2 text-center text-sm text-gray-400">Connect with YouTubers</p>
-        </div>
+          </motion.div>
+          <motion.p className="mt-2 text-center text-sm text-gray-400" variants={itemVariants}>
+            Connect with YouTubers
+          </motion.p>
+        </motion.div>
         
         <div className="px-8 py-6">
           {!showVerification ? (
-            <form className="space-y-6" onSubmit={handleSignUp}>
-              <div className="space-y-4">
-                <div className="relative">
+            <motion.form className="space-y-6" onSubmit={handleSignUp} variants={formVariants} initial="hidden" animate="visible">
+              <motion.div className="space-y-4" variants={formVariants}>
+                <motion.div className="relative" variants={itemVariants}>
                   <Label htmlFor="name" className="text-white">Name</Label>
                   <Input onChange={(e) => setTName(e.target.value)} id="name" name="name" type="text" required className="pl-10 mt-1 text-white focus:border-green-500 focus:ring-green-500 transition-all duration-300" />
                   <UserPlus className="absolute left-3 top-9 text-gray-400" size={18} />
-                </div>
-                <div className="relative">
+                </motion.div>
+                <motion.div className="relative" variants={itemVariants}>
                   <Label htmlFor="email" className="text-white">Company Email</Label>
-                  <Input onChange={(e) => setCompanyEmail(e.target.value)}id="email" name="email" type="email" required className="pl-10 mt-1 text-white focus:border-green-500 focus:ring-green-500 transition-all duration-300" />
+                  <Input onChange={(e) => setCompanyEmail(e.target.value)} id="email" name="email" type="email" required className="pl-10 mt-1 text-white focus:border-green-500 focus:ring-green-500 transition-all duration-300" />
                   <Mail className="absolute left-3 top-9 text-gray-400" size={18} />
-                </div>
-                <div className="relative">
+                </motion.div>
+                <motion.div className="relative" variants={itemVariants}>
                   <Label htmlFor="password" className="text-white">Password</Label>
                   <Input 
                     id="password" 
@@ -171,15 +201,17 @@ export default function EnhancedSignUpForm() {
                     onChange={(e) => setPassword(e.target.value)}
                   />
                   <Lock className="absolute left-3 top-9 text-gray-400" size={18} />
-                  <button 
+                  <motion.button 
                     type="button" 
                     onClick={() => setShowPassword(!showPassword)} 
                     className="absolute right-3 top-9 text-gray-400 hover:text-white transition-colors duration-300"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
                   >
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
-                </div>
-                <div className="relative">
+                  </motion.button>
+                </motion.div>
+                <motion.div className="relative" variants={itemVariants}>
                   <Label htmlFor="confirmPassword" className="text-white">Confirm Password</Label>
                   <Input 
                     id="confirmPassword" 
@@ -196,15 +228,17 @@ export default function EnhancedSignUpForm() {
                       <CheckCircle className="absolute right-3 top-9 text-green-500" size={18} /> : 
                       <AlertCircle className="absolute right-3 top-9 text-red-500" size={18} />
                   )}
-                </div>
-              </div>
-              <Button disabled={loading} type="submit" className="w-full bg-green-600 hover:bg-green-700 text-white transition-colors duration-300 flex items-center justify-center">
-                Sign Up <ArrowRight className="ml-2" size={18} />
-              </Button>
-            </form>
+                </motion.div>
+              </motion.div>
+              <motion.div variants={itemVariants}>
+                <Button disabled={loading} type="submit" className="w-full bg-green-600 hover:bg-green-700 text-white transition-colors duration-300 flex items-center justify-center">
+                  Sign Up <ArrowRight className="ml-2" size={18} />
+                </Button>
+              </motion.div>
+            </motion.form>
           ) : (
-            <form className="space-y-6" onSubmit={handleVerification}>
-              <div className="relative">
+            <motion.form className="space-y-6" onSubmit={handleVerification} variants={formVariants} initial="hidden" animate="visible">
+              <motion.div className="relative" variants={itemVariants}>
                 <Label htmlFor="verificationCode" className="text-white">Verification Code</Label>
                 <Input 
                   id="verificationCode" 
@@ -216,18 +250,20 @@ export default function EnhancedSignUpForm() {
                   onChange={(e) => setVerificationCode(e.target.value)}
                 />
                 <CheckCircle className="absolute left-3 top-9 text-gray-400" size={18} />
-              </div>
-              <Button 
-                type="submit" 
-                className="w-full bg-green-600 hover:bg-green-700 text-white transition-colors duration-300 flex items-center justify-center"
-                disabled={!verificationCode || loading}
-              >
-                Verify and Sign Up <ArrowRight className="ml-2" size={18} />
-              </Button>
-            </form>
+              </motion.div>
+              <motion.div variants={itemVariants}>
+                <Button 
+                  type="submit" 
+                  className="w-full bg-green-600 hover:bg-green-700 text-white transition-colors duration-300 flex items-center justify-center"
+                  disabled={!verificationCode || loading}
+                >
+                  Verify and Sign Up <ArrowRight className="ml-2" size={18} />
+                </Button>
+              </motion.div>
+            </motion.form>
           )}
           
-          <div className="mt-6">
+          <motion.div className="mt-6" variants={itemVariants}>
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-600"></div>
@@ -237,7 +273,7 @@ export default function EnhancedSignUpForm() {
               </div>
             </div>
 
-            <div className="mt-6">
+            <motion.div className="mt-6" variants={itemVariants}>
               <Button 
                 onClick={handleGoogleSignUp}
                 className="w-full bg-white hover:bg-gray-200 text-gray-900 transition-colors duration-300 flex items-center justify-center"
@@ -262,20 +298,21 @@ export default function EnhancedSignUpForm() {
                 </svg>
                 Continue with Google
               </Button>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
 
-          <div className="mt-6 text-center">
+          <motion.div className="mt-6 text-center" variants={itemVariants}>
             <p className="text-sm text-gray-400">
               Already have an account?{' '}
               <Link href="/login" className="font-medium text-green-500 hover:text-green-400 transition-colors duration-300">
                 Login
               </Link>
             </p>
-          </div>
+          </motion.div>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
+    </>
   )
 }
 

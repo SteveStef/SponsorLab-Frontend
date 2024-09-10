@@ -6,6 +6,9 @@ import { useSearchParams } from 'next/navigation';
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
 
+import { motion } from 'framer-motion'
+import { Youtube, ArrowRight } from 'lucide-react'
+
 export default function SignupYoutuber() {
   const params = useSearchParams();
   const handleYoutuberSignup = () => window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/google/auth/creator`;
@@ -21,52 +24,93 @@ export default function SignupYoutuber() {
     if(err) toast.error(err);
   }, [err]);
 
+  const containerVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
+  }
+
+  const contentVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.3 } }
+  }
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+  }
+
   return (
     <>
     <Header />
-    <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-background px-4 py-12 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-md w-full space-y-6">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Sign up for an account</h1>
-          <p className="mt-2 text-muted-foreground">Create your account by signing in with Google, Be sure to use the same google account as your youtube channel</p>
-        </div>
-        <div className="space-y-4">
-          <Button onClick={handleYoutuberSignup} variant="outline" className="w-full">
-            <ChromeIcon className="mr-2 h-4 w-4" />
-            Sign up with Google
-          </Button>
-        </div>
-        <div className="text-center text-sm text-muted-foreground">
-          Already have an account?{" "}
-          <Link href="../login" className="font-medium hover:underline" prefetch={false}>
-            Sign in
-          </Link>
-        </div>
-      </div>
-    </div>
-    </>
-  )
-}
-
-function ChromeIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+    <motion.div
+      className="min-h-screen flex items-center justify-center p-4 "
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
     >
-      <circle cx="12" cy="12" r="10" />
-      <circle cx="12" cy="12" r="4" />
-      <line x1="21.17" x2="12" y1="8" y2="8" />
-      <line x1="3.95" x2="8.54" y1="6.06" y2="14" />
-      <line x1="10.88" x2="15.46" y1="21.94" y2="14" />
-    </svg>
+      <motion.div className="w-full max-w-lg space-y-8 rounded-xl shadow-2xl overflow-hidden p-8" variants={containerVariants}>
+        <motion.div variants={contentVariants} initial="hidden" animate="visible">
+          <motion.div className="flex items-center justify-center space-x-2 mb-6" variants={itemVariants}>
+            <motion.div
+              className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+            >
+              <Youtube className="text-white" size={24} />
+            </motion.div>
+            <h2 className="text-3xl font-bold text-white">SponsorLab</h2>
+          </motion.div>
+
+          <motion.h3 className="text-2xl font-semibold text-white text-center mb-4" variants={itemVariants}>
+            YouTuber Sign Up
+          </motion.h3>
+
+          <motion.p className="text-gray-300 text-center mb-6" variants={itemVariants}>
+To sign up as a YouTuber, use the Google account linked to your YouTube channel. This helps us verify your channel and offer the best experience on SponsorLab.
+          </motion.p>
+
+          <motion.div variants={itemVariants}>
+            <Button
+              onClick={handleYoutuberSignup}
+              className="w-full bg-red-600 hover:bg-red-700 text-white transition-colors duration-300 flex items-center justify-center py-6 text-lg"
+            >
+              <Youtube className="mr-2" size={24} />
+              Sign Up with YouTube
+            </Button>
+          </motion.div>
+
+          <motion.p className="text-gray-400 text-center mt-6" variants={itemVariants}>
+            By signing up, you agree to our{' '}
+            <Link href="/terms-of-service" className="text-green-500 hover:text-green-400 transition-colors duration-300">
+              Terms of Service
+            </Link>{' '}
+            and{' '}
+            <Link href="/privacy" className="text-green-500 hover:text-green-400 transition-colors duration-300">
+              Privacy Policy
+            </Link>
+            .
+          </motion.p>
+
+          <motion.div className="mt-8 text-center" variants={itemVariants}>
+            <p className="text-sm text-gray-400">
+              Already have an account?{' '}
+              <Link href="/login" className="font-medium text-green-500 hover:text-green-400 transition-colors duration-300">
+                Log in
+              </Link>
+            </p>
+          </motion.div>
+
+          <motion.div className="mt-4 text-center" variants={itemVariants}>
+            <p className="text-sm text-gray-400">
+              Are you a sponsor?{' '}
+              <Link href="/signup/sponsor" className="font-medium text-green-500 hover:text-green-400 transition-colors duration-300">
+                Sign up as a Sponsor
+              </Link>
+            </p>
+          </motion.div>
+        </motion.div>
+      </motion.div>
+    </motion.div>
+    </>
   )
 }

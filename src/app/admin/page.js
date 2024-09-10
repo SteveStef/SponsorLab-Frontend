@@ -9,8 +9,9 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { DollarSign, Users, Youtube, AlertCircle, CheckCircle, Clock, FileQuestion, TrendingUp, Filter, Calendar, CreditCard, Video, User, Building } from "lucide-react";
 import { convertFromUtcToLocal } from "@/utils";
+import Header from "../components/nav";
 import request from "@/request";
-
+import { toast } from "sonner";
 
 const PieChart = ({ sponsors, youtubers }) => {
   const total = sponsors + youtubers
@@ -95,9 +96,7 @@ export default function AdminDashboard() {
   const [filters, setFilters] = useState({ type: 'All', status: 'All', search: '' })
   const [transfers, setTransfers] = useState([]);
   const [transactionsHistory, setTransactionHistory] = useState([]);
-
-  console.log("transfers ", transfers);
-  console.log("transactions ", transactionsHistory);
+  const [loading, setLoading] = useState(false);
 
   const [stats, setStats] = useState({
     totalUsers: 0,
@@ -138,16 +137,56 @@ export default function AdminDashboard() {
   )*/
 
   async function fetchAdminData() {
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/admin`;
-    const response = await request(url, "GET", null);
-    setStats((prev) => ({ 
-      ...prev, totalUsers: response.body.userCount,
-      sponsors: response.body.sponsors, stripeBalance: response.body.balance,
-      youtubers: response.body.channels
-    }));
-    console.log(response);
-    setTransfers(response.body.transfers);
-    setTransactionHistory(response.body.transactions);
+    try {
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/admin`;
+      const response = await request(url, "GET", null);
+      setStats((prev) => ({ 
+        ...prev, totalUsers: response.body.userCount,
+        sponsors: response.body.sponsors, stripeBalance: response.body.balance,
+        youtubers: response.body.channels
+      }));
+      console.log(response);
+      setTransfers(response.body.transfers);
+      setTransactionHistory(response.body.transactions);
+    } catch(err) {
+      console.log(err);
+    }
+  }
+
+  async function syncYoutubeData() {
+    try {
+      setLoading(true)
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/admin/sync-channels`;
+      const response = await request(url, "POST", {});
+      console.log(response);
+      if(response && response.success) {
+        toast.success("Channels are synced");
+      } else {
+        toast.error("There was a problem syncing the youtube data");
+      }
+    } catch(err) {
+      toast.error(err);
+      console.log(err);
+    }
+    setLoading(false);
+  }
+
+  async function transferMoney() {
+    try {
+      setLoading(true);
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/admin/transfer`;
+      const response = await request(url, "POST", {});
+      console.log(response);
+      if(response && response.success) {
+        toast.success(response.message);
+      } else {
+        toast.error(response.message);
+      }
+    } catch(err) {
+      toast.error(err);
+      console.log(err);
+    }
+    setLoading(false);
   }
 
   useEffect(() => {
@@ -155,9 +194,34 @@ export default function AdminDashboard() {
   },[]);
 
   return (
+    <>
+    <Header />
+    <br></br>
+    <br></br>
+    <br></br>
     <div className="min-h-screen text-gray-100 p-8">
       <h1 className="text-4xl font-bold mb-8 text-center">SponsorLab Admin Dashboard</h1>
-      
+
+    <div className="flex"> 
+    <Button 
+    onClick={syncYoutubeData}
+    className="bg-red-600 hover:bg-red-700 text-white transition-colors duration-300 flex items-center justify-center m-2"
+    disabled={loading}
+    >
+    <Youtube className="mr-2" size={18} />
+    Sync Youtube Data
+    </Button>
+
+    <Button 
+    onClick={transferMoney}
+    className="bg-green-600 hover:bg-green-700 text-white transition-colors duration-300 flex items-center justify-center m-2"
+    disabled={loading}
+    >
+    <DollarSign size={18} />
+    Send Payouts to Youtubers
+    </Button>
+    </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <Card className="border-gray-700 hover:bg-gray-750 transition-colors">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
@@ -565,6 +629,7 @@ export default function AdminDashboard() {
         </DialogContent>
       </Dialog>
     </div>
+    </>
   )
 }
 

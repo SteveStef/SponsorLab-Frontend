@@ -7,6 +7,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import Header from "../components/nav";
 import request from "@/request";
+import { useRef } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useAppContext } from "@/context";
@@ -43,20 +44,19 @@ export default function Component() {
 
   async function login(e) {
     e.preventDefault();
-    setLoading(true);
     const url = `${process.env.NEXT_PUBLIC_API_URL}/auth/sponsor/sign-in`;
     const body = {
-      email: email,
-      password: password
+      email: email.current.value,
+      password: password.current.value
     };
 
     if(!body.email || !body.password) {
       toast.error("Please enter a valid email and password");
-      setLoading(false);
       return;
     }
 
     const response = await request(url, "POST", body);
+    console.log(response);
     if(!response || response.status === 500) toast.error("Internal server error, please try again later");
     else if(!response.success) {
       toast.error(response.message);
@@ -73,13 +73,13 @@ export default function Component() {
       connectToSocket();
       router.push("/listings");
     }
-    setLoading(false);
   }
 
   function connectToSocket() {
     const socketConn = io.connect(process.env.NEXT_PUBLIC_API_URL);
     setSocket(socketConn);
   }
+
 
   const googleLoginSponsor = () => window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/google/auth/sponsor`;
   const googleLoginYoutuber = () => window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/google/auth/creator`;
@@ -173,7 +173,7 @@ export default function Component() {
             <motion.div className="mt-6 space-y-4" variants={formVariants}>
               <motion.div variants={itemVariants}>
                 <Button 
-                  onClick={googleLoginYoutuber}
+                  onClick={googleLoginSponsor}
                   className="w-full bg-red-600 hover:bg-red-700 text-white transition-colors duration-300 flex items-center justify-center"
                 >
                   <Youtube className="mr-2" size={18} />
@@ -182,7 +182,7 @@ export default function Component() {
               </motion.div>
               <motion.div variants={itemVariants}>
                 <Button 
-                  onClick={googleLoginSponsor}
+                  onClick={googleLoginYoutuber}
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white transition-colors duration-300 flex items-center justify-center"
                 >
                   <Briefcase className="mr-2" size={18} />
