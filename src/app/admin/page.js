@@ -7,88 +7,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { DollarSign, Users, Youtube, AlertCircle, CheckCircle, Clock, FileQuestion, TrendingUp, Filter, Calendar, CreditCard, Video, User, Building } from "lucide-react";
+import { ArrowUpIcon, DollarSign, Users, Youtube, AlertCircle, Clock, TrendingUp, Filter, Calendar, CreditCard, Video, User, Building } from "lucide-react";
 import { convertFromUtcToLocal } from "@/utils";
 import Header from "../components/nav";
 import request from "@/request";
 import { toast } from "sonner";
-
-const PieChart = ({ sponsors, youtubers }) => {
-  const total = sponsors + youtubers
-  const sponsorsPercentage = (sponsors / total) * 100
-  const youtubersPercentage = (youtubers / total) * 100
-
-  return (
-    <svg width="200" height="200" viewBox="0 0 100 100">
-      <circle cx="50" cy="50" r="45" fill="#059669" />
-      <circle
-        cx="50"
-        cy="50"
-        r="45"
-        fill="transparent"
-        stroke="#22c55e"
-        strokeWidth="90"
-        strokeDasharray={`${sponsorsPercentage} ${youtubersPercentage}`}
-        transform="rotate(-90 50 50)"
-      />
-      <text x="50" y="50" textAnchor="middle" dy=".3em" fontSize="8" fill="white">
-        {`${Math.round(sponsorsPercentage)}% Sponsors`}
-      </text>
-    </svg>
-  )
-}
-
-const LineGraph = ({ data, width }) => {
-  const maxAmount = Math.max(...data.map(item => item.amount))
-  const graphWidth = width;
-  const graphHeight = 400;
-  const padding = 40;
-  const xStep = (graphWidth - 2 * padding) / (data.length - 1)
-  const yScale = (graphHeight - 2 * padding) / maxAmount
-
-  const points = data.map((item, index) => 
-    `${padding + index * xStep},${graphHeight - padding - item.amount * yScale}`
-  ).join(' ')
-
-  return (
-    <svg width={graphWidth} height={graphHeight}>
-      <polyline
-        fill="none"
-        stroke="#22c55e"
-        strokeWidth="2"
-        points={points}
-      />
-      {data.map((item, index) => (
-        <g key={index}>
-          <circle
-            cx={padding + index * xStep}
-            cy={graphHeight - padding - item.amount * yScale}
-            r="4"
-            fill="#22c55e"
-          />
-          <text
-            x={padding + index * xStep}
-            y={graphHeight - 5}
-            textAnchor="middle"
-            fill="white"
-            fontSize="12"
-          >
-            {item.month}
-          </text>
-          <text
-            x={padding + index * xStep}
-            y={graphHeight - padding - item.amount * yScale - 10}
-            textAnchor="middle"
-            fill="white"
-            fontSize="12"
-          >
-            ${item.amount}
-          </text>
-        </g>
-      ))}
-    </svg>
-  )
-}
 
 export default function AdminDashboard() {
   const [selectedTransaction, setSelectedTransaction] = useState(null)
@@ -108,20 +31,7 @@ export default function AdminDashboard() {
       pending: 0,
       adminReview: 0,
     },
-    profit: [
-      { month: 'Jan', amount: 10000 },
-      { month: 'Feb', amount: 12000 },
-      { month: 'Mar', amount: 15000 },
-      { month: 'Apr', amount: 13000 },
-      { month: 'May', amount: 16000 },
-      { month: 'Jun', amount: 20000 },
-      { month: 'Jul', amount: 22000 },
-      { month: 'Aug', amount: 25000 },
-      { month: 'Sep', amount: 23000 },
-      { month: 'Oct', amount: 26000 },
-      { month: 'Nov', amount: 28000 },
-      { month: 'Dec', amount: 30000 },
-    ],
+    profit: [],
   });
 
   const size = useWindowSize();
@@ -143,7 +53,7 @@ export default function AdminDashboard() {
       setStats((prev) => ({ 
         ...prev, totalUsers: response.body.userCount,
         sponsors: response.body.sponsors, stripeBalance: response.body.balance,
-        youtubers: response.body.channels
+        youtubers: response.body.channels, profit: response.body.profit
       }));
       console.log(response);
       setTransfers(response.body.transfers);
@@ -202,6 +112,65 @@ export default function AdminDashboard() {
     <div className="min-h-screen text-gray-100 p-8">
       <h1 className="text-4xl font-bold mb-8 text-center">SponsorLab Admin Dashboard</h1>
 
+
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <Card className="hover:bg-gray-750 transition-colors">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+            <Users className="w-4 h-4 text-green-400" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.totalUsers.toLocaleString()}</div>
+          </CardContent>
+        </Card>
+        <Card className="hover:bg-gray-750 transition-colors">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-sm font-medium">Sponsors</CardTitle>
+            <Building className="w-4 h-4 text-green-400" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.sponsors.toLocaleString()}</div>
+          </CardContent>
+        </Card>
+        <Card className="hover:bg-gray-750 transition-colors">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-sm font-medium">YouTubers</CardTitle>
+            <Youtube className="w-4 h-4 text-green-400" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.youtubers.toLocaleString()}</div>
+          </CardContent>
+        </Card>
+        <Card className="hover:bg-gray-750 transition-colors">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-sm font-medium">Stripe Balance</CardTitle>
+            <DollarSign className="w-4 h-4 text-green-400" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">${stats.stripeBalance.toLocaleString()}</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+<Card className="">
+          <CardHeader>
+            <CardTitle>Profit Tracking</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold mb-2">$45,678.90</div>
+            <p className="text-green-400 flex items-center">
+              <ArrowUpIcon className="h-4 w-4 mr-1" />
+              12% from last month
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Actions</CardTitle>
+          </CardHeader>
+          <CardContent className="flex space-x-4">
     <div className="flex"> 
     <Button 
     onClick={syncYoutubeData}
@@ -221,83 +190,15 @@ export default function AdminDashboard() {
     Send Payouts to Youtubers
     </Button>
     </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <Card className="border-gray-700 hover:bg-gray-750 transition-colors">
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-            <Users className="w-4 h-4 text-green-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalUsers.toLocaleString()}</div>
-          </CardContent>
-        </Card>
-        <Card className="border-gray-700 hover:bg-gray-750 transition-colors">
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium">Sponsors</CardTitle>
-            <Building className="w-4 h-4 text-green-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.sponsors.toLocaleString()}</div>
-          </CardContent>
-        </Card>
-        <Card className="border-gray-700 hover:bg-gray-750 transition-colors">
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium">YouTubers</CardTitle>
-            <Youtube className="w-4 h-4 text-green-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.youtubers.toLocaleString()}</div>
-          </CardContent>
-        </Card>
-        <Card className="border-gray-700 hover:bg-gray-750 transition-colors">
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium">Stripe Balance</CardTitle>
-            <DollarSign className="w-4 h-4 text-green-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">${stats.stripeBalance.toLocaleString()}</div>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <Card className="border-gray-700 hover:bg-gray-750 transition-colors">
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold">Current Transaction</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex justify-between items-center mb-4">
-              <div className="flex items-center">
-                <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
-                <span>Completed: {stats.transactions.completed}</span>
-              </div>
-              <div className="flex items-center">
-                <Clock className="w-4 h-4 text-yellow-400 mr-2" />
-                <span>Pending: {stats.transactions.pending}</span>
-              </div>
-              <div className="flex items-center">
-                <FileQuestion className="w-4 h-4 text-red-400 mr-2" />
-                <span>Admin Review: {stats.transactions.adminReview}</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-gray-700 hover:bg-gray-750 transition-colors">
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold">Sponsors vs YouTubers</CardTitle>
-          </CardHeader>
-          <CardContent className="flex justify-center">
-            <PieChart sponsors={stats.sponsors} youtubers={stats.youtubers} />
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card className="border-gray-700 hover:bg-gray-750 transition-colors mb-8">
+      <Card className="hover:bg-gray-750 transition-colors mb-8">
         <CardHeader>
           <CardTitle className="text-xl font-semibold flex items-center">
             <TrendingUp className="w-6 h-6 mr-2 text-green-400" />
-            Profit Over Time
+              User Growth
           </CardTitle>
         </CardHeader>
         <CardContent className="overflow-x-auto">
@@ -305,7 +206,7 @@ export default function AdminDashboard() {
         </CardContent>
       </Card>
       
-      <Card className="border-gray-700 hover:bg-gray-750 transition-colors">
+      <Card className="hover:bg-gray-750 transition-colors">
         <CardHeader>
           <CardTitle className="text-xl font-semibold flex items-center">
             <AlertCircle className="w-6 h-6 mr-2 text-yellow-500" />
@@ -351,7 +252,7 @@ export default function AdminDashboard() {
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="border-gray-700">
+                <TableRow className="">
                   <TableHead className="text-gray-300">Type</TableHead>
                   <TableHead className="text-gray-300">Amount</TableHead>
                   <TableHead className="text-gray-300">Status</TableHead>
@@ -365,7 +266,7 @@ export default function AdminDashboard() {
                 {transfers.map((t,idx) => (
                   <TableRow 
                     key={idx} 
-                    className="border-gray-700 cursor-pointer hover:bg-gray-700"
+                    className="cursor-pointer hover:bg-gray-700"
                     onClick={() => setSelectedTransfer(t)}
                   >
                     <TableCell>{t.pricingModel}</TableCell>
@@ -392,7 +293,7 @@ export default function AdminDashboard() {
 
 
 
-      <Card className="border-gray-700 hover:bg-gray-750 transition-colors mt-8">
+      <Card className="hover:bg-gray-750 transition-colors mt-8">
         <CardHeader>
           <CardTitle className="text-xl font-semibold flex items-center">
             <AlertCircle className="w-6 h-6 mr-2 text-yellow-500" />
@@ -438,7 +339,7 @@ export default function AdminDashboard() {
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="border-gray-700">
+                <TableRow className="">
                   <TableHead className="text-gray-300">Type</TableHead>
                   <TableHead className="text-gray-300">Amount</TableHead>
                   <TableHead className="text-gray-300">Status</TableHead>
@@ -452,7 +353,7 @@ export default function AdminDashboard() {
                 {transactionsHistory.map((transaction,idx) => (
                   <TableRow 
                     key={idx} 
-                    className="border-gray-700 cursor-pointer hover:bg-gray-700"
+                    className="cursor-pointer hover:bg-gray-700"
                     onClick={() => setSelectedTransaction(transaction)}
                   >
                     <TableCell>{transaction.request.pricingModel}</TableCell>
@@ -472,8 +373,6 @@ export default function AdminDashboard() {
           </div>
         </CardContent>
       </Card>
-
-
 
       <Dialog open={!!selectedTransaction} onOpenChange={() => setSelectedTransaction(null)}>
         <DialogContent className="text-white">
@@ -652,3 +551,79 @@ function useWindowSize() {
   return windowSize;
 }
 
+const PieChart = ({ sponsors, youtubers }) => {
+  const total = sponsors + youtubers
+  const sponsorsPercentage = (sponsors / total) * 100
+  const youtubersPercentage = (youtubers / total) * 100
+
+  return (
+    <svg width="200" height="200" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="45" fill="#059669" />
+      <circle
+        cx="50"
+        cy="50"
+        r="45"
+        fill="transparent"
+        stroke="#22c55e"
+        strokeWidth="90"
+        strokeDasharray={`${sponsorsPercentage} ${youtubersPercentage}`}
+        transform="rotate(-90 50 50)"
+      />
+      <text x="50" y="50" textAnchor="middle" dy=".3em" fontSize="8" fill="white">
+        {`${Math.round(sponsorsPercentage)}% Sponsors`}
+      </text>
+    </svg>
+  )
+}
+
+const LineGraph = ({ data, width }) => {
+  const maxAmount = Math.max(...data.map(item => item.amount))
+  const graphWidth = width;
+  const graphHeight = 400;
+  const padding = 40;
+  const xStep = (graphWidth - 2 * padding) / (data.length - 1)
+  const yScale = (graphHeight - 2 * padding) / maxAmount
+
+  const points = data.map((item, index) => 
+    `${padding + index * xStep},${graphHeight - padding - item.amount * yScale}`
+  ).join(' ')
+
+  return (
+    <svg width={graphWidth} height={graphHeight}>
+      <polyline
+        fill="none"
+        stroke="#22c55e"
+        strokeWidth="2"
+        points={points}
+      />
+      {data.map((item, index) => (
+        <g key={index}>
+          <circle
+            cx={padding + index * xStep}
+            cy={graphHeight - padding - item.amount * yScale}
+            r="4"
+            fill="#22c55e"
+          />
+          <text
+            x={padding + index * xStep}
+            y={graphHeight - 5}
+            textAnchor="middle"
+            fill="white"
+            fontSize="12"
+          >
+            {item.month}
+          </text>
+          <text
+            x={padding + index * xStep}
+            y={graphHeight - padding - item.amount * yScale - 10}
+            textAnchor="middle"
+            fill="white"
+            fontSize="12"
+          >
+            {item.amount.toLocaleString()}
+          </text>
+        </g>
+      ))}
+    </svg>
+  )
+}
