@@ -14,11 +14,12 @@ import request from "@/request";
 import { toast } from "sonner";
 
 export default function AdminDashboard() {
-  const [selectedTransaction, setSelectedTransaction] = useState(null)
-  const [selectedTransfer, setSelectedTransfer] = useState(null)
-  const [filters, setFilters] = useState({ type: 'All', status: 'All', search: '' })
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
+  const [selectedTransfer, setSelectedTransfer] = useState(null);
+  const [filters, setFilters] = useState({ type: 'All', status: 'All', search: '' });
   const [transfers, setTransfers] = useState([]);
   const [transactionsHistory, setTransactionHistory] = useState([]);
+  const [profitsMade, setProfitsMade] = useState(0);
   const [loading, setLoading] = useState(false);
 
   const [stats, setStats] = useState({
@@ -31,7 +32,8 @@ export default function AdminDashboard() {
       pending: 0,
       adminReview: 0,
     },
-    profit: [],
+    profits: [],
+    userGrowth: [],
   });
 
   const size = useWindowSize();
@@ -53,9 +55,14 @@ export default function AdminDashboard() {
       setStats((prev) => ({ 
         ...prev, totalUsers: response.body.userCount,
         sponsors: response.body.sponsors, stripeBalance: response.body.balance,
-        youtubers: response.body.channels, profit: response.body.profit
+        userGrowth: response.body.userGrowth, youtubers: response.body.channels,
+        profits: response.body.profits
       }));
-      console.log(response);
+
+      let sum = 0;
+      for(let i = 0; i < response.body.profits.length; i++) sum += response.body.profits[i].amount;
+      setProfitsMade(sum);
+
       setTransfers(response.body.transfers);
       setTransactionHistory(response.body.transactions);
     } catch(err) {
@@ -159,10 +166,10 @@ export default function AdminDashboard() {
             <CardTitle>Profit Tracking</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold mb-2">$45,678.90</div>
+            <div className="text-2xl font-bold mb-2">${profitsMade.toLocaleString()}</div>
             <p className="text-green-400 flex items-center">
               <ArrowUpIcon className="h-4 w-4 mr-1" />
-              12% from last month
+              0% from last month
             </p>
           </CardContent>
         </Card>
@@ -202,7 +209,7 @@ export default function AdminDashboard() {
           </CardTitle>
         </CardHeader>
         <CardContent className="overflow-x-auto">
-        { size.width && <LineGraph data={stats.profit} width={size.width} />}
+        { size.width && <LineGraph data={stats.userGrowth} width={size.width} />}
         </CardContent>
       </Card>
       

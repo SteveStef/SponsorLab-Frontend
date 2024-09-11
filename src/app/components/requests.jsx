@@ -164,7 +164,8 @@ export default function Component() {
       toast.success("Send the video url to the sponsor!");
       getRequests();
     } else {
-      toast.error("Something went wrong, try again later");
+      //toast.error("Something went wrong, try again later");
+      toast.error(response.message);
     }
     setLoad(false);
   }
