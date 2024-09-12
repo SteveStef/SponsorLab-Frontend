@@ -10,16 +10,19 @@ import Image from "next/image";
 import SponsorForm from "../components/sponsorForm";
 import { PlayIcon, ThumbsUpIcon, UserIcon, VideoIcon } from "lucide-react"
 import { convertFromUtcToLocal } from "@/utils";
+import { useAppContext } from "@/context";
 
 export default function Component({ params }) {
 
   const [listing, setListing] = useState(null);
   const [showSponsorForm, setShowSponsorForm] = useState(false);
   const [viewRanges, setViewRanges] = useState([]);
+  const { role } = useAppContext();
 
   async function fetchListing() {
     const url = `${process.env.NEXT_PUBLIC_API_URL}/posts/${params.id}`;
     const response = await request(url, "GET", null);
+    console.log(response);
     if(response && response.success) {
       setListing(response.body);
       let tmp = [];
@@ -37,7 +40,6 @@ export default function Component({ params }) {
       setViewRanges(tmp);
     }
   }
-//  console.log(listing);
 
   useEffect(() => {
     if(params.id) fetchListing();
@@ -101,7 +103,7 @@ export default function Component({ params }) {
           }
 
         </div>
-        <Button onClick={() => setShowSponsorForm(true)} className="mt-4">Sponsor this listing</Button>
+        <Button disabled={!listing || (role !== "SPONSOR" || listing.purchased || !listing.published)} onClick={() => setShowSponsorForm(true)} className="mt-4">Sponsor this listing</Button>
       </div>
       <div className="grid gap-4">
         {/* New section: View Range Probabilities */}

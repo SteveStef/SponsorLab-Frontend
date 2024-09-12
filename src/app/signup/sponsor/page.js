@@ -3,13 +3,13 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button"
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import request from "@/request";
 import { useRouter } from 'next/navigation';
 import { useAppContext } from "@/context";
 import { useSearchParams } from 'next/navigation';
-import { UserPlus, Mail, Lock, Eye, EyeOff, CheckCircle, ArrowRight, AlertCircle, LogIn } from 'lucide-react';
+import { UserPlus, Mail, Lock, Eye, EyeOff, CheckCircle, ArrowRight, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import io from "socket.io-client";
 import Header from "../../components/nav";
@@ -239,7 +239,7 @@ export default function EnhancedSignUpForm() {
           ) : (
             <motion.form className="space-y-6" onSubmit={handleVerification} variants={formVariants} initial="hidden" animate="visible">
               <motion.div className="relative" variants={itemVariants}>
-                <Label htmlFor="verificationCode" className="text-white">Verification Code</Label>
+                <Label htmlFor="verificationCode" className="text-white">Verification code sent to {email}</Label>
                 <Input 
                   id="verificationCode" 
                   name="verificationCode" 

@@ -9,14 +9,89 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import Image from "next/image";
 import Beaker from "../../../public/Beaker.png";
 
+import { useState, useEffect } from 'react'
+import { MessageSquare, UserPlus, AlertCircle, Search } from 'lucide-react'
+import { Input } from "@/components/ui/input"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import request from "@/request";
+
 export default function Navbar() {
   const { organization, auth, role, name, profilePic } = useAppContext();
+  const [isOpen, setIsOpen] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [filteredNotifications, setFilteredNotifications] = useState([]);
+  const [hasNew, setHasNew] = useState(false);
+
+  const [notifications, setNotifications] = useState([]);
+  const [allNotifications, setAllNotifications] = useState([]);
+
+  async function fetchNotifications() {
+    try {
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/notifications`;
+      const response = await request(url, "GET", null);
+      console.log(response);
+      if(response && response.success) {
+        setNotifications(response.body);
+        setHasNew(response.hasNew);
+      }
+    } catch(err) {
+      console.log(err);
+    }
+  }
+
+  async function fetchAllNotifications() {
+    try {
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/notifications/all`;
+      const response = await request(url, "GET", null);
+      if(response && response.success) {
+        setAllNotifications(response.body);
+      }
+    } catch(err) {
+      console.log(err);
+    }
+  }
+
+  async function viewNotifications() {
+    try {
+      setHasNew(false);
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/notifications/view`;
+      await request(url, "put", {});
+    } catch(err) {
+      console.log(err);
+    }
+  }
+
+  useEffect(() => {
+    fetchNotifications();
+  }, [])
+
+  useEffect(() => {
+    if(isOpen) viewNotifications();
+  },[isOpen]);
+
+  useEffect(() => {
+    const lowercasedFilter = searchTerm.toLowerCase()
+    const filtered = allNotifications.filter(item => {
+      return Object.values(item).some(value =>
+        typeof value === "string" && value.toLowerCase().includes(lowercasedFilter)
+      )
+    })
+    setFilteredNotifications(filtered)
+  }, [searchTerm, isModalOpen])
 
   const links = [
     { url: "../../listings", name: "Listings", auth: true, role: "ANY" },
     //{ url: "../pricing", name: "Pricing", auth: true, role: "CREATOR" },
     { url: "../organizations", name: "Organizations", auth: true, role: "ANY" },
     { url: "../profiles", name: "Youtubers", auth: true, role: "ANY" },
+    { url: "../requests", name: "Sponsorships", auth: true, role: "ANY" },
     //{ url: "../create", name: "Create", auth: true, role: "CREATOR" },
     { url: "../../signup", name: "Login/Signup", auth: false, role: "ANY" },
   ];
@@ -69,31 +144,54 @@ export default function Navbar() {
           {
             auth &&
               <>
-
         <div className="relative">
-          <Link href="../../requests" prefetch={false}>
+          <Link href="../../chat" prefetch={false}>
           <Button variant="ghost" size="icon" className="rounded-full">
             <InboxIcon className="h-5 w-5" />
             <span className="sr-only">Requests</span>
           </Button>
           </Link>
-          <div className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">
+          <div 
+            className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">
             1
           </div>
         </div>
 
-        <div className="relative">
-                  <Link href="../../chat" prefetch={false}>
-          <Button variant="ghost" size="icon" className="rounded-full">
+              <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="relative">
             <BellIcon className="h-5 w-5" />
-            <span className="sr-only">Notifications</span>
-          </Button>
-          </Link>
-          <div className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">
-            1
-          </div>
-        </div>
-
+              {hasNew && (
+                <span className="absolute top-0 right-0 h-3 w-3 bg-red-500 rounded-full" />
+              )}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-80 border-gray-700 p-4" align="end">
+            <h2 className="text-lg font-semibold mb-2">Notifications</h2>
+            <ScrollArea className="h-[300px] overflow-y-auto">
+              {notifications.map((notification) => (
+                <DropdownMenuItem key={notification.id} className="p-0 focus:bg-transparent">
+                  <NotificationItem notification={notification} />
+                </DropdownMenuItem>
+              ))}
+            </ScrollArea>
+            {notifications.length === 0 ? (
+              <p className="text-gray-500 text-center py-4">No new notifications</p>
+            ) : (
+              <Button 
+                variant="outline" 
+                className="w-full mt-2 text-green-400 hover:text-green-300 border-green-400 hover:bg-green-400/10"
+                onClick={async() => {
+                  await fetchAllNotifications();
+                  setIsModalOpen(true);
+                  setIsOpen(false);
+                }}
+              >
+                View All
+              </Button>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -126,6 +224,7 @@ export default function Navbar() {
             </DropdownMenuContent>
           </DropdownMenu>
 
+
               </>
           }
 
@@ -154,6 +253,33 @@ export default function Navbar() {
           </SheetContent>
         </Sheet>
       </div>
+
+<Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="text-white border-gray-700 sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>All Notifications</DialogTitle>
+          </DialogHeader>
+          <div className="relative mb-4">
+            <Input
+              type="text"
+              placeholder="Search notifications..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="border-gray-600 text-white placeholder-gray-400 pr-10"
+            />
+            <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+          </div>
+          <ScrollArea className="mt-4 max-h-[60vh] overflow-y-auto pr-4">
+            {filteredNotifications.length > 0 ? (
+              filteredNotifications.map((notification, idx) => (
+                <NotificationItem key={idx} notification={notification} />
+              ))
+            ) : (
+              <p className="text-gray-400 text-center py-4">No notifications found</p>
+            )}
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
       <div className="w-full bg-green-500 h-0.5"></div>
     </header>
   )
@@ -239,3 +365,26 @@ function InboxIcon(props) {
     </svg>
   )
 }
+
+const getIcon = (type) => {
+  switch (type) {
+    case 'CHAT': return <MessageSquare className="h-5 w-5 text-blue-400" />
+    case 'REQUEST': return <UserPlus className="h-5 w-5 text-green-400" />
+    case 'SYSTEM': return <AlertCircle className="h-5 w-5 text-yellow-400" />
+  }
+}
+
+const NotificationItem = ({ notification }) => (
+  <div className="flex items-start space-x-4 p-3 hover:bg-gray-700 rounded-lg mb-2">
+    <div className="flex-shrink-0 mt-1">
+      {getIcon(notification.type)}
+    </div>
+    <div className="flex-1 min-w-0">
+      <p className="text-sm font-medium text-gray-200">{notification.title}</p>
+      <p className="text-sm text-gray-400">{notification.message}</p>
+      <p className="text-xs text-gray-500 mt-1">{notification.time}</p>
+    </div>
+  </div>
+)
+
+
