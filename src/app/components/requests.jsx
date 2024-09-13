@@ -392,7 +392,7 @@ const tabContent = {
           <Calendar className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
           Upload Deadline: {request.transaction && convertFromUtcToLocal(request.transaction.deadline)}
         </p>
-        <div className="flex text-green-400">
+        <div className="flex text-yellow-400">
         <InfoIcon className="w-5 h-5 mr-1"/>
         <p className="text-sm ">{(request.transaction && request.transaction.videoUrl) ? "The video url was send and is being reviewed by the sponsor":"Send Video Url"}</p>
       </div>

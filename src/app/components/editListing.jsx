@@ -107,7 +107,8 @@ export default function Component({listing, setSelectedListing, viewDeviations})
     if(response && response.success) {
       window.location.href = "";
     } else {
-      toast.error("Something went wrong");
+      if(response.status===401) toast.error(response.message);
+      else toast.error("Something went wrong, try again later");
     }
     setLoad(false);
   }

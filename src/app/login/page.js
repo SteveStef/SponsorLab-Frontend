@@ -65,7 +65,7 @@ export default function Component() {
       setAuth(true);
       setRole("SPONSOR");
       setName(response.body.name);
-      setEmail(email.current.value);
+      setEmail(email);
       setProfilePic(response.body.profileImage);
       setAccountType(response.body.accountType);
       setOrganization(response.body.company.id);

@@ -129,7 +129,7 @@ export default function Component({ params }) {
             <CardTitle>About the Author</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-4">
-          <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
+          <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-3">
             <div className="flex items-center space-x-2">
               <UserIcon className="h-5 w-5 text-gray-400" />
               <div>
@@ -151,13 +151,6 @@ export default function Component({ params }) {
               <div>
                 <p className="text-sm font-semibold text-gray-300">Total Videos</p>
                 <p className="text-lg font-bold text-gray-100">{listing && (listing.user.channel.videoCount || 0).toLocaleString()}</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-2">
-              <ThumbsUpIcon className="h-5 w-5 text-gray-400" />
-              <div>
-                <p className="text-sm font-semibold text-gray-300">Engagement Rate</p>
-                <p className="text-lg font-bold text-gray-100">8.5%</p>
               </div>
             </div>
           </div>

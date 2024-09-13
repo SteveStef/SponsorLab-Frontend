@@ -200,27 +200,6 @@ export default function Component() {
                 </Link>
               ))}
             </div>
-    <div className="mt-8 flex items-center ml-80">
-              <Button
-                onClick={() => setPage(page - 1)}
-                disabled={page + 1 === 1}
-                className="bg-green-500 hover:bg-green-600 disabled:opacity-50 ml-50 mr-5"
-              >
-                <ChevronLeftIcon className="h-4 w-4 mr-2 ml-auto" />
-                Previous
-              </Button>
-              <span className="text-gray-300">
-                Page {page + 1} of {totalPages}
-              </span>
-              <Button
-                onClick={() => setPage(page + 1)}
-                disabled={page + 1=== totalPages}
-                className="bg-green-500 hover:bg-green-600 disabled:opacity-50 mr-50 ml-5"
-              >
-                Next
-                <ChevronRightIcon className="h-4 w-4 ml-2" />
-              </Button>
-            </div>
           </main>
         </div>
       </div>

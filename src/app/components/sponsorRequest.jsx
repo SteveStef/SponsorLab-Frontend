@@ -423,8 +423,8 @@ const tabContent = {
         </p>
       <div className="flex">
         <InfoIcon 
-      className="w-4 h-4 mr-2 flex-shrink-0 text-green-500" />
-        <p className="text-sm text-green-300">{request.transaction && request.transaction.videoUrl ? "Please review this url and approve or refute it" : "Waiting for the youtuber to post the video url by the deadline"}</p>
+      className="w-4 h-4 mr-2 flex-shrink-0 text-yellow-500" />
+        <p className="text-sm text-yellow-400">{request.transaction && request.transaction.videoUrl ? "Please review this url and approve or refute it" : "Waiting for the youtuber to post the video url by the deadline"}</p>
       </div>
 
       {

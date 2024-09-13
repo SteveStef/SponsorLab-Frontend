@@ -14,10 +14,9 @@ const request = async (url, req_method, body) => {
       const data = await response.json();
 
       if(response.status === 401 && data.error && data.error === "Not authorized") {
-        const parts = window.location.href.split("/");
-        const path = "/" + parts[parts.length - 1];
-        const validPaths = ["/login", "/", "/signup", "/terms-of-service", "/signup/youtuber", "signup/sponsor"];
-        if(!validPaths.includes(path) && parts[parts.length-2] !== "authenticate") {
+        const path = window.location.pathname;
+        const validPaths = ["/login", "/", "/signup", "/terms-of-service", "/signup/youtuber", "/signup/sponsor"];
+        if(!validPaths.includes(path) && !path.includes("authenticate")) {
           window.location.href = "../../../signup";
         }
       }
@@ -36,10 +35,11 @@ const request = async (url, req_method, body) => {
       const data = await response.json();
 
       if(response.status === 401 && data.error && data.error === "Not authorized") {
-        const parts = window.location.href.split("/");
-        const path = "/" + parts[parts.length - 1];
-        const validPaths = ["/login", "/", "/signup", "/terms-of-service", "/signup/youtuber", "signup/sponsor"];
-        if(!validPaths.includes(path) && parts[parts.length-2] !== "authenticate") window.location.href = "../../../signup";
+        const path = window.location.pathname;
+        const validPaths = ["/login", "/", "/signup", "/terms-of-service", "/signup/youtuber", "/signup/sponsor"];
+        if(!validPaths.includes(path) && !path.includes("authenticate")) {
+          window.location.href = "../../../signup";
+        }
       }
 
       return data;

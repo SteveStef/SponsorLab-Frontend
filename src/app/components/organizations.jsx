@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {  Select} from "@/components/ui/select";
 import { UsersIcon, FilterIcon,InfoIcon, ChevronRightIcon, AlertTriangleIcon, CheckCircleIcon} from "lucide-react"
+import {useRouter} from "next/navigation";
 
 import {
   DropdownMenu,
@@ -17,13 +18,12 @@ import {
 
 import request from "@/request.js";
 
-import Link from "next/link"
-
 export default function Component() {
   const [searchTerm, setSearchTerm] = useState("")
   const [memberFilter, setMemberFilter] = useState("all")
   const [currentPage, setCurrentPage] = useState(1)
   const [organizations, setOrganizations] = useState([]);
+  const router = useRouter();
 
   async function fetchOrganizations() {
     const url = `${process.env.NEXT_PUBLIC_API_URL}/users/organizations`;
@@ -129,10 +129,8 @@ export default function Component() {
                       </div>
                     </CardContent>
                     <CardFooter>
-                      <Button className="w-full bg-green-600 hover:bg-green-700 text-white">
-                        <Link href={`./organizations/${org.id}`}>
-                          View Details
-                        </Link>
+                      <Button onClick={() => router.push(`./organizations/${org.id}`)}className="w-full bg-green-600 hover:bg-green-700 text-white">
+                  View Details
                       </Button>
                     </CardFooter>
                   </Card>
