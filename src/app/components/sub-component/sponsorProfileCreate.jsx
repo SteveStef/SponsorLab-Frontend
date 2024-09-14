@@ -19,7 +19,6 @@ export default function Component(props) {
     website: '',
     description: '',
     productCategories: [],
-    //products: [],
     contentTypes: [],
     audienceAge: '',
     budgetRange: '',
@@ -86,7 +85,28 @@ export default function Component(props) {
     }
   ]
 
-  const allCategories = ['Technology', 'Fashion', 'Beauty', 'Food', 'Gaming', 'Fitness', 'Education', 'Travel']
+const allCategories  = [
+  "Electronics",
+  "Home & Kitchen",
+  "Fashion & Apparel",
+  "Beauty & Personal Care",
+  "Health & Wellness",
+  "Toys & Games",
+  "Sports & Outdoors",
+  "Automotive",
+  "Office Supplies",
+  "Baby Products",
+  "Pet Supplies",
+  "Grocery & Gourmet Food",
+  "Tools & Home Improvement",
+  "Books & Media",
+  "Garden & Outdoors",
+  "Jewelry & Accessories",
+  "Crafts & DIY",
+  "Travel & Luggage",
+  "Music Instruments & Gear",
+  "Home Decor"
+];
 
   const filteredCategories = allCategories.filter(category => 
     category.toLowerCase().includes(searchTerm.toLowerCase()) &&
@@ -293,7 +313,7 @@ export default function Component(props) {
                     Budget Range (per sponsorship)
                   </Label>
                   <div className="space-y-2">
-                    {['0-500', '501-1000', '1001-5000', '5000+'].map((range) => (
+                    {['0-1000', '1000-5000', '5000-10000', '10000+'].map((range) => (
                       <label key={range} className="flex items-center space-x-2 cursor-pointer">
                         <input
                           type="radio"

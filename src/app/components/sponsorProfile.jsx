@@ -52,6 +52,7 @@ export default function Component({params}) {
     return <NotFound />
   }
 
+
   return (
     <div className="text-gray-100">
       {/* Profile Header */}
@@ -147,7 +148,7 @@ export default function Component({params}) {
               <CardContent className="space-y-4">
                 <div className="flex items-center space-x-3">
                   <Globe className="text-green-400" />
-                  <a href={`https://${profile.website}`} className="text-green-400 hover:underline">
+                  <a href={`https://${profile.website && profile.website.replace("https://","")}`} className="text-green-400 hover:underline">
                     {profile.website}
                   </a>
                 </div>

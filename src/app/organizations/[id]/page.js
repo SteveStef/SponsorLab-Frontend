@@ -1,7 +1,5 @@
 
 "use client";
-import Organizations from "../../components/organization";
-import EditProfileOrg from "../../components/editSponsorProfile";
 import Header from "../../components/nav"
 import SponsorProfile from "@/app/components/sponsorProfile";
 

@@ -10,7 +10,6 @@ import Image from "next/image";
 import request from "@/request";
 import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, PaginationLink, PaginationNext } from "@/components/ui/pagination";
 import ProfileLoad from "./sub-component/profileLoad";
-import FeaturedListings from "./sub-component/featuredListings";
 
 export default function Component() {
  const [search, setSearch] = useState("")

@@ -111,10 +111,13 @@ export default function Navbar() {
   return (
     <header className="fixed top-0 z-50 w-full bg-background border-b">
       <div className="container flex h-16 items-center justify-between px-4 md:px-6">
-        <Link href="../../../" className="flex items-center gap-2" prefetch={false}>
-          <Image src={Beaker} alt="LOGO" style={{ width: '32px' }} />
-          <span className="font-semibold" style={{fontSize: "25px"}}>Sponsor <span className="text-green-500">Lab</span></span>
-        </Link>
+<Link href="../../../" className="flex items-center gap-2" prefetch={false}>
+  <Image src={Beaker} alt="LOGO" style={{ width: '32px' }} />
+  <span className="font-semibold" style={{fontSize: "25px"}}>
+    Sponsor<span className="text-green-500">Lab</span>
+    <span className="ml-2 text-xs bg-green-400 text-black font-bold px-2 py-1 rounded relative" style={{ top: '-3px' }}>Beta</span>
+  </span>
+</Link>
         <nav className="hidden items-center gap-6 md:flex">
           {
             links.map((link, idx) => {
@@ -146,10 +149,15 @@ export default function Navbar() {
             <span className="sr-only">Requests</span>
           </Button>
           </Link>
-          <div 
-            className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">
-            1
-          </div>
+              {
+                notifications.filter(n => n.type === "CHAT" && !n.seen).length > 0 && 
+                <div 
+                className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">
+                {
+                  notifications.filter(n => n.type === "CHAT" && !n.seen).length
+                }
+                </div>
+              }
         </div>
 
               <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
