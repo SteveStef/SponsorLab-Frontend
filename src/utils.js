@@ -1,9 +1,10 @@
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
-
+import relativeTime from 'dayjs/plugin/relativeTime';
 dayjs.extend(utc);
 dayjs.extend(timezone);
+dayjs.extend(relativeTime);
 
 export function addLocalTimezone(selectedDate) {
   return dayjs(selectedDate).tz(Intl.DateTimeFormat().resolvedOptions().timeZone).format('YYYY-MM-DD HH:mm:ss Z');
@@ -12,6 +13,11 @@ export function addLocalTimezone(selectedDate) {
 export function convertFromUtcToLocal(utcDate) {
   const back = dayjs(utcDate).tz(Intl.DateTimeFormat().resolvedOptions().timeZone);
   return back.format('MMMM D, YYYY');
+}
+
+export function chatTime(utcDate) {
+  const localTime = dayjs(utcDate).tz(Intl.DateTimeFormat().resolvedOptions().timeZone);
+  return localTime.fromNow();
 }
 
 export function getTodaysDate() {

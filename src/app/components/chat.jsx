@@ -10,7 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { useAppContext } from "@/context";
 import request from "@/request";
 import { toast } from "sonner";
-import { convertFromUtcToLocal } from "@/utils";
+import { convertFromUtcToLocal, chatTime } from "@/utils";
 
 
 export default function Component() {
@@ -185,7 +185,7 @@ export default function Component() {
                   >
                     {message.content}
                   </div>
-                  <span className="text-xs text-gray-500 mt-1">10am</span>
+                  <span className="text-xs text-gray-500 mt-1">{chatTime(message.createdAt)}</span>
                 </div>
               </div>
             </div>

@@ -9,16 +9,12 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import Image from "next/image";
 import Beaker from "../../../public/Beaker.png";
 
-import { useState, useEffect } from 'react'
-import { MessageSquare, UserPlus, AlertCircle, Search } from 'lucide-react'
-import { Input } from "@/components/ui/input"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import { useState, useEffect } from 'react';
+import { MessageSquare, UserPlus, AlertCircle, Search } from 'lucide-react';
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { convertFromUtcToLocal } from "@/utils.js";
 import request from "@/request";
 
 export default function Navbar() {
@@ -36,7 +32,6 @@ export default function Navbar() {
     try {
       const url = `${process.env.NEXT_PUBLIC_API_URL}/notifications`;
       const response = await request(url, "GET", null);
-      console.log(response);
       if(response && response.success) {
         setNotifications(response.body);
         setHasNew(response.hasNew);
@@ -223,8 +218,6 @@ export default function Navbar() {
 
             </DropdownMenuContent>
           </DropdownMenu>
-
-
               </>
           }
 
@@ -254,7 +247,7 @@ export default function Navbar() {
         </Sheet>
       </div>
 
-<Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+    <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="text-white border-gray-700 sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>All Notifications</DialogTitle>
@@ -382,7 +375,7 @@ const NotificationItem = ({ notification }) => (
     <div className="flex-1 min-w-0">
       <p className="text-sm font-medium text-gray-200">{notification.title}</p>
       <p className="text-sm text-gray-400">{notification.message}</p>
-      <p className="text-xs text-gray-500 mt-1">{notification.time}</p>
+      <p className="text-xs text-gray-500 mt-1">{convertFromUtcToLocal(notification.createdAt)}</p>
     </div>
   </div>
 )
