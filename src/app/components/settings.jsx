@@ -99,26 +99,12 @@ export default function Component() {
     setDescription(state.description);
   },[state]);
 
-  async function fetchCustomer() {
-    try {
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/stripe/customer`;
-      const response = await request(url, "GET", null);
-      console.log(response);
-    } catch(err) {
-      console.log(err);
-    }
-  }
-
-  useEffect(() => {
-    fetchCustomer();
-  },[]);
 
   async function updateProfile() {
     setLoad(true)
     const url = `${process.env.NEXT_PUBLIC_API_URL}/users/update-profile`
     const formData = new FormData()
     formData.append("name", name)
-    formData.append("bio", description)
     formData.append("file", image)
     formData.append("oldPassword", oldPassword)
     formData.append("newPassword", newPassword)
@@ -179,19 +165,6 @@ export default function Component() {
   }
 
   // Mock payment data (replace with actual data from your API)
-  const paymentData = {
-    status: "active",
-    cardLastFour: "4242",
-    cardBrand: "visa",
-    expiryDate: "12/2024"
-  }
-
-  const bankAccountData = {
-    accountNumber: "****6789",
-    routingNumber: "****1234",
-    accountType: "Checking",
-    bankName: "Example Bank"
-  }
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -237,12 +210,6 @@ export default function Component() {
             </div>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="description">Profile Description</Label>
-                <Textarea value={description} onChange={(e) => setDescription(e.target.value)}id="description" placeholder="Tell us a bit about yourself..." className="min-h-[120px]" />
-              </div>
-            </div>
-            <div className="space-y-4">
-              <div className="space-y-2">
                 <h2 className="text-xl font-bold">Change Password</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -268,6 +235,12 @@ export default function Component() {
                 </div>
               </div>
             </div>
+
+        <div className="flex justify-end">
+          <Button onClick={updateProfile} disabled={load}>
+            Save Changes
+          </Button>
+        </div>
           </TabsContent>
 
           <TabsContent value="profile" className="space-y-6">
@@ -278,22 +251,22 @@ export default function Component() {
           </TabsContent>
 
           <TabsContent value="payment" className="space-y-6">
-          <PaymentSection role={state.role} paymentData={paymentData} bankAccountData={bankAccountData} 
-            addPaymentMethod={addPaymentMethod} addBankAccount={addBankAccount} loadingRedirect={loadingRedirect}/>
-          </TabsContent>
 
+          <PaymentSection role={state.role} addPaymentMethod={addPaymentMethod} 
+            addBankAccount={addBankAccount} loadingRedirect={loadingRedirect}/>
+
+          </TabsContent>
         </Tabs>
-        <div className="flex justify-end">
-          <Button onClick={updateProfile} disabled={load}>
-            Save Changes
-          </Button>
-        </div>
+
       </div>
     </div>
   )
 }
 
-function PaymentSection({ role, paymentData, bankAccountData, addPaymentMethod, addBankAccount, loadingRedirect}) {
+function PaymentSection({ role, addPaymentMethod, addBankAccount, loadingRedirect}) {
+  const [cardInfo, setCardInfo] = useState(null);
+  const [bankAccountInfo, setBankAccountInfo] = useState(null);
+
   function routeToFn() {
     if (role === "SPONSOR") {
       addPaymentMethod()
@@ -301,6 +274,36 @@ function PaymentSection({ role, paymentData, bankAccountData, addPaymentMethod, 
       addBankAccount()
     }
   }
+
+  async function fetchCustomer() {
+    try {
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/stripe/customer`;
+      const response = await request(url, "GET", null);
+      if(response && response.success) {
+        setCardInfo(response.customer);
+      }
+    } catch(err) {
+      console.log(err);
+    }
+  }
+
+  async function fetchBankAccountInfo() {
+    try {
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/stripe/account`;
+      const response = await request(url, "GET", null);
+      console.log(response);
+      if(response && response.success) {
+        setBankAccountInfo(response.account);
+      }
+    } catch(err) {
+      console.log(err);
+    }
+  }
+
+  useEffect(() => {
+    if(role === "SPONSOR") fetchCustomer();
+    else if(role === "CREATOR") fetchBankAccountInfo();
+  },[]);
 
   if(role === "SPONSOR") {
     return <Card>
@@ -316,25 +319,25 @@ function PaymentSection({ role, paymentData, bankAccountData, addPaymentMethod, 
                     </div>
                     <div>
                       <p className="font-medium">
-                        {paymentData.cardBrand.charAt(0).toUpperCase() + paymentData.cardBrand.slice(1)} ending in {paymentData.cardLastFour}
+                        {cardInfo && cardInfo.brand} ending in {cardInfo && cardInfo.last4}
                       </p>
-                      <p className="text-sm text-muted-foreground">Expires {paymentData.expiryDate}</p>
+                      <p className="text-sm text-muted-foreground">Expires {cardInfo && cardInfo.expMonth}/{cardInfo && cardInfo.expYear}</p>
                     </div>
                   </div>
-                  <Badge variant={paymentData.status === "active" ? "success" : "warning"}>
-                    {paymentData.status === "active" ? "Active" : "Incomplete"}
+                  <Badge variant={cardInfo && cardInfo.verified ? "success" : "warning"}>
+                    {cardInfo && cardInfo.verified ? "Active" : "Incomplete"}
                   </Badge>
                 </div>
                 <div className="space-y-2">
                   <h3 className="text-sm font-medium">Payment Status</h3>
                   <div className="flex items-center space-x-2">
-                    {paymentData.status === "active" ? (
+                    {cardInfo && cardInfo.verified ? (
                       <CheckCircleIcon className="h-5 w-5 text-green-500" />
                     ) : (
                       <AlertCircleIcon className="h-5 w-5 text-yellow-500" />
                     )}
                     <span className="text-sm">
-                      {paymentData.status === "active"
+                      {cardInfo && cardInfo.verified
                         ? "Your payment method is set up and active."
                         : "Please complete your payment setup."}
                     </span>
@@ -359,26 +362,13 @@ function PaymentSection({ role, paymentData, bankAccountData, addPaymentMethod, 
                     <div className="p-2 bg-primary/10 rounded-full">
                     </div>
                     <div>
-                      <p className="font-medium">{bankAccountData.bankName}</p>
-                      <p className="text-sm text-muted-foreground">Account ending in {bankAccountData.accountNumber}</p>
+                      <p className="font-medium">{bankAccountInfo && bankAccountInfo.name}</p>
+                      <p className="text-sm text-muted-foreground">Account ending in {bankAccountInfo && bankAccountInfo.last4}</p>
                     </div>
                   </div>
                   <Badge>
-                    {bankAccountData.accountType}
+                    {bankAccountInfo && bankAccountInfo.verified ? "Active" : "Incomplete"}
                   </Badge>
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-sm font-medium">Account Details</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label>Routing Number</Label>
-                      <Input value={bankAccountData.routingNumber} disabled />
-                    </div>
-                    <div>
-                      <Label>Account Number</Label>
-                      <Input value={bankAccountData.accountNumber} disabled />
-                    </div>
-                  </div>
                 </div>
                 <Button onClick={addBankAccount} variant="outline" className="w-full">
                   Update Bank Account
@@ -389,6 +379,7 @@ function PaymentSection({ role, paymentData, bankAccountData, addPaymentMethod, 
 }
 
 function SponsorProfileUpdate({ formState }) {
+  const [load, setLoad] = useState(false);
   const handleFormChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
@@ -413,6 +404,7 @@ function SponsorProfileUpdate({ formState }) {
   }
 
   const updateAccountInfo = async () => {
+    setLoad(true);
     const url = `${process.env.NEXT_PUBLIC_API_URL}/users/sponsor/create-profile`;
     const response = await request(url, "POST", formData);
     if(response && response.success) {
@@ -420,9 +412,10 @@ function SponsorProfileUpdate({ formState }) {
     } else {
       toast.error("There is a problem with updating your profile.");
     }
+    setLoad(false);
   }
 
-  return    <Card>
+  return    <><Card>
               <CardHeader>
                 <CardTitle>Profile Information</CardTitle>
                 <CardDescription>Update your profile details and preferences.</CardDescription>
@@ -514,11 +507,15 @@ function SponsorProfileUpdate({ formState }) {
                     placeholder="What are your main goals for your account or business?"
                   />
                 </div>
-                <Button onClick={updateAccountInfo} className="w-full">
-                  Update Account Information
-                </Button>
               </CardContent>
             </Card>
+
+        <div className="flex justify-end">
+          <Button onClick={updateAccountInfo} disabled={load}>
+            Save Changes
+          </Button>
+        </div>
+    </>
 
 }
 
