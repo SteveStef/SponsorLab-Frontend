@@ -2,7 +2,9 @@
 import Black from "../../../public/connect.jpg";
 import Image from "next/image";
 import { convertFromUtcToLocal } from "@/utils";
-import { ChevronLeftIcon, FilterIcon, InfoIcon , ChevronRightIcon, AlertTriangleIcon, CheckCircleIcon } from "lucide-react";
+import { ChevronLeftIcon, FilterIcon, InfoIcon , ChevronRightIcon, AlertTriangleIcon, CheckCircleIcon, 
+ EyeIcon, DollarSignIcon, CalendarIcon, TrendingUpIcon, TagIcon  } from "lucide-react";
+import { Badge } from '@/components/ui/badge'
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
@@ -149,56 +151,73 @@ export default function Component() {
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-              {filteredListings.map((listing, idx) => (
-                <Link key={idx} href={`./listings/${listing.id}`} className="rounded-lg overflow-hidden shadow-lg transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg hover:shadow-green-500/20">
-                  <Image
-                    src={listing.thumbnailName || Black}
-                    alt={listing.title}
-                    width="576"
-                    height="284"
-                    className="w-full h-40 object-cover"
-                    priority={false}
-                  />
-
-                {/*
-                <span className="absolute top-2 left-2 bg-green-500 text-xs font-semibold px-2 py-1 rounded-full">
-                {listing.category}
-                </span>
-                */}
-
-                  <div className="p-4 w-50">
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="text-lg font-semibold truncate">{listing.title}</h3>
-                      <span className=" bg-purple-500 text-xs font-semibold px-2 py-1 rounded-full">{listing.tag}</span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                      <p className="text-gray-400">Views: {listing.estimatedViews.toLocaleString()}</p>
-                      <p className="text-gray-400">Price: ${(listing.estimatedPrice / 100).toLocaleString()}
-                        {listing.pricingModel ==="CPM"&&<span className=""> CPM</span>}</p>
-                      <p className="text-gray-400">{convertFromUtcToLocal(listing.uploadDate)}</p>
-                      <p className="text-gray-400">
-                <span
-                className={`font-semibold ${listing.riskEvaluation === 'Low' ? 'text-green-400' : listing.riskEvaluation === "Medium" ? 'text-yellow-400' : 'text-red-400'}`}>
-                <span className="flex items-center">
-                <span><span className="text-gray-400 font-normal">Risk: </span><span className="pr-1">{listing.riskEvaluation}</span></span>
-
-                {
-                  listing.riskEvaluation === "Low" ?
-                  <CheckCircleIcon className="h-4 w-4 mr-2 text-green-400" />
-                  : listing.riskEvaluation === "Medium" ?
-
-                  <AlertTriangleIcon className="h-4 w-4 mr-2 text-yellow-400" />
-                  :
-                  <AlertTriangleIcon className="h-4 w-4 mr-2 text-red-400" />
-                }
-                </span>
-                  </span>
+    {filteredListings.map((listing, idx) => (
+        <Link
+          key={idx}
+          href={`./listings/${listing.id}`}
+          className="group flex flex-col rounded-lg overflow-hidden shadow-lg transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-xl hover:shadow-green-500/20 h-full"
+        >
+          <div className="relative">
+            <Image
+              src={listing.thumbnailName || Black}
+              alt={listing.title}
+              width={576}
+              height={284}
+              className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-110"
+              priority={false}
+            />
+            <Badge className="absolute top-2 right-2 bg-purple-500 text-white">
+              <TagIcon className="w-3 h-3 mr-1" />
+              {listing.tag}
+            </Badge>
+          </div>
+          <div className="p-4 flex-grow flex flex-col justify-between">
+            <div>
+              <h3 className="text-lg font-semibold mb-3 line-clamp-2 text-gray-100 group-hover:text-green-400 transition-colors duration-300">
+                {listing.title}
+              </h3>
+              <div className="grid grid-cols-2 gap-3 text-sm mb-4">
+                <p className="flex items-center text-gray-300">
+                  <EyeIcon className="w-4 h-4 mr-2 text-blue-400" />
+                  <span className="font-medium">{listing.estimatedViews.toLocaleString()} views</span> 
                 </p>
-                    </div>
-                    <Button className="w-full mt-4 bg-green-500 hover:bg-green-600">View Details</Button>
-                  </div>
-                </Link>
-              ))}
+                <p className="flex items-center text-gray-300">
+                  <DollarSignIcon className="w-4 h-4 mr-2 text-green-400" />
+                  <span className="font-medium">${(listing.estimatedPrice / 100).toLocaleString()}</span>
+                  <span className="ml-1 text-xs bg-gray-700 px-1 py-0.5 rounded">{listing.pricingModel}</span>
+                </p>
+                <p className="flex items-center text-gray-300">
+                  <CalendarIcon className="w-4 h-4 mr-2 text-yellow-400" />
+                  {convertFromUtcToLocal(listing.uploadDate)}
+                </p>
+                <p className="flex items-center">
+                  <TrendingUpIcon className="w-4 h-4 mr-2 text-purple-400" />
+                  <span className="text-gray-300 mr-1">Risk:</span>
+                  <span
+                    className={`font-semibold ${
+                      listing.riskEvaluation === 'Low'
+                        ? 'text-green-400'
+                        : listing.riskEvaluation === "Medium"
+                        ? 'text-yellow-400'
+                        : 'text-red-400'
+                    }`}
+                  >
+                    {listing.riskEvaluation}
+                  </span>
+                  {listing.riskEvaluation === "Low" ? (
+                    <CheckCircleIcon className="h-4 w-4 ml-1 text-green-400" />
+                  ) : (
+                    <AlertTriangleIcon className={`h-4 w-4 ml-1 ${listing.riskEvaluation === "Medium" ? "text-yellow-400" : "text-red-400"}`} />
+                  )}
+                </p>
+              </div>
+            </div>
+            <Button className="w-full mt-auto bg-green-500 hover:bg-green-600 transition-colors duration-300">
+              View Details
+            </Button>
+          </div>
+        </Link>
+      ))}
             </div>
           </main>
         </div>

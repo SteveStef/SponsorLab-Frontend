@@ -12,7 +12,7 @@ export function addLocalTimezone(selectedDate) {
 
 export function convertFromUtcToLocal(utcDate) {
   const back = dayjs(utcDate).tz(Intl.DateTimeFormat().resolvedOptions().timeZone);
-  return back.format('MMMM D, YYYY');
+  return back.format('MM/DD/YYYY');
 }
 
 export function chatTime(utcDate) {
