@@ -312,6 +312,8 @@ function PaymentSection({ role, addPaymentMethod, addBankAccount, loadingRedirec
                 <CardDescription>Manage your payment information and view your current status.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
+              {
+                cardInfo && 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
                     <div className="p-2 bg-primary/10 rounded-full">
@@ -328,6 +330,7 @@ function PaymentSection({ role, addPaymentMethod, addBankAccount, loadingRedirec
                     {cardInfo && cardInfo.verified ? "Active" : "Incomplete"}
                   </Badge>
                 </div>
+              }
                 <div className="space-y-2">
                   <h3 className="text-sm font-medium">Payment Status</h3>
                   <div className="flex items-center space-x-2">
@@ -358,6 +361,8 @@ function PaymentSection({ role, addPaymentMethod, addBankAccount, loadingRedirec
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
+            {
+              bankAccountInfo && 
                   <div className="flex items-center space-x-4">
                     <div className="p-2 bg-primary/10 rounded-full">
                     </div>
@@ -366,6 +371,18 @@ function PaymentSection({ role, addPaymentMethod, addBankAccount, loadingRedirec
                       <p className="text-sm text-muted-foreground">Account ending in {bankAccountInfo && bankAccountInfo.last4}</p>
                     </div>
                   </div>
+            }
+
+                    <span className="text-sm flex">
+                    {bankAccountInfo && bankAccountInfo.verified ? (
+                      <CheckCircleIcon className="h-5 w-5 text-green-500 mr-2" />
+                    ) : (
+                      <AlertCircleIcon className="h-5 w-5 text-yellow-500 mr-2" />
+                    )}
+                      {bankAccountInfo && bankAccountInfo.verified
+                        ? "Your bank account is set up and active."
+                        : "Please complete your bank setup."}
+                    </span>
                   <Badge>
                     {bankAccountInfo && bankAccountInfo.verified ? "Active" : "Incomplete"}
                   </Badge>

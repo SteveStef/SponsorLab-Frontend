@@ -8,8 +8,28 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import request, { axiosRequest } from "@/request";
-import { ListIcon } from 'lucide-react';
+import { ListIcon, Eye, Calendar, Info, DollarSign, Image } from 'lucide-react';
 import { addLocalTimezone, convertFromUtcToLocal, inPast } from "@/utils";
+
+const contentTypes = [
+"Technology",
+"Gaming",
+"Fashion",
+"Education",
+"Finance",
+"Lifestyle",
+"Food/Cooking",
+"Family",
+"Music",
+"Vlogs",
+"Business",
+"DIY/Crafts",
+"Travel",
+"Religion",
+"Nature",
+"Garden",
+"Wellness"
+];
 
 export default function Component({listing, setSelectedListing, viewDeviations}) {
   const [title, setTitle] = useState(listing.title);
@@ -126,21 +146,34 @@ export default function Component({listing, setSelectedListing, viewDeviations})
         <form className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="title">Title</Label>
+                    <Label htmlFor="title" className="flex items-center">
+                      <Info className="mr-2 text-green-400 h-5" />
+                      Title
+                    </Label>
               <Input value={title} onChange={(e) => setTitle(e.target.value)} id="title" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="price">Estimated Price</Label>
+
+                    <Label htmlFor="price" className="flex items-center">
+                      <DollarSign className="mr-2 text-green-400 h-5" />
+    Estimated Price ({listing.pricingModel})
+                    </Label>
               <Input value={estimatedPrice} onChange={(e) => setEstimatedPrice(e.target.value)} id="price" type="number" />
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="views">Views</Label>
+              <Label htmlFor="views" className="flex items-center">
+              <Eye className="mr-2 text-green-400" />Views</Label>
               <Input value={estimatedViews} onChange={(e) => setEstimatedViews(e.target.value)} id="views" type="number" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="thumbnail">Change Thumbnail</Label>
+
+              <Label htmlFor="thumbnail" className="flex items-center">
+    <Image className="mr-2 text-green-400 h-5" />
+Change Thumbnail
+    </Label>
+              
               <Input id="thumbnail" type="file" onChange={handleImageChange} />
             </div>
                   <div className="space-y-2">
@@ -154,15 +187,20 @@ export default function Component({listing, setSelectedListing, viewDeviations})
                         <SelectValue placeholder="Select a category" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="tech">Technology</SelectItem>
-                        <SelectItem value="gaming">Gaming</SelectItem>
-                        <SelectItem value="lifestyle">Lifestyle</SelectItem>
-                        <SelectItem value="education">Education</SelectItem>
+                        {
+                          contentTypes.map((item, idx) => (
+                            <SelectItem key={idx} value={item}>{item}</SelectItem>
+                          ))
+                        }
                       </SelectContent>
                     </Select>
                   </div>
             <div className="space-y-2">
-              <Label htmlFor="upload-date">Upload Date</Label>
+              <Label htmlFor="upload-date" className="flex items-center"> 
+
+    <Calendar className="mr-2 text-green-400 h-5" />
+              Upload Date
+              </Label>
               <Input value={uploadDate} onChange={(e) => setUploadDate(e.target.value)} id="upload-date" type="date" />
             </div>
           </div>

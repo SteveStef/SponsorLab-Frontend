@@ -16,11 +16,11 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={inter.className}>
-          <AppWrapper>
             <Suspense>
+          <AppWrapper>
             {children}
-            </Suspense>
           </AppWrapper>
+            </Suspense>
         <Toaster richColors />
     </body>
     </html>

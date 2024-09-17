@@ -121,7 +121,7 @@ export default function EnhancedSignUpForm() {
         setCompany(response.body.company);
         setOrganization(response.body.company.id);
         connectToSocket();
-        router.push("/listings");
+        router.push("/organizations/"+response.body.company.id);
       }
     }
     setLoading(false);

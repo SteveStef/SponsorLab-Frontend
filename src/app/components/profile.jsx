@@ -13,7 +13,8 @@ import Link from "next/link";
 import NotFound from "./NotFound";
 import { convertFromUtcToLocal } from "@/utils";
 import { Badge } from "@/components/ui/badge";
-import { FileIcon, CheckCircle2, CheckCircle,XCircle, Play, ThumbsUp, Video, Users, DollarSign, Clock, Eye, Share2, Edit, Building2 } from "lucide-react";
+import { FileIcon, CheckCircle2, CheckCircle,XCircle, Play, ThumbsUp, Video, Users, 
+  DollarSign, Clock, Eye, Share2, EditIcon, Building2 } from "lucide-react";
 
 export default function Component({id}) {
   const [user, setUser] = useState(null);
@@ -205,64 +206,62 @@ export default function Component({id}) {
           <Button style={{marginLeft: "140%"}}>Create Listing</Button>
           </Link> : listings.length === 0 && <div className="font-semibold" style={{marginLeft: "140%"}} >No Listings Yet...</div>
         }
-        {
-          listings.map((listing, idx) => {
-            return (
-              <div  key={idx}className=" bg-background rounded-lg overflow-hidden shadow-lg transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
-                <div className="relative h-48 sm:h-46 md:h-54 lg:h-52 overflow-hidden">
-                  <Image
-                    onClick={() => handleListingClick(listing)}
-                    src={listing.thumbnailName || black}
-                    alt="Post Thumbnail"
-                    className="w-full h-full object-cover cursor-pointer"
-                    width="576"
-                    height="284"
-                    style={{ aspectRatio: "576/284", objectFit: "cover" }}
-                  />
-              <div className={`absolute top-2 left-2 bg-primary-foreground text-primary px-2 py-1 rounded-md text-xs`}>
+{listings.map((listing, idx) => (
+        <div key={idx} className="bg-card text-card-foreground rounded-lg overflow-hidden shadow-lg transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
+          <div className="relative aspect-video">
+            <Image
+              src={listing.thumbnailName || "/placeholder.svg"}
+              alt={listing.title}
+              layout="fill"
+              objectFit="cover"
+              className="cursor-pointer"
+              onClick={() => handleListingClick(listing)}
+            />
+            <Badge className="absolute top-2 left-2 bg-primary text-primary-foreground">
               {listing.tag}
+            </Badge>
+          </div>
+          <div className="p-6 space-y-2">
+            <h3 
+              className="text-xl font-semibold line-clamp-2 cursor-pointer hover:underline" 
+              onClick={() => handleListingClick(listing)}
+            >
+              {listing.title}
+            </h3>
+            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+              <EyeIcon className="w-4 h-4" />
+              <span>{new Intl.NumberFormat().format(listing.estimatedViews)} views</span>
+            </div>
+            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+              <CalendarIcon className="w-4 h-4" />
+              <span>{convertFromUtcToLocal(listing.uploadDate)}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="text-lg font-semibold">
+                ${(listing.estimatedPrice / 100).toLocaleString()}
+                <span className="text-xs ml-1">{listing.pricingModel}</span>
               </div>
-                </div>
-                <div className="p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="text-sm text-muted-foreground">
-                      <EyeIcon className="w-4 h-4 inline-block mr-1" />
-                      {new Intl.NumberFormat().format(listing.estimatedViews)}
-                    </div>
-
-                  {
-                    owner &&
-                        <Badge
-                          variant="solid"
-                          className="px-3 py-1 rounded-md text-xs font-medium"
-                          style={{ backgroundColor: listing.purchased ? "green" : listing.expired ? "darkred" : listing.published ? "green" : "gray", color: "white" }}
-                        >
-                          {listing.purchased ? "Purchased" : listing.expired ? "Expired" : listing.published ? "Public" : "Private"}
-                        </Badge>
-                  }
-                  </div>
-                  <h3 onClick={() => handleListingClick(listing)} className="text-lg font-semibold mb-2 cursor-pointer">
-                    {listing.title}
-                  </h3>
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm text-muted-foreground">
-                      <CalendarIcon className="w-4 h-4 inline-block mr-1" />
-                      {convertFromUtcToLocal(listing.uploadDate)}
-                    </div>
-                    <div className="text-primary font-semibold">${(listing.estimatedPrice / 100).toLocaleString() }
-                      {
-                        owner &&
-                      <Button onClick={() => setSelectedListing(listing)} variant="outline" className="shrink-0 ml-4">
-                        Edit  Listing
-                      </Button>
-                      }
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )
-          })
-        }
+              {owner && (
+                <Badge
+                  variant={listing.purchased ? "success" : listing.expired ? "destructive" : listing.published ? "success" : "secondary"}
+                >
+                  {listing.purchased ? "Purchased" : listing.expired ? "Expired" : listing.published ? "Public" : "Private"}
+                </Badge>
+              )}
+            </div>
+            {owner && (
+              <Button 
+                variant="outline" 
+                className="w-full mt-4" 
+                onClick={() => setSelectedListing(listing)}
+              >
+                <EditIcon className="w-4 h-4 mr-2" />
+                Edit Listing
+              </Button>
+            )}
+          </div>
+        </div>
+      ))}
       </div>
       </div>
     </div>

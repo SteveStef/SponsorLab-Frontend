@@ -11,6 +11,26 @@ import request from "@/request";
 import { toast } from "sonner";
 import { useAppContext } from '@/context'
 
+const contentTypes = [
+"Technology",
+"Gaming",
+"Fashion",
+"Education",
+"Finance",
+"Lifestyle",
+"Food/Cooking",
+"Family",
+"Music",
+"Vlogs",
+"Business",
+"DIY/Crafts",
+"Travel",
+"Religion",
+"Nature",
+"Garden",
+"Wellness"
+];
+
 export default function Component(props) {
   const [step, setStep] = useState(1)
   const { company, setCompany } = useAppContext();
@@ -257,7 +277,7 @@ const allCategories  = [
                     Preferred Content Types
                   </Label>
                   <div className="space-y-2">
-                    {['Product Reviews', 'Tutorials', 'Vlogs', 'Unboxing', 'Challenges'].map((type) => (
+                    {contentTypes.map((type) => (
                       <div key={type} className="flex items-center">
                         <Checkbox
                           id={type}

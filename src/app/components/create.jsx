@@ -15,6 +15,26 @@ import { useAppContext } from "@/context";
 import { redirect, useRouter } from 'next/navigation';
 import Image from "next/image";
 
+const contentTypes = [
+"Technology",
+"Gaming",
+"Fashion",
+"Education",
+"Finance",
+"Lifestyle",
+"Food/Cooking",
+"Family",
+"Music",
+"Vlogs",
+"Business",
+"DIY/Crafts",
+"Travel",
+"Religion",
+"Nature",
+"Garden",
+"Wellness"
+];
+
 export default function Component() {
   const [step, setStep] = useState(1);
   const [pricingModel, setPricingModel] = useState('CPM')
@@ -195,10 +215,11 @@ export default function Component() {
                         <SelectValue placeholder="Select a category" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="tech">Technology</SelectItem>
-                        <SelectItem value="gaming">Gaming</SelectItem>
-                        <SelectItem value="lifestyle">Lifestyle</SelectItem>
-                        <SelectItem value="education">Education</SelectItem>
+                        {
+                          contentTypes.map((item, idx) => (
+                            <SelectItem key={idx} value={item}>{item}</SelectItem>
+                          ))
+                        }
                       </SelectContent>
                     </Select>
                   </div>
