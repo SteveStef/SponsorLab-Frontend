@@ -55,6 +55,7 @@ export default function Component({listing, setShowSponsorForm}) {
       title: titleRef.current.value, 
       creatorSpeach: speechRef.current.value,
       timeStampOfAdvertisement: timeStampRef.current.value,
+      productDescription: descriptionRef.current.value,
       duration: durationRef.current.value,
       price: estPriceRef.current.value,
       creatorName: listing.user.channel.name,

@@ -10,7 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { User, Search,FileCheck, DollarSign, 
-  Clock, InfoIcon, CheckCircle, Copy, XCircle, Eye, FileText, Check, X, Calendar, FileIcon, PlusIcon } from 'lucide-react';
+  Clock, InfoIcon, CheckCircle, Copy, XCircle, Eye, FileText, Check, X, Calendar, 
+  FileIcon, PlusIcon, Package, MessageSquare, Video, Timer, Gift, MessageCircle } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useAppContext } from '@/context';
 import Request from "@/request";
@@ -35,6 +36,7 @@ export default function Component() {
   const [load, setLoad] = useState(true);
   const { name, company } = useAppContext();
   const [videoUrls, setVideoUrls] = useState({});
+  console.log(requests);
 
   const router = useRouter();
 
@@ -293,6 +295,7 @@ export default function Component() {
                       </Badge>
                       }
                     </div>
+
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -315,34 +318,69 @@ export default function Component() {
       </div>
 
       {/* Proposal Modal */}
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="text-gray-300 border-gray-800 max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-gray-100">Sponsor Proposal</DialogTitle>
-          </DialogHeader>
-          {selectedRequest && (
-            <>
-              <div className="grid gap-4">
+<Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+      <DialogContent className="text-gray-300 max-w-4xl">
+        <DialogHeader>
+          <DialogTitle className="text-3xl font-bold text-green-400">Sponsor Proposal</DialogTitle>
+        </DialogHeader>
+        {selectedRequest && (
+          <>
+            <div className="grid grid-cols-2 gap-6">
+              <div className="space-y-4">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-100">Sender Information</h3>
+                  <h3 className="text-lg font-semibold text-green-400 flex items-center">
+                    <User className="w-5 h-5 mr-2" />
+                    Sender Information
+                  </h3>
                   <p><strong>Name:</strong> {name}</p>
                   <p><strong>Company:</strong> {company.orginization.indexOf(".") > 0 ? company.orginization : "individual"}</p>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-100">Proposal</h3>
-                  <p>{selectedRequest.proposal}</p>
+                  <h3 className="text-lg font-semibold text-green-400 flex items-center">
+                    <Package className="w-5 h-5 mr-2" />
+                    Product/Service Details
+                  </h3>
+                  <p><strong>Title:</strong> {selectedRequest.title}</p>
+                  <p><strong>Short Description:</strong> {selectedRequest.productDescription}</p>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-green-400 flex items-center">
+                    <MessageSquare className="w-5 h-5 mr-2" />
+                    Speech Requirements
+                  </h3>
+                  <p>{selectedRequest.description}</p>
                 </div>
               </div>
-              <div className="flex justify-end gap-4 mt-4">
-                <Button onClick={() => setIsModalOpen(false)}variant="outline" className="bg-red-900 text-red-100 hover:bg-red-800 border-red-700 flex items-center">
-                  <X className="w-4 h-4 mr-2" />
-                  Close
-                </Button>
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-green-400 flex items-center">
+                    <Video className="w-5 h-5 mr-2" />
+                    Advertisement Details
+                  </h3>
+                  <p><strong><Clock className="w-4 h-4 inline mr-1" /> Timestamp:</strong> {selectedRequest.timeStamp}</p>
+                  <p><strong><DollarSign className="w-4 h-4 inline mr-1" /> Proposed Payment:</strong> ${selectedRequest.price}</p>
+                  <p><strong><Timer className="w-4 h-4 inline mr-1" /> Ad Duration:</strong> {selectedRequest.duration} seconds</p>
+                  <p><strong><Gift className="w-4 h-4 inline mr-1" /> Sample Product:</strong> {selectedRequest.sendingProduct ? 'Yes' : 'No'}</p>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-green-400 flex items-center">
+                    <FileText className="w-5 h-5 mr-2" />
+                    Proposal Message
+                  </h3>
+                  <p className="max-h-40 overflow-y-auto">{selectedRequest.proposal}</p>
+                </div>
               </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+            </div>
+            <div className="flex justify-end gap-4 mt-6">
+              <Button onClick={() => setIsModalOpen(false)} variant="outline" className="bg-gray-800 text-green-400 hover:bg-gray-700 border-green-600 flex items-center">
+                <X className="w-4 h-4 mr-2" />
+                Close
+              </Button>
+            </div>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
     </div>
   )
 }
@@ -411,7 +449,8 @@ const tabContent = {
   ongoing: {
     title: "You have partnered with a youtuber!",
     content: (request, videoUrls, copied, handleCopy) => (
-      <div className="space-y-2">
+      <div className="space-y-1">
+
         <p className="text-sm text-gray-400 flex items-center">
           <User className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
           Youtuber: {request.creator.name}
@@ -449,6 +488,15 @@ const tabContent = {
       </div>
       </div>
       }
+
+      <div 
+        className="absolute top-0 right-2 flex cursor-pointer text-green-500 hover:text-green-400 transition-colors"
+        onClick={()=>{window.open(`${process.env.NEXT_PUBLIC_CLIENT_URL}/chat/${request.chatRoom.id}`, '_blank')}}
+        title="Open Direct Message"
+      >
+        <MessageCircle className="w-5 h-5 mr-1" />
+        Open Chat
+      </div>
       </div>
     )
   },
@@ -548,7 +596,7 @@ function ShowButtons(props) {
     className="bg-gray-800 text-gray-300 hover:bg-gray-700 border-gray-600 flex items-center"
     onClick={() => handleViewProposal(request)}>
     <Eye className="w-4 h-4 mr-2" />
-    View Proposal
+    View Details
   </Button> 
 
   const confirm = <Button disabled={load} onClick={map["confirmRequest"]} variant="outline" className="bg-green-900 text-green-100 hover:bg-green-800 border-green-700 flex items-center">
@@ -604,10 +652,15 @@ function ShowButtons(props) {
       }
     }
     return <></>
+
   }
+
+  const PRICE = request.pricingModel === "CPM" ? parseFloat((request.requestedPrice / 100) * request.post.estimatedViews / 1000) : request.requestedPrice / 100;
 
   return <>
     {getButton()}
+      { 
+        fnsName !== "confirmRequest" ? 
       <Dialog open={showConfirm} onOpenChange={setShowConfirm}>
         <DialogContent className="sm:max-w-[600px] text-gray-100 border-gray-700">
           <DialogHeader>
@@ -644,6 +697,73 @@ function ShowButtons(props) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+          :
+          <Dialog open={showConfirm} onOpenChange={setShowConfirm}>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-bold">Checkout - Partnership Step</DialogTitle>
+        </DialogHeader>
+        <div className="py-4">
+          <div className="flex items-start space-x-2 mb-4 p-3 bg-gray-50 rounded-md">
+            <InfoIcon className="w-5 h-5 text-black mt-0.5 flex-shrink-0" />
+            <p className="text-sm text-black">
+              This will initiate the partnership with the YouTuber. The funds will be held until the video is published and reviewed by you (the sponsor). Only then will the funds be transferred to the YouTuber.
+            </p>
+          </div>
+          {
+            request.pricingModel === "CPM" &&
+            <div className="flex items-start space-x-2 mb-4 p-3 bg-gray-50 rounded-md">
+            <InfoIcon className="w-5 h-5 text-black mt-0.5 flex-shrink-0" />
+            <p className="text-sm text-black">
+            The pricing model is based on CPM, meaning you will initially be charged based on the estimated number of views the video is expected to receive. After one month, you will either be charged or refunded the difference, depending on the actual performance of the video.
+            </p>
+            </div>
+          }
+          <h4 className="text-lg font-semibold mb-4">Order Summary</h4>
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <span className="font-semibold">Subtotal</span>
+              <span>${PRICE.toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Stripe Fee (2.9%)</span>
+              <span>${(0.029 * (PRICE)).toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Sales Tax (6%)</span>
+              <span>${(0.06 * (PRICE)).toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>PartnerShip Fee (2%)</span>
+              <span>${(0.02 * (PRICE)).toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between font-bold text-lg pt-2 border-t">
+              <span>Total</span>
+          <span>${(PRICE + (0.109 * PRICE)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+            </div>
+          </div>
+        </div>
+        <p className="text-sm text-gray-500 mb-4">
+          By clicking "Confirm Partnership", you agree to the terms of service and privacy policy. Also you may be refunded if the Youtuber does not 
+          do the agreed terms of the sponsoring.
+        </p>
+        <DialogFooter className="sm:justify-start">
+          <Button
+            disabled={load}
+            onClick={() => {
+              fns[fnsName](selectedParams);
+              setShowConfirm(false);
+            }
+            }
+            className="w-full bg-green-600 text-white hover:bg-green-700"
+          >
+            {load ? "Processing..." : "Confirm Partnership"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+      }
+
   </>
 }
 

@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { User, Search,FileCheck, DollarSign, InfoIcon, Video, Link2,
-  Clock, CheckCircle, XCircle, Eye, FileText, Check, X, Calendar, PlusIcon, FileIcon } from 'lucide-react';
+  Clock, CheckCircle, XCircle, Eye, FileText, Check, X, Calendar, FileIcon, Package, MessageSquare, Timer, Gift, MessageCircle} from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import Request from "@/request";
 import { toast } from "sonner";
@@ -287,34 +287,75 @@ export default function Component() {
         </div>
       </div>
 
-      {/* Proposal Modal */}
+
 <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="text-gray-300 border-gray-800 max-w-2xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-gray-100">Sponsor Proposal</DialogTitle>
-          </DialogHeader>
-          {selectedRequest && (
-            <>
-              <div className="grid gap-4">
+      <DialogContent className="text-gray-300 max-w-4xl">
+        <DialogHeader>
+          <DialogTitle className="text-3xl font-bold text-green-400">Sponsor Proposal</DialogTitle>
+        </DialogHeader>
+        {selectedRequest && (
+          <>
+            <div className="grid grid-cols-2 gap-6">
+              <div className="space-y-4">
                 <div>
+                  <h3 className="text-lg font-semibold text-green-400 flex items-center">
+                    <User className="w-5 h-5 mr-2" />
+                    Sender Information
+                  </h3>
                   <p><strong>Name:</strong> {selectedRequest.sponsor.name}</p>
                   <p className="break-words"><strong>Company:</strong> {selectedRequest.sponsor.company.orginization.indexOf(".") > 0 ? selectedRequest.sponsor.company.orginization : "individual"}</p>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-100">Proposal</h3>
-                  <p className="whitespace-normal break-words">{selectedRequest.proposal}</p>
+                  <h3 className="text-lg font-semibold text-green-400 flex items-center">
+                    <Package className="w-5 h-5 mr-2" />
+                    Product/Service Details
+                  </h3>
+                  <p><strong>Title:</strong> {selectedRequest.title}</p>
+                  <p><strong>Short Description:</strong> {selectedRequest.productDescription}</p>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-green-400 flex items-center">
+                    <MessageSquare className="w-5 h-5 mr-2" />
+                    Speech Requirements
+                  </h3>
+                  <p>{selectedRequest.description}</p>
                 </div>
               </div>
-              <div className="flex justify-end gap-4 mt-4">
-                <Button onClick={() => setIsModalOpen(false)} variant="outline" className="bg-red-900 text-red-100 hover:bg-red-800 border-red-700 flex items-center">
-                  <X className="w-4 h-4 mr-2" />
-                  Close
-                </Button>
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-green-400 flex items-center">
+                    <Video className="w-5 h-5 mr-2" />
+                    Advertisement Details
+                  </h3>
+                  <p><strong><Clock className="w-4 h-4 inline mr-1" /> Timestamp:</strong> {selectedRequest.timeStamp}</p>
+                  <p><strong><DollarSign className="w-4 h-4 inline mr-1" /> Proposed Payment:</strong> ${selectedRequest.price}</p>
+                  <p><strong><Timer className="w-4 h-4 inline mr-1" /> Ad Duration:</strong> {selectedRequest.duration} seconds</p>
+                  <p><strong><Gift className="w-4 h-4 inline mr-1" /> Sample Product:</strong> {selectedRequest.sendingProduct ? 'Yes' : 'No'}</p>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-green-400 flex items-center">
+                    <FileText className="w-5 h-5 mr-2" />
+                    Proposal Message
+                  </h3>
+                  <p className="max-h-40 overflow-y-auto">{selectedRequest.proposal}</p>
+                </div>
               </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+            </div>
+            <div className="flex justify-end gap-4 mt-6">
+              <Button onClick={() => setIsModalOpen(false)} variant="outline" className="bg-gray-800 text-green-400 hover:bg-gray-700 border-green-600 flex items-center">
+                <X className="w-4 h-4 mr-2" />
+                Close
+              </Button>
+            </div>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
+
+
+
+
+
     </div>
   )
 }
@@ -412,6 +453,15 @@ const tabContent = {
           <Link2 className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
           <Link href={request.transaction && request.transaction.videoUrl || "#"} style={{cursor: "pointer"}}>{(request.transaction && request.transaction.videoUrl) || "No link uploaded"}</Link>
         </p>
+
+      <div 
+        className="absolute top-0 right-2 flex cursor-pointer text-green-500 hover:text-green-400 transition-colors"
+        onClick={()=>{window.open(`${process.env.NEXT_PUBLIC_CLIENT_URL}/chat/${request.chatRoom.id}`, '_blank')}}
+        title="Open Direct Message"
+      >
+        <MessageCircle className="w-5 h-5 mr-1" />
+        Open Chat
+      </div>
       </div>
     )
   },

@@ -3,9 +3,8 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageSquareX, Send, Calendar,Upload, DollarSign, Menu, Info, X, Clock, Target, UserIcon, CheckCircle } from "lucide-react";
+import { Send, Calendar,Upload, DollarSign, Menu, Info, X, Clock, Target, UserIcon, CheckCircle } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useAppContext } from "@/context";
 import request from "@/request";
@@ -13,18 +12,14 @@ import { toast } from "sonner";
 import { convertFromUtcToLocal, chatTime } from "@/utils";
 
 
-export default function Component() {
+export default function Component({ room, participant, chatMessages }) {
   const [leftPanelOpen, setLeftPanelOpen] = useState(false)
   const [rightPanelOpen, setRightPanelOpen] = useState(false)
 
   const { socket, name } = useAppContext();
-  const [chatRooms, setChatRooms] = useState([]);
+  const [messages, setMessages] = useState(chatMessages);
 
-  const [selected, setSelected] = useState(0);
-  const [selectedParticipant, setSelectedParticipant] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [joined, setJoined] = useState(false);
-  const [messages, setMessages] = useState([]);
 
   const [newMessage, setNewMessage] = useState('')
   const messagesEndRef = useRef(null)
@@ -37,71 +32,33 @@ export default function Component() {
     scrollToBottom()
   }, [messages]);
 
-  async function getChatRooms() {
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/chat`;
-    const response = await request(url, "GET", null);
-    if(response && response.success) {
-      setChatRooms(response.body);
-      if(response.body.length !== 0) {
-        setMessages(response.body[0].messages);
-        setSelectedParticipant(response.body[0].participants[0].user)
-      }
-    }
-    setLoading(false);
-  }
-
-  console.log(chatRooms);
 
   useEffect(() => {
-    getChatRooms();
-  },[]);
-
-  useEffect(() => {
-    if(chatRooms.length > 0) {
-      setSelectedParticipant(chatRooms[selected].participants[0].user);
-    }
-  },[selected]);
-
-  useEffect(() => {
-    if(!loading && socket) {
-      for(let i = 0; i < chatRooms.length; i++) {
-        socket.emit("join_room", { room:chatRooms[i].id });
-      }
+    if(socket) {
+      socket.emit("join_room", { room: room.id });
       setJoined(true)
     }
-  },[loading]);
+  },[socket]);
 
   useEffect(() => {
     if(joined && socket) {
       socket.on("recieve_message", (data) => {
-        setMessages((list) => [...list, { id: list.length + 1, senderId: 'Them', content: data.message}]);
+        if(room.id === data.room) {
+          setMessages((list) => [...list, { id: list.length + 1, senderId: 'Them', content: data.message}]);
+        }
       });
     }
   },[joined]);
 
   const handleSendMessage = async () => {
     if (newMessage.trim()) {
-      socket.emit("send_message", {room: chatRooms[selected].id, message: newMessage});
+      socket.emit("send_message", {room: room.id, message: newMessage});
       setMessages((list) => [...list, { id: list.length + 1, senderId: 'You', content: newMessage }]);
       setNewMessage('');
       const res = await request(`${process.env.NEXT_PUBLIC_API_URL}/chat/message`, "POST",
-        {roomId: chatRooms[selected].id, message: newMessage});
+        {roomId: room.id, message: newMessage});
       if(!res || !res.success) toast.error("Failed to send message, try again later");
     }
-  }
-
-  function switchRooms(index) {
-    const msgs = [...messages];
-    const updateRooms = [...chatRooms];
-    updateRooms[selected].messages = msgs;
-    setChatRooms(updateRooms);
-    setSelected(index)
-    setMessages(updateRooms[index].messages);
-  }
-
-  if(loading) return <div></div>
-  if(!loading && chatRooms.length === 0) {
-    return <NotDirectMessages />
   }
 
   return (
@@ -123,12 +80,12 @@ export default function Component() {
           </Button>
         </div>
         <ScrollArea className="h-[calc(91vh-60px)]">
-          {chatRooms.map((room, index) => {
+          {false && chatRooms.map((room, index) => {
             const participant = room.participants[0]
             const name = participant.user.channel ? participant.user.channel.name : participant.user.company.orginization;
 
             return (
-              <div key={index} onClick={() => switchRooms(index)} className={`flex items-center space-x-2 p-2 rounded ${selected === index ? 'bg-green-900' : 'hover:bg-gray-800'} cursor-pointer mb-2`}>
+              <div key={index} onClick={() => switchRooms(room.id)} className={`flex items-center space-x-2 p-2 rounded ${selectedRoomId === room.id ? 'bg-green-900' : 'hover:bg-gray-800'} cursor-pointer mb-2`}>
                 <Avatar>
                   <AvatarImage src={`${(participant.user.s3ImageName || participant.user.googleImage)||""}`} alt={room.participants[0].user.name} />
                   <AvatarFallback><UserIcon className="h-6 w-6" /></AvatarFallback>
@@ -153,7 +110,7 @@ export default function Component() {
           >
             <Menu className="h-6 w-6" />
           </Button>
-          <h2 className="text-xl font-bold">Chat with {selectedParticipant.name}</h2>
+          <h2 className="text-xl font-bold">Chat with {participant.name}</h2>
           <Button
             variant="ghost"
             size="icon"
@@ -171,8 +128,8 @@ export default function Component() {
             >
               <div className={`flex ${message.senderId === "You" ? "flex-row-reverse" : "flex-row"} items-end space-x-2`}>
         <Avatar className="w-7 h-7 mr-1 ml-1">
-          <AvatarImage src={`https://api.dicebear.com/6.x/initials/svg?seed=${message.senderId === "You" ? name : selectedParticipant.name}`} />
-          <AvatarFallback>{message.senderId === "You" ? name : selectedParticipant.name}</AvatarFallback>
+          <AvatarImage src={`https://api.dicebear.com/6.x/initials/svg?seed=${message.senderId === "You" ? name : participant.name}`} />
+          <AvatarFallback>{message.senderId === "You" ? name : participant.name}</AvatarFallback>
         </Avatar>
                 <div className={`flex flex-col ${message.senderId === "You" ? "items-end" : "items-start"}`}>
                   <div
@@ -237,15 +194,15 @@ export default function Component() {
               <div className="space-y-2">
                 <div className="flex items-center space-x-2">
                   <Calendar className="w-5 h-5 text-green-500" />
-                  <span>Upload Date: {chatRooms.length > 0 && convertFromUtcToLocal(chatRooms[selected].request.transaction.deadline)}</span>
+                  <span>Upload Date: {convertFromUtcToLocal(room.request.transaction.deadline)}</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Clock className="w-5 h-5 text-green-500" />
-                  <span>Ad Duration: {chatRooms[selected].request.duration} seconds</span>
+                  <span>Ad Duration: {room.request.duration} seconds</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Target className="w-5 h-5 text-green-500" />
-                  <span>Time-Stamp: {chatRooms[selected].request.timeStamp}</span>
+                  <span>Time-Stamp: {room.request.timeStamp}</span>
                 </div>
               </div>
             </div>
@@ -255,11 +212,11 @@ export default function Component() {
               <div className="space-y-2">
                 <div className="flex items-center space-x-2">
                   <Upload className="w-5 h-5 text-green-500" />
-                  <span>Product Name: {chatRooms[selected].request.title}</span>
+                  <span>Product Name: {room.request.title}</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <CheckCircle className="w-5 h-5 text-green-500" />
-                  <span>Sending Sample Product: {chatRooms[selected].request.sendingProduct ? "YES" : "NO"}</span>
+                  <span>Sending Sample Product: {room.request.sendingProduct ? "YES" : "NO"}</span>
                 </div>
               </div>
             </div>
@@ -269,13 +226,13 @@ export default function Component() {
               <div className="space-y-2">
                 <div className="flex items-center space-x-2">
                   <DollarSign className="w-5 h-5 text-green-500" />
-                  <span>Pricing Type: {chatRooms[selected].request.pricingModel === "CPM" ? "CPM" : "Flat Rate"}</span>
+                  <span>Pricing Type: {room.pricingModel === "CPM" ? "CPM" : "Flat Rate"}</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <DollarSign className="w-5 h-5 text-green-500" />
-                  <span>Cost: {chatRooms[selected].request.pricingModel === "CPM" ? 
-                      `$${(chatRooms[selected].request.requestedPrice).toLocaleString()} / 1K Views` 
-                      : `$${(chatRooms[selected].request.requestedPrice / 100).toLocaleString()}`}
+                  <span>Cost: {room.request.pricingModel === "CPM" ? 
+                      `$${(room.request.requestedPrice/100).toLocaleString()} / 1K Views` 
+                      : `$${(room.request.requestedPrice / 100).toLocaleString()}`}
     </span>
                 </div>
               </div>
@@ -284,28 +241,12 @@ export default function Component() {
             <div>
               <h3 className="text-lg font-semibold mb-2">Product Description</h3>
               <p className="text-sm text-gray-400">
-                  {chatRooms[selected].request.description}
+                  {room.request.description}
               </p>
             </div>
           </div>
         </ScrollArea>
       </div>
-    </div>
-  )
-}
-
-function NotDirectMessages() {
-  return (
-    <div className="flex items-center justify-center text-gray-200"style={{marginTop: "20%"}}>
-      <Card className="w-full max-w-md border-green-500">
-        <CardContent className="flex flex-col items-center justify-center p-6 text-center">
-          <MessageSquareX className="w-16 h-16 text-green-500 mb-4" />
-          <h1 className="text-2xl font-bold mb-2">No Direct Messages</h1>
-          <p className="text-gray-400">
-            You currently have no direct messages. When you receive messages, they will appear here.
-          </p>
-        </CardContent>
-      </Card>
     </div>
   )
 }

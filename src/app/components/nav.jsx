@@ -32,6 +32,7 @@ export default function Navbar() {
     try {
       const url = `${process.env.NEXT_PUBLIC_API_URL}/notifications`;
       const response = await request(url, "GET", null);
+      console.log(response);
       if(response && response.success) {
         setNotifications(response.body);
         setHasNew(response.hasNew);
@@ -142,23 +143,6 @@ export default function Navbar() {
           {
             auth &&
               <>
-        <div className="relative">
-          <Link href="../../chat" prefetch={false}>
-          <Button variant="ghost" size="icon" className="rounded-full">
-            <InboxIcon className="h-5 w-5" />
-            <span className="sr-only">Requests</span>
-          </Button>
-          </Link>
-              {
-                notifications.filter(n => n.type === "CHAT" && !n.seen).length > 0 && 
-                <div 
-                className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">
-                {
-                  notifications.filter(n => n.type === "CHAT" && !n.seen).length
-                }
-                </div>
-              }
-        </div>
 
               <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
           <DropdownMenuTrigger asChild>
@@ -174,7 +158,7 @@ export default function Navbar() {
             <ScrollArea className="h-[300px] overflow-y-auto">
               {notifications.map((notification) => (
                 <DropdownMenuItem key={notification.id} className="p-0 focus:bg-transparent">
-                  <NotificationItem notification={notification} />
+                  <Link href={`${notification.link ? notification.link : ""}`}><NotificationItem notification={notification} /></Link>
                 </DropdownMenuItem>
               ))}
             </ScrollArea>
@@ -273,7 +257,7 @@ export default function Navbar() {
           <ScrollArea className="mt-4 max-h-[60vh] overflow-y-auto pr-4">
             {filteredNotifications.length > 0 ? (
               filteredNotifications.map((notification, idx) => (
-                <NotificationItem key={idx} notification={notification} />
+                <Link href={`${notification.link ? notification.link : ""}`}><NotificationItem key={idx} notification={notification} /></Link>
               ))
             ) : (
               <p className="text-gray-400 text-center py-4">No notifications found</p>
