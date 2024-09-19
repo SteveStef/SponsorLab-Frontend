@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback, act } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Label } from "@/components/ui/label";
 import Link from 'next/link';
 import { Badge } from "@/components/ui/badge";
@@ -358,7 +358,7 @@ export default function Component() {
                     Advertisement Details
                   </h3>
                   <p><strong><Clock className="w-4 h-4 inline mr-1" /> Timestamp:</strong> {selectedRequest.timeStamp}</p>
-                  <p><strong><DollarSign className="w-4 h-4 inline mr-1" /> Proposed Payment:</strong> ${selectedRequest.price}</p>
+                  <p><strong><DollarSign className="w-4 h-4 inline mr-1" /> Proposed Payment:</strong> ${selectedRequest.requestedPrice/100} {selectedRequest.pricingModel}</p>
                   <p><strong><Timer className="w-4 h-4 inline mr-1" /> Ad Duration:</strong> {selectedRequest.duration} seconds</p>
                   <p><strong><Gift className="w-4 h-4 inline mr-1" /> Sample Product:</strong> {selectedRequest.sendingProduct ? 'Yes' : 'No'}</p>
                 </div>

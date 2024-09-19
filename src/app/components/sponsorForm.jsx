@@ -162,7 +162,7 @@ export default function Component({listing, setShowSponsorForm}) {
                   checked={agreed}
                   onCheckedChange={(agree) => setAgreed(agree)}
                 />
-                <span>I have read and accept the <Link href="../../terms-of-service" style={{color: "lightgreen"}}>Terms of Service</Link></span>
+                <span>I have read and accept the <span onClick={()=>window.open(`${process.env.NEXT_PUBLIC_CLIENT_URL}/terms-of-service`, '_blank')}style={{color: "lightgreen", cursor: "pointer"}}>Terms of Service</span></span>
               </div>
             </Label>
           </div>
