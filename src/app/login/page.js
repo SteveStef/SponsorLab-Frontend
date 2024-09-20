@@ -12,7 +12,6 @@ import { useRouter } from "next/navigation";
 import { useAppContext } from "@/context";
 import { motion } from 'framer-motion'
 import { useState } from "react";
-import io from "socket.io-client";
 
 
 export default function Component() {
@@ -21,8 +20,8 @@ export default function Component() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const { setDescription, setEmail, setAccountType, setSocket,
-    setName, setRole, setOrganization, setAuth, setProfilePic } = useAppContext();
+  const { setDescription, setEmail, setAccountType, setName, 
+    setRole, setOrganization, setAuth, setProfilePic } = useAppContext();
 
   const router = useRouter();
 
@@ -70,15 +69,9 @@ export default function Component() {
       setAccountType(response.body.accountType);
       setOrganization(response.body.company.id);
       setDescription(response.body.bio);
-      connectToSocket();
       router.push("/listings");
     }
     setLoading(false);
-  }
-
-  function connectToSocket() {
-    const socketConn = io.connect(process.env.NEXT_PUBLIC_API_URL);
-    setSocket(socketConn);
   }
 
   const googleLoginSponsor = () => window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/google/auth/sponsor`;

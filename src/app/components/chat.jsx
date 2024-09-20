@@ -10,13 +10,14 @@ import { useAppContext } from "@/context";
 import request from "@/request";
 import { toast } from "sonner";
 import { convertFromUtcToLocal, chatTime } from "@/utils";
-
+import io from "socket.io-client";
 
 export default function Component({ room, participant, chatMessages }) {
   const [leftPanelOpen, setLeftPanelOpen] = useState(false)
   const [rightPanelOpen, setRightPanelOpen] = useState(false)
+  const [socket, setSocket] = useState(null);
 
-  const { socket, name } = useAppContext();
+  const { name } = useAppContext();
   const [messages, setMessages] = useState(chatMessages);
 
   const [joined, setJoined] = useState(false);
@@ -32,6 +33,9 @@ export default function Component({ room, participant, chatMessages }) {
     scrollToBottom()
   }, [messages]);
 
+  useEffect(() => {
+    connectToSocket();
+  },[])
 
   useEffect(() => {
     if(socket) {
@@ -49,6 +53,13 @@ export default function Component({ room, participant, chatMessages }) {
       });
     }
   },[joined]);
+
+  function connectToSocket() {
+    if(!socket) {
+      const socketConn = io.connect(process.env.NEXT_PUBLIC_API_URL);
+      setSocket(socketConn);
+    }
+  }
 
   const handleSendMessage = async () => {
     if (newMessage.trim()) {
@@ -128,7 +139,7 @@ export default function Component({ room, participant, chatMessages }) {
             >
               <div className={`flex ${message.senderId === "You" ? "flex-row-reverse" : "flex-row"} items-end space-x-2`}>
         <Avatar className="w-7 h-7 mr-1 ml-1">
-          <AvatarImage src={`https://api.dicebear.com/6.x/initials/svg?seed=${message.senderId === "You" ? name : participant.name}`} />
+          <AvatarImage src={`https://api.dicebear.com/5.x/initials/svg?seed=${message.senderId === "You" ? name : participant.name}`} />
           <AvatarFallback>{message.senderId === "You" ? name : participant.name}</AvatarFallback>
         </Avatar>
                 <div className={`flex flex-col ${message.senderId === "You" ? "items-end" : "items-start"}`}>
@@ -246,36 +257,6 @@ export default function Component({ room, participant, chatMessages }) {
             </div>
           </div>
         </ScrollArea>
-      </div>
-    </div>
-  )
-}
-
-
-function ChatMessage({ messageData, name }) {
-  const message = {
-    name,
-    content: messageData.content,
-    time: new Date(),
-    isSender: false
-  }
-
-  return (
-    <div className={`flex ${message.isSender ? 'justify-end' : 'justify-start'} mb-4`}>
-      <div className={`flex items-end space-x-2 ${message.isSender ? 'flex-row-reverse space-x-reverse' : ''}`}>
-        <Avatar className="w-8 h-8">
-          <AvatarImage src={`https://api.dicebear.com/6.x/initials/svg?seed=${message.name}`} />
-          <AvatarFallback>{message.name.charAt(0)}</AvatarFallback>
-        </Avatar>
-        <div className={`flex flex-col ${message.isSender ? 'items-end' : 'items-start'}`}>
-          <div className={`rounded-lg p-3 max-w-[240px] ${message.isSender ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
-            <p className="text-sm break-words">{message.content}</p>
-          </div>
-          <div className="flex items-center mt-1 space-x-2">
-            <p className="text-xs text-muted-foreground">{message.name}</p>
-            <p className="text-xs text-muted-foreground">{format(message.time, 'HH:mm')}</p>
-          </div>
-        </div>
       </div>
     </div>
   )

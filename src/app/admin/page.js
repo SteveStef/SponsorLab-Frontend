@@ -155,7 +155,7 @@ export default function AdminDashboard() {
             <DollarSign className="w-4 h-4 text-green-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${stats.stripeBalance.toLocaleString()}</div>
+            <div className="text-2xl font-bold">${(stats.stripeBalance / 100).toLocaleString()}</div>
           </CardContent>
         </Card>
       </div>

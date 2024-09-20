@@ -4,11 +4,10 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useAppContext } from "@/context";
 import request from "@/request";
-import io from "socket.io-client";
 
 export default function Authenticating({params}) {
   const router = useRouter();
-  const { setCompany, setSocket, setEmail, setAccountType, setName, setRole, setOrganization, setAuth, setProfilePic } = useAppContext();
+  const { setCompany, setEmail, setAccountType, setName, setRole, setOrganization, setAuth, setProfilePic } = useAppContext();
 
   async function authenticateUser(id) {
     const url = `${process.env.NEXT_PUBLIC_API_URL}/google/account/${id}`;
@@ -32,14 +31,8 @@ export default function Authenticating({params}) {
         setOrganization(response.body.channel.name);
         setProfilePic(response.body.googleImage || response.body.channel.imageUrl || "");
       }
-      connectToSocket();
     }
     router.push("/listings");
-  }
-
-  function connectToSocket() {
-    const socketConn = io.connect(process.env.NEXT_PUBLIC_API_URL);
-    setSocket(socketConn);
   }
 
   useEffect(() => {

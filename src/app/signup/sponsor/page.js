@@ -11,11 +11,10 @@ import { useAppContext } from "@/context";
 import { useSearchParams } from 'next/navigation';
 import { UserPlus, Mail, Lock, Eye, EyeOff, CheckCircle, ArrowRight, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
-import io from "socket.io-client";
 import Header from "../../components/nav";
 
 export default function EnhancedSignUpForm() {
-  const { setSocket, setCompany, setOrganization, setAuth, setName, setEmail, setRole, setAccountType } = useAppContext();
+  const { setCompany, setOrganization, setAuth, setName, setEmail, setRole, setAccountType } = useAppContext();
 
   const [showVerification, setShowVerification] = useState(false)
   const [verificationCode, setVerificationCode] = useState('')
@@ -120,16 +119,10 @@ export default function EnhancedSignUpForm() {
         setAccountType(response.body.accountType);
         setCompany(response.body.company);
         setOrganization(response.body.company.id);
-        connectToSocket();
         router.push("/organizations/"+response.body.company.id);
       }
     }
     setLoading(false);
-  }
-
-  function connectToSocket() {
-    const socketConn = io.connect(process.env.NEXT_PUBLIC_API_URL);
-    setSocket(socketConn);
   }
 
   const handleGoogleSignUp = () => window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/google/auth/sponsor`;
