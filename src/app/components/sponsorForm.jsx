@@ -34,7 +34,7 @@ export default function Component({listing, setShowSponsorForm}) {
     if(!body.title) error = "Purchase must have a title";
     else if(!body.timeStampOfAdvertisement) error = "Purchase must have a title";
     else if((parseInt(body.duration) <= 0)) error = "duration must be creater than 0 seconds";
-    else if((parseFloat(body.price <= 0))) error = "Price must be creater than $0.00";
+    else if((parseFloat(body.price) <= 0)) error = "Price must be creater than $0.00";
     else if(!agreed) error = "Please accept the terms of service";
     else if(!body.proposal) error = "Please enter something for the proposal";
 

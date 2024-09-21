@@ -11,12 +11,11 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { User, Search,FileCheck, DollarSign, 
   Clock, InfoIcon, CheckCircle, Copy, XCircle, Eye, FileText, Check, X, Calendar, 
-  FileIcon, PlusIcon, Package, MessageSquare, Video, Timer, Gift, MessageCircle } from 'lucide-react';
+  FileIcon, Link2, PlusIcon, Package, MessageSquare, Video, Timer, Gift, MessageCircle } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useAppContext } from '@/context';
 import Request from "@/request";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import { convertFromUtcToLocal, inPast } from '@/utils';
 
 const formatDate = (dateString) => {
@@ -36,15 +35,18 @@ export default function Component() {
   const [load, setLoad] = useState(true);
   const { name, company } = useAppContext();
   const [videoUrls, setVideoUrls] = useState({});
-  console.log(requests);
-
-  const router = useRouter();
 
   const getStatusIcon = (status) => {
     switch (status) {
       case 'PENDING':
         return <Clock className="w-4 h-4 mr-1" />
-      case 'SPONSOR_REVIEW':
+      case 'DRAFT_REVIEW':
+        return <Eye className="w-4 h-4 mr-1" />
+      case 'DRAFT_ACCEPTED':
+        return <Eye className="w-4 h-4 mr-1" />
+      case 'DRAFT_REFUSED':
+        return <Eye className="w-4 h-4 mr-1" />
+      case 'FINAL_REVIEW':
         return <Eye className="w-4 h-4 mr-1" />
       case 'ADMIN_REVIEW':
         return <Eye className="w-4 h-4 mr-1" />
@@ -60,7 +62,6 @@ export default function Component() {
         return null
     }
   }
-
   const handleViewProposal = (request) => {
     setSelectedRequest(request)
     setIsModalOpen(true)
@@ -70,12 +71,18 @@ export default function Component() {
     switch (status) {
       case 'PENDING':
         return 'bg-yellow-900 text-yellow-300'
-      case 'SPONSOR_REVIEW':
+      case 'DRAFT_REVIEW':
+        return 'bg-yellow-900 text-yellow-300'
+      case 'DRAFT_ACCEPTED':
+        return 'bg-green-900 text-green-300'
+      case 'DRAFT_REFUSED':
+        return 'bg-red-900 text-red-300'
+      case 'ACCEPTED':
+        return 'bg-green-900 text-green-300'
+      case 'FINAL_REVIEW':
         return 'bg-yellow-900 text-yellow-300'
       case 'ADMIN_REVIEW':
         return 'bg-purple-500 text-white-300'
-      case 'ACCEPTED':
-        return 'bg-green-900 text-green-300'
       case 'COMPLETED':
         return 'bg-green-900 text-green-300'
       case 'DECLINED':
@@ -92,7 +99,6 @@ export default function Component() {
     setLoad(true);
     const url = `${process.env.NEXT_PUBLIC_API_URL}/requests/sponsor`;
     const response = await Request(url, "GET", null);
-    console.log(response);
     if(response && response.success) {
       response.body.sort((a,b) =>  new Date(b.createdAt) - new Date(a.createdAt));
       setRequests(response.body);
@@ -100,10 +106,9 @@ export default function Component() {
       let vurls = {};
       for(let i = 0; i < response.body.length; i++) {
         const req = response.body[i];
-        console.log(req.transaction)
         obj[req.id] = (req.transaction && req.transaction.status === "COMPLETED") ? "receipt" : req.transaction ? "ongoing" : "request";
-        if(req.transaction && req.transaction.videoUrl) {
-          vurls[req.transaction.id] = req.transaction.videoUrl;
+        if(req.transaction) {
+          vurls[req.transaction.id] = req.transaction.videoUrl || req.transaction.draftVideoUrl || "";
         }
       }
       setActiveTab(obj);
@@ -133,10 +138,10 @@ export default function Component() {
     setLoad(true);
     const url = `${process.env.NEXT_PUBLIC_API_URL}/requests/sponsor/confirm-payment`;
     const response = await Request(url, "POST",  { requestId });
-    console.log(response);
     if(response && response.success) {
       toast.success("Request was accepted");
       await openChat(creatorEmail, requestId);
+      await getRequests();
     } else {
       toast.error("There was a problem when declining request");
     }
@@ -147,10 +152,7 @@ export default function Component() {
     setLoad(true);
     const url = `${process.env.NEXT_PUBLIC_API_URL}/chat`;
     const body = { otherUserEmail: email, requestId }
-    const response = await Request(url, "POST", body);
-    if(response && response.success) {
-      router.push("../chat");
-    }
+    await Request(url, "POST", body);
     setLoad(false);
   }
 
@@ -177,7 +179,7 @@ export default function Component() {
   }
 
   async function refuteVideo(transactionId) {
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/transactions/sponsor/refuteVideo`;
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/transactions/sponsor/refute-video`;
     const body = { transactionId }
     const response = await Request(url, "POST", body);
     if(response && response.success) {
@@ -186,7 +188,30 @@ export default function Component() {
     } else {
       toast.error("Something went wrong, please try again later.");
     }
+  }
 
+  async function approveDraft(transactionId) {
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/transactions/sponsor/approve-draft`;
+    const body = { transactionId }
+    const response = await Request(url, "PUT", body);
+    if(response && response.success) {
+      toast.success("Video has been approved");
+      getRequests();
+    } else {
+      toast.error("Failed to approve video, try again later");
+    }
+  }
+
+  async function refuteDraft(transactionId) {
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/transactions/sponsor/refute-draft`;
+    const body = { transactionId }
+    const response = await Request(url, "POST", body);
+    if(response && response.success) {
+      toast.success("The video url has been refuted and is now under admin review.");
+      getRequests();
+    } else {
+      toast.error("Something went wrong, please try again later.");
+    }
   }
 
   async function refund(transactionId) {
@@ -280,7 +305,7 @@ export default function Component() {
                           <div className="flex items-center space-x-2">
                             <p className="text-lg font-bold text-gray-100 flex items-center">
                               <DollarSign className="w-5 h-5 mr-1 flex-shrink-0 text-gray-400" />
-                        {(request.requestedPrice / 100).toLocaleString()} {request.pricingModel === "CPM" && " CPM"}
+                        {(request.requestedPrice / 100).toLocaleString()} {request.pricingModel === "CPM" ? " CPM" : " FLAT"}
                       </p>
                       {
                         activeTab[request.id] === "request" ? 
@@ -304,7 +329,10 @@ export default function Component() {
                   </ScrollArea>
                 </CardContent>
                 <CardFooter className="flex justify-between">
-                  <ShowButtons request={request} load={load} activeTab={key} confirmRequest={confirmRequest} cancelRequest={cancelRequest} handleViewProposal={handleViewProposal} approveVideo={approveVideo} refuteVideo={refuteVideo} refund={refund}
+                  <ShowButtons request={request} load={load} 
+                    activeTab={key} confirmRequest={confirmRequest} cancelRequest={cancelRequest} 
+                    handleViewProposal={handleViewProposal} approveVideo={approveVideo} refuteVideo={refuteVideo} refund={refund}
+                    approveDraft={approveDraft} refuteDraft={refuteDraft}
                   />
 
                 </CardFooter>
@@ -461,23 +489,33 @@ const tabContent = {
           Upload Deadline: {request.transaction && convertFromUtcToLocal(request.transaction.deadline)}
         </p>
       <div className="flex">
-        <InfoIcon 
-      className="w-4 h-4 mr-2 flex-shrink-0 text-yellow-500" />
-        <p className="text-sm text-yellow-400">{request.transaction && request.transaction.videoUrl ? "Please review this url and approve or refute it" : "Waiting for the youtuber to post the video url by the deadline"}</p>
+        <InfoIcon className="w-5 h-5 mr-1 mt-1 flex-shrink-0 text-yellow-500" />
+        <p className="text-md text-yellow-400">
+
+        {
+            request.transaction && request.transaction.status === "FINAL_REVIEW" ? "Please review the final video url"
+          : request.transaction && request.transaction.status === "DRAFT_REVIEW" ? "Please review the following video draft"
+          : request.transaction && request.transaction.status === "PENDING" ? "Waiting for youtuber to send a draft of the advertisement"
+          : request.transaction && request.transaction.status === "DRAFT_ACCEPTED" ? "Waiting for the youtuber to send the posted youtube video url."
+          : request.transaction && request.transaction.status === "DRAFT_REFUSED" ? "Waiting for the youtuber to make the changes and send a new draft"
+          : "No further action is reqired for this step"
+        }
+
+      </p>
       </div>
 
       {
-        request.transaction && request.transaction.videoUrl &&
+        request.transaction && !["DRAFT_ACCEPTED", "CANCELED"].includes(request.transaction.status) &&
             <div className="space-y-2 px-1">
-              <Label htmlFor="name">Final Youtube Video Url</Label>
+              <Label htmlFor="name">Video Url</Label>
       <div className="flex items-center space-x-2">
             <Input 
       style={{cursor: "pointer"}}
       onClick={() => handleCopy(videoUrls[request.transaction.id])}
       id="bananan"
       readOnly
-      value={`${videoUrls[request.transaction.id]}`}
-            />
+      value={`${videoUrls[request.transaction.id]}`} 
+        />
       <Button 
       size="icon"
       onClick={() => handleCopy(videoUrls[request.transaction.id])}
@@ -486,17 +524,13 @@ const tabContent = {
       </Button>
 
       </div>
+        <p className="text-sm text-gray-400 hover:text-gray-200 flex items-center">
+          <Link2 className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
+          <Link href={request.transaction && (request.transaction.videoUrl|| request.transaction.draftVideoUrl) || "#"} style={{cursor: "pointer"}}>
+      {(request.transaction.videoUrl|| request.transaction.draftVideoUrl) || "No link uploaded"}</Link>
+        </p>
       </div>
       }
-
-      <div 
-        className="absolute top-0 right-2 flex cursor-pointer text-green-500 hover:text-green-400 transition-colors"
-        onClick={()=>{window.open(`${process.env.NEXT_PUBLIC_CLIENT_URL}/chat/${request.chatRoom.id}`, '_blank')}}
-        title="Open Direct Message"
-      >
-        <MessageCircle className="w-5 h-5 mr-1" />
-        Open Chat
-      </div>
       </div>
     )
   },
@@ -524,7 +558,11 @@ const tabContent = {
 
 
 function ShowButtons(props) {
-  const { request, load, activeTab, confirmRequest, cancelRequest, handleViewProposal, approveVideo, refuteVideo, refund } = props;
+  const { request, load, activeTab, confirmRequest, 
+    cancelRequest, handleViewProposal, approveVideo, refuteVideo, refund,
+    approveDraft, refuteDraft
+  } = props;
+
   const [showConfirm, setShowConfirm] = useState(false);
   const [selectedParams, setSelectedParams] = useState("");
   const [selectedInfo, setSelectedInfo] = useState("");
@@ -533,8 +571,13 @@ function ShowButtons(props) {
   const fns = {
     confirmRequest: confirmRequest, 
     cancelRequest: cancelRequest,
+
     approveVideo: approveVideo,
     refuteVideo: refuteVideo,
+
+    approveDraft: approveDraft,
+    refuteDraft: refuteDraft,
+
     refund: refund
   }
 
@@ -579,17 +622,44 @@ function ShowButtons(props) {
         info: "An admin will take a look at this transaction and determind the outcome."
       });
     },
+    "approveDraft": () => {
+      setShowConfirm(true);
+      setFnsName("approveDraft");
+      setSelectedParams(request.transaction.id);
+      setSelectedInfo({ 
+        title: "Are you sure you want to approve this url?", 
+        info: "By accepting this you are saying you are content with how the ad is"
+      });
+    },
+    "refuteDraft": () => {
+      setShowConfirm(true);
+      setFnsName("refuteDraft");
+      setSelectedParams(request.transaction.id);
+      setSelectedInfo({ 
+        title: "Are you sure you want to refute video url?", 
+        info: "Send a message of what you want the youtuber to change"
+      });
+    },
     "refund": () => {
       setShowConfirm(true);
       setFnsName("refund");
       setSelectedParams(request.transaction.id);
-      setSelectedInfo({ 
+      setSelectedInfo({
         title: "Are you sure you want to refund your Partnership?", 
         info: "You are now able to refund because the youtbuer failed to post the video url by the deadline. This action will give you your money back and terminate the transaction between you and the youtuber."
       });
     },
 
   }
+
+  const openChat = <Button
+  className="bg-yellow-700 text-gray-300 hover:bg-yellow-800 flex items-center"
+        onClick={()=>{window.open(`${process.env.NEXT_PUBLIC_CLIENT_URL}/chat/${props.request.chatRoom.id}`, '_blank')}}
+        title="Open Direct Message"
+      >
+        <MessageCircle className="w-5 h-5 mr-1" />
+        Open Chat
+      </Button>
 
   const viewProposal = <Button
     variant="outline"
@@ -624,6 +694,16 @@ function ShowButtons(props) {
       Get Refund
     </Button>
 
+  const approveDraftBtn = <Button disabled={load} onClick={map["approveDraft"]} variant="outline" className="bg-green-900 text-green-100 hover:bg-green-800 border-green-700 flex items-center">
+      <Check className="w-4 h-4 mr-2" />
+      Approve Draft
+    </Button>
+
+  const refuteDraftBtn = <Button disabled={load} onClick={map["refuteDraft"]} variant="outline" className="bg-red-900 text-red-100 hover:bg-red-800 border-red-700 flex items-center">
+      <X className="w-4 h-4 mr-2" />
+      Refute Draft
+    </Button>
+
   function isLate() {
     let deadlineInLocalTime = convertFromUtcToLocal(request.transaction.deadline);
     if(inPast(deadlineInLocalTime)) {
@@ -634,6 +714,7 @@ function ShowButtons(props) {
 
   function getButton() {
     const {request} = props;
+    const status = request.transaction ? request.transaction.status : "";
     if(!request.transaction) {
       if(request.status === "PENDING") {
         return <>{cancel}{viewProposal}</>
@@ -644,19 +725,20 @@ function ShowButtons(props) {
         return viewProposal
       }
     } else { // there is a transaciton
-      if(request.transaction.videoUrl && activeTab === "ongoing" && request.transaction.status === "SPONSOR_REVIEW") {
-        return <>{approve}{refute}</>
-      } else if(activeTab === "request") return viewProposal
-      else if(request.transaction && !request.transaction.videoUrl && activeTab === "ongoing" && request.transaction.status === "PENDING" && isLate()) {
-        return <>{refundBtn}</>
+      if(request.transaction) {
+
+        if(activeTab === "ongoing" && status === "FINAL_REVIEW") return <>{approve}{openChat}{refute}</>
+        if(activeTab === "ongoing" && (status === "DRAFT_REVIEW" || status === "DRAFT_REFUSED")) return <>{approveDraftBtn}{openChat}{refuteDraftBtn}</>
+        else if(activeTab === "request") return viewProposal
+        else if(!request.transaction.videoUrl && activeTab === "ongoing" && request.transaction.status === "PENDING" && isLate()) return <>{refundBtn}{openChat}</>
+        else if(activeTab === "ongoing") return openChat
+
       }
     }
     return <></>
-
   }
 
   const PRICE = request.pricingModel === "CPM" ? parseFloat((request.requestedPrice / 100) * request.post.estimatedViews / 1000) : request.requestedPrice / 100;
-
   return <>
     {getButton()}
       { 

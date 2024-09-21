@@ -22,6 +22,7 @@ const formatDate = (dateString) => {
     day: 'numeric'
   })
 }
+
 export default function Component() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
@@ -36,7 +37,13 @@ export default function Component() {
     switch (status) {
       case 'PENDING':
         return <Clock className="w-4 h-4 mr-1" />
-      case 'SPONSOR_REVIEW':
+      case 'DRAFT_REVIEW':
+        return <Eye className="w-4 h-4 mr-1" />
+      case 'DRAFT_ACCEPTED':
+        return <Eye className="w-4 h-4 mr-1" />
+      case 'DRAFT_REFUSED':
+        return <Eye className="w-4 h-4 mr-1" />
+      case 'FINAL_REVIEW':
         return <Eye className="w-4 h-4 mr-1" />
       case 'ADMIN_REVIEW':
         return <Eye className="w-4 h-4 mr-1" />
@@ -61,10 +68,16 @@ export default function Component() {
     switch (status) {
       case 'PENDING':
         return 'bg-yellow-900 text-yellow-300'
-      case 'SPONSOR_REVIEW':
+      case 'DRAFT_REVIEW':
         return 'bg-yellow-900 text-yellow-300'
+      case 'DRAFT_ACCEPTED':
+        return 'bg-green-900 text-green-300'
+      case 'DRAFT_REFUSED':
+        return 'bg-red-900 text-red-300'
       case 'ACCEPTED':
         return 'bg-green-900 text-green-300'
+      case 'FINAL_REVIEW':
+        return 'bg-yellow-900 text-yellow-300'
       case 'ADMIN_REVIEW':
         return 'bg-purple-500 text-white-300'
       case 'COMPLETED':
@@ -82,7 +95,6 @@ export default function Component() {
     setRefreshing(true);
     const url = `${process.env.NEXT_PUBLIC_API_URL}/requests/creator`;
     const response = await Request(url, "GET", null);
-    console.log(response);
     if(response && response.success) {
       response.body.sort((a,b) =>  new Date(b.createdAt) - new Date(a.createdAt));
       setRequests(response.body);
@@ -92,7 +104,7 @@ export default function Component() {
         const req = response.body[i];
         obj[req.id] = (req.transaction && req.transaction.status === "COMPLETED") ? "receipt" : req.transaction ? "ongoing" : "request";
         if(req.transaction) {
-          vurls[req.transaction.id] = req.transaction.videoUrl || "";
+          vurls[req.transaction.id] = req.transaction.videoUrl || req.transaction.draftVideoUrl || "";
         }
       }
       setVideoUrls(vurls);
@@ -106,7 +118,6 @@ export default function Component() {
     setLoad(true);
     const url = `${process.env.NEXT_PUBLIC_API_URL}/requests/creator/accept`;
     const response = await Request(url, "PUT", {requestId});
-    console.log(response);
     if(response && response.success) {
       toast.success("Request was accepted");
       getRequests();
@@ -152,6 +163,24 @@ export default function Component() {
     setActiveTab(tmp);
   }
 
+  console.log(videoUrls);
+  async function sendDraftUrl(transactionId) {
+    const videoUrl = videoUrls[transactionId];
+    if(!videoUrl) {
+      toast.error("Invalid video");
+      return;
+    }
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/transactions/creator/post-draft`;
+    const response = await Request(url, "PUT", {transactionId, videoUrl});
+    if(response && response.success) {
+      toast.success("Send the video url to the sponsor!");
+      getRequests();
+    } else {
+      toast.error(response.message);
+    }
+    setLoad(false);
+  }
+
   async function sendVideoUrl(transactionId) {
     const videoUrl = videoUrls[transactionId];
     if(!videoUrl || !videoUrl.includes("youtube.com/watch?v=")) {
@@ -164,7 +193,6 @@ export default function Component() {
       toast.success("Send the video url to the sponsor!");
       getRequests();
     } else {
-      //toast.error("Something went wrong, try again later");
       toast.error(response.message);
     }
     setLoad(false);
@@ -243,7 +271,7 @@ export default function Component() {
                               <DollarSign className="w-5 h-5 mr-1 flex-shrink-0 text-gray-400" />
                         {(request.requestedPrice / 100).toLocaleString()}
                         {
-                          request.pricingModel=== "CPM" && " CPM"
+                          request.pricingModel=== "CPM" ? " CPM" : " FLAT"
                         }
                       </p>
                       {
@@ -271,7 +299,7 @@ export default function Component() {
                 </CardContent>
                 <CardFooter className="flex justify-between">
                         <ShowButtons request={request} load={load} 
-                          activeTab={key} sendVideoUrl={sendVideoUrl} 
+                          activeTab={key} sendDraftUrl={sendDraftUrl} sendVideoUrl={sendVideoUrl} 
                           cancelTransaction={cancelTransaction} 
                           handleViewProposal={handleViewProposal} 
                           declineRequest={declineRequest} 
@@ -328,7 +356,7 @@ export default function Component() {
                     Advertisement Details
                   </h3>
                   <p><strong><Clock className="w-4 h-4 inline mr-1" /> Timestamp:</strong> {selectedRequest.timeStamp}</p>
-                  <p><strong><DollarSign className="w-4 h-4 inline mr-1" /> Proposed Payment:</strong> ${selectedRequest.price}</p>
+                  <p><strong><DollarSign className="w-4 h-4 inline mr-1" /> Proposed Payment:</strong> ${(selectedRequest.requestedPrice / 100).toLocaleString()}</p>
                   <p><strong><Timer className="w-4 h-4 inline mr-1" /> Ad Duration:</strong> {selectedRequest.duration} seconds</p>
                   <p><strong><Gift className="w-4 h-4 inline mr-1" /> Sample Product:</strong> {selectedRequest.sendingProduct ? 'Yes' : 'No'}</p>
                 </div>
@@ -434,35 +462,36 @@ const tabContent = {
           Upload Deadline: {request.transaction && convertFromUtcToLocal(request.transaction.deadline)}
         </p>
         <div className="flex text-yellow-400">
-        <InfoIcon className="w-5 h-5 mr-1"/>
-        <p className="text-sm ">{(request.transaction && request.transaction.videoUrl) ? "The video url was send and is being reviewed by the sponsor":"Send Video Url"}</p>
+        <InfoIcon className="w-5 h-5 mr-1 mt-1"/>
+      {
+        {
+          FINAL_REVIEW: "The final video URL is being reviewed by the sponsor",
+            DRAFT_REVIEW: "The draft URL is being reviewed by the sponsor",
+            PENDING: "Please send a draft of the video that contains your ad for the sponsor to review",
+            DRAFT_ACCEPTED: "The draft was accepted, please send the published YouTube video URL",
+            DRAFT_REFUSED: "The sponsor refused your draft, please make these changes and send another draft"
+        }[request.transaction?.status] || "No further action is required for this step"
+      }
       </div>
-            <div className="space-y-2 px-1">
-              <Label htmlFor="name">Final Youtube Video Url</Label>
-            <Input disabled={(request.transaction && (request.transaction.status !== "PENDING" && request.transaction.status !== "SPONSOR_REVIEW"))} 
-              id="name"
-              onChange={(e) => {
-                setVideoUrls((prev => ({
-                  ...prev, [request.transaction.id]: e.target.value
-                })))
-              }}
-              placeholder="https://www.youtube.com/watch?v=..."
-            />
-            </div>
-        <p className="text-sm text-gray-400 hover:text-gray-200 flex items-center">
-          <Link2 className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
-          <Link href={request.transaction && request.transaction.videoUrl || "#"} style={{cursor: "pointer"}}>{(request.transaction && request.transaction.videoUrl) || "No link uploaded"}</Link>
-        </p>
-
-      <div 
-        className="absolute top-0 right-2 flex cursor-pointer text-green-500 hover:text-green-400 transition-colors"
-        onClick={()=>{window.open(`${process.env.NEXT_PUBLIC_CLIENT_URL}/chat/${request.chatRoom.id}`, '_blank')}}
-        title="Open Direct Message"
-      >
-        <MessageCircle className="w-5 h-5 mr-1" />
-        Open Chat
+      <div className="space-y-2 px-1">
+        <Label htmlFor="name">
+          {["PENDING", "DRAFT_REVIEW"].includes(request.transaction?.status) ? "Send the URL of an unlisted video or Dropbox link" : "Send the posted YouTube video URL"}
+        </Label>
+        <Input 
+          id="name"
+          disabled={!["PENDING", "DRAFT_REVIEW", "FINAL_REVIEW", "DRAFT_ACCEPTED", "DRAFT_REFUSED"].includes(request.transaction?.status)}
+          placeholder={request.transaction?.status === "DRAFT_ACCEPTED" ? "https://www.youtube.com/watch?v=..." : ""}
+          onChange={(e) => setVideoUrls((prev) => ({ ...prev, [request.transaction.id]: e.target.value }))}
+        />
       </div>
-      </div>
+      
+      <p className="text-sm text-gray-400 hover:text-gray-200 flex items-center">
+        <Link2 className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
+        <Link href={request.transaction?.videoUrl || request.transaction?.draftVideoUrl || "#"}>
+          {request.transaction?.videoUrl || request.transaction?.draftVideoUrl || "No link uploaded"}
+        </Link>
+      </p>
+    </div>
     )
   },
   receipt: {
@@ -502,6 +531,7 @@ function ShowButtons(props) {
     decline:props.declineRequest, 
     accept: props.acceptRequest,
     cancelTransaction: props.cancelTransaction,
+    sendDraftUrl: props.sendDraftUrl,
     sendVideoUrl: props.sendVideoUrl,
   }
 
@@ -542,8 +572,26 @@ function ShowButtons(props) {
         info: "The video url will be send to the sponsor for review and if they approve then you will be paid. If they do not approve of this video url, then the url will go under admin review."
       });
     },
-
+    "sendDraftUrl": () => {
+      setShowConfirm(true);
+      setFnsName("sendDraftUrl");
+      setSelectedParams(props.request.transaction.id);
+      setSelectedInfo({ 
+        title: "Are you sure you want to send this url as a draft?", 
+        info: "The video url will be send to the sponsor for review. If they do not approve of this video url, they will explain what they want to edit."
+      });
+    }
   }
+
+  const openChat = <Button
+  className="bg-yellow-700 text-gray-300 hover:bg-yellow-800 flex items-center"
+        onClick={()=>{window.open(`${process.env.NEXT_PUBLIC_CLIENT_URL}/chat/${props.request.chatRoom.id}`, '_blank')}}
+        title="Open Direct Message"
+      >
+        <MessageCircle className="w-5 h-5 mr-1" />
+        Open Chat
+      </Button>
+
 
   const viewProposal = <Button
     variant="outline"
@@ -552,7 +600,18 @@ function ShowButtons(props) {
     <Eye className="w-4 h-4 mr-2" />
     View Proposal
   </Button> 
-  const videoUrl = <Button
+
+  const videoUrl = props.request.transaction && (["PENDING","DRAFT_REFUSED","DRAFT_REVIEW"].includes(props.request.transaction.status)) ? 
+    <Button
+    variant="outline"
+    className="bg-green-800 text-gray-300 hover:bg-green-700 border-gray-600 flex items-center"
+    onClick={() => map["sendDraftUrl"]()}
+  >
+    <Video className="w-4 h-4 mr-2" />
+    Send Draft Url
+  </Button> 
+
+    : <Button
     variant="outline"
     className="bg-green-800 text-gray-300 hover:bg-green-700 border-gray-600 flex items-center"
     onClick={() => map["sendVideoUrl"]()}
@@ -579,6 +638,7 @@ function ShowButtons(props) {
 
   function getButton() {
     const {request} = props;
+    const status = request.transaction ? request.transaction.status : "";
 
     if(!request.transaction) {
       if(request.status === "PENDING") {
@@ -591,9 +651,11 @@ function ShowButtons(props) {
     } else { // there is a transaciton
       if(props.activeTab === "request") {
         return <>{viewProposal}</>
-      } else if((request.transaction.status === "PENDING" || request.transaction.status === "SPONSOR_REVIEW") && props.activeTab === "ongoing") {
-        return <>{cancel}{videoUrl}</>
+
+      } else if(!["ADMIN_REVIEW", "COMPLETED", "FAILED", "CANCELED"].includes(status) && props.activeTab === "ongoing") {
+        return <>{cancel}{openChat}{videoUrl}</>
       }
+      return <>{openChat}</>
     }
   }
 
