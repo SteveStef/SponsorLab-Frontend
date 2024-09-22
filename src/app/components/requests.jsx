@@ -14,6 +14,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import Request from "@/request";
 import { toast } from "sonner";
 import { convertFromUtcToLocal } from '@/utils';
+import { Progress } from "@/components/ui/progress"
 
 const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('en-US', {
@@ -163,7 +164,6 @@ export default function Component() {
     setActiveTab(tmp);
   }
 
-  console.log(videoUrls);
   async function sendDraftUrl(transactionId) {
     const videoUrl = videoUrls[transactionId];
     if(!videoUrl) {
@@ -196,6 +196,33 @@ export default function Component() {
       toast.error(response.message);
     }
     setLoad(false);
+  }
+
+  const steps = ["Pending Draft", "Draft Review", "Pending Final Draft", "Final Review", "Complete"]
+
+  function determineStep(status) {
+    switch (status) {
+      case 'PENDING':
+        return 0;
+      case 'DRAFT_REVIEW':
+        return 1;
+      case 'DRAFT_REFUSED':
+        return 1;
+      case 'DRAFT_ACCEPTED':
+        return 2;
+      case 'FINAL_REVIEW':
+        return 3;
+      case 'ADMIN_REVIEW':
+        return 3;
+      case 'COMPLETED':
+        return 4;
+      case 'DECLINED':
+        return 0;
+      case 'CANCELED':
+        return 0;
+      default:
+        return 0;
+    }
   }
 
   return (
@@ -308,6 +335,26 @@ export default function Component() {
                 </CardFooter>
                 </TabsContent>
                 ))}
+
+              {
+                activeTab[request.id]=== "ongoing" && 
+              <div className="px-6 mb-4">
+              <Progress value={determineStep(request.transaction?.status) * 25} 
+              className="w-full h-2" />
+              <div className="flex justify-between mt-2">
+                    {steps.map((step, index) => {
+                      const s = determineStep(request.transaction?.status);
+                      return (
+                      <span 
+                        key={step} 
+                        className={`text-xs ${index <= s ? 'text-white-500 font-semibold' : 'text-gray-400'}`}
+                      >
+                        {step}
+                      </span>
+                    )})}
+                  </div>
+              </div>
+              }
                 </Tabs>
               </Card>
             ))}
@@ -457,30 +504,38 @@ const tabContent = {
           <User className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
           Sponsor: {request.sponsor.name}
         </p>
+
+        <p className="text-sm text-green-500 flex items-center cursor-pointer hover:text-green-400"
+        onClick={()=>{window.open(`${process.env.NEXT_PUBLIC_CLIENT_URL}/chat/${request.chatRoom.id}`, '_blank')}}
+      >
+        <MessageCircle className="w-5 h-5 mr-1" />
+        Open direct messaging with {request.sponsor.name}
+        </p>
+
         <p className="text-sm text-gray-400 flex items-center">
           <Calendar className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
           Upload Deadline: {request.transaction && convertFromUtcToLocal(request.transaction.deadline)}
         </p>
-        <div className="flex text-yellow-400">
-        <InfoIcon className="w-5 h-5 mr-1 mt-1"/>
+        <div className="text-sm flex text-yellow-400">
+        <InfoIcon className="w-4 h-4 mr-1 mt-1"/>
       {
         {
           FINAL_REVIEW: "The final video URL is being reviewed by the sponsor",
             DRAFT_REVIEW: "The draft URL is being reviewed by the sponsor",
             PENDING: "Please send a draft of the video that contains your ad for the sponsor to review",
             DRAFT_ACCEPTED: "The draft was accepted, please send the published YouTube video URL",
-            DRAFT_REFUSED: "The sponsor refused your draft, please make these changes and send another draft"
+            DRAFT_REFUSED: "The sponsor refused your draft, please make these changes and send another draft: " 
         }[request.transaction?.status] || "No further action is required for this step"
       }
       </div>
+      {
+        request.transaction?.status === "DRAFT_REFUSED" && <div className="mt-2">request.transaction?.refuteUrlInfo</div>
+      }
       <div className="space-y-2 px-1">
-        <Label htmlFor="name">
-          {["PENDING", "DRAFT_REVIEW"].includes(request.transaction?.status) ? "Send the URL of an unlisted video or Dropbox link" : "Send the posted YouTube video URL"}
-        </Label>
         <Input 
           id="name"
           disabled={!["PENDING", "DRAFT_REVIEW", "FINAL_REVIEW", "DRAFT_ACCEPTED", "DRAFT_REFUSED"].includes(request.transaction?.status)}
-          placeholder={request.transaction?.status === "DRAFT_ACCEPTED" ? "https://www.youtube.com/watch?v=..." : ""}
+          placeholder={request.transaction?.status === "DRAFT_ACCEPTED" ? "https://www.youtube.com/watch?v=..." : "Enter video link"}
           onChange={(e) => setVideoUrls((prev) => ({ ...prev, [request.transaction.id]: e.target.value }))}
         />
       </div>
@@ -583,16 +638,6 @@ function ShowButtons(props) {
     }
   }
 
-  const openChat = <Button
-  className="bg-yellow-700 text-gray-300 hover:bg-yellow-800 flex items-center"
-        onClick={()=>{window.open(`${process.env.NEXT_PUBLIC_CLIENT_URL}/chat/${props.request.chatRoom.id}`, '_blank')}}
-        title="Open Direct Message"
-      >
-        <MessageCircle className="w-5 h-5 mr-1" />
-        Open Chat
-      </Button>
-
-
   const viewProposal = <Button
     variant="outline"
     className="bg-gray-800 text-gray-300 hover:bg-gray-700 border-gray-600 flex items-center"
@@ -653,9 +698,9 @@ function ShowButtons(props) {
         return <>{viewProposal}</>
 
       } else if(!["ADMIN_REVIEW", "COMPLETED", "FAILED", "CANCELED"].includes(status) && props.activeTab === "ongoing") {
-        return <>{cancel}{openChat}{videoUrl}</>
+        return <>{cancel}{videoUrl}</>
       }
-      return <>{openChat}</>
+      return <></>
     }
   }
 
@@ -675,6 +720,7 @@ function ShowButtons(props) {
               {selectedInfo.info}
             </DialogDescription>
           </div>
+          
           <DialogFooter className="sm:justify-start">
             <Button
               disabled={props.load}

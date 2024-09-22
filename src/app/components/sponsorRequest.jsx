@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, act } from 'react';
 import { Label } from "@/components/ui/label";
 import Link from 'next/link';
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +17,8 @@ import { useAppContext } from '@/context';
 import Request from "@/request";
 import { toast } from "sonner";
 import { convertFromUtcToLocal, inPast } from '@/utils';
+import { Textarea } from '@/components/ui/textarea';
+import { Progress } from "@/components/ui/progress"
 
 const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('en-US', {
@@ -50,8 +52,6 @@ export default function Component() {
         return <Eye className="w-4 h-4 mr-1" />
       case 'ADMIN_REVIEW':
         return <Eye className="w-4 h-4 mr-1" />
-      case 'ACCEPTED':
-        return <CheckCircle className="w-4 h-4 mr-1" />
       case 'COMPLETED':
         return <CheckCircle className="w-4 h-4 mr-1" />
       case 'DECLINED':
@@ -77,8 +77,6 @@ export default function Component() {
         return 'bg-green-900 text-green-300'
       case 'DRAFT_REFUSED':
         return 'bg-red-900 text-red-300'
-      case 'ACCEPTED':
-        return 'bg-green-900 text-green-300'
       case 'FINAL_REVIEW':
         return 'bg-yellow-900 text-yellow-300'
       case 'ADMIN_REVIEW':
@@ -202,12 +200,16 @@ export default function Component() {
     }
   }
 
-  async function refuteDraft(transactionId) {
+  async function refuteDraft(params) {
+    const parts = params.split("|");
+    const transactionId = parts[0];
+    const refuteInfo = parts[1];
+
     const url = `${process.env.NEXT_PUBLIC_API_URL}/transactions/sponsor/refute-draft`;
-    const body = { transactionId }
+    const body = { transactionId, refuteInfo }
     const response = await Request(url, "POST", body);
     if(response && response.success) {
-      toast.success("The video url has been refuted and is now under admin review.");
+      toast.success("The draft url has been refuted.");
       getRequests();
     } else {
       toast.error("Something went wrong, please try again later.");
@@ -233,6 +235,33 @@ export default function Component() {
       setTimeout(() => setCopied(false), 2000) // Reset after 2 seconds
     })
   }, [])
+
+  const steps = ["Pending Draft", "Draft Review", "Pending Final Draft", "Final Review", "Complete"]
+
+  function determineStep(status) {
+    switch (status) {
+      case 'PENDING':
+        return 0;
+      case 'DRAFT_REVIEW':
+        return 1;
+      case 'DRAFT_REFUSED':
+        return 1;
+      case 'DRAFT_ACCEPTED':
+        return 2;
+      case 'FINAL_REVIEW':
+        return 3;
+      case 'ADMIN_REVIEW':
+        return 3;
+      case 'COMPLETED':
+        return 4;
+      case 'DECLINED':
+        return 0;
+      case 'CANCELED':
+        return 0;
+      default:
+        return 0;
+    }
+  }
 
   return (
     <div className="text-gray-300 flex justify-center">
@@ -276,11 +305,26 @@ export default function Component() {
               <Card key={request.id} className="w-full max-w-4xl">
                 <Tabs defaultValue="request" value={activeTab[request.id]} onValueChange={(val) => changeTab(request.id, val)} 
                   className="w-full">
+
                   <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="request">Request</TabsTrigger>
                     <TabsTrigger disabled={!request.transaction} value="ongoing">Parnership</TabsTrigger>
                     <TabsTrigger disabled={(!request.transaction) || (request.transaction.status!=="COMPLETED")} value="receipt">Receipt</TabsTrigger>
                   </TabsList>
+
+              {/*{
+                activeTab[request.id]=== "ongoing" && 
+            <div className="mt-5 flex justify-between ml-4 mr-4">
+              {[1, 2, 3, 4].map((i) => (
+                <div
+                  key={i}
+                  className={`w-1/4 h-2 rounded ${i <= determineStep(request.transaction?.status) ? 'bg-green-700' : 'bg-gray-500'} transition-all duration-300`}
+                />
+              ))}
+            </div>
+              }*/}
+
+
                   {Object.entries(tabContent).map(([key, { title, content }]) => (
                     <TabsContent key={key} value={key}>
                       <CardHeader className="relative pb-2">
@@ -337,11 +381,33 @@ export default function Component() {
 
                 </CardFooter>
                 </TabsContent>
+
                 ))}
-                </Tabs>
+
+              {
+                activeTab[request.id]=== "ongoing" && 
+              <div className="px-6 mb-4">
+              <Progress value={determineStep(request.transaction?.status) * 25} 
+              className="w-full h-2" />
+              <div className="flex justify-between mt-2">
+                    {steps.map((step, index) => {
+                      const s = determineStep(request.transaction?.status);
+                      return (
+                      <span 
+                        key={step} 
+                        className={`text-xs ${index <= s ? 'text-white-500 font-semibold' : 'text-gray-400'}`}
+                      >
+                        {step}
+                      </span>
+                    )})}
+                  </div>
+              </div>
+              }
+              </Tabs>
               </Card>
             ))}
           </div>
+
         </div>
       </div>
 
@@ -483,13 +549,19 @@ const tabContent = {
           <User className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
           Youtuber: {request.creator.name}
         </p>
+        <p className="text-sm text-green-500 flex items-center cursor-pointer hover:text-green-400"
+        onClick={()=>{window.open(`${process.env.NEXT_PUBLIC_CLIENT_URL}/chat/${request.chatRoom.id}`, '_blank')}}
+      >
+        <MessageCircle className="w-5 h-5 mr-1" />
+        Open direct messaging with {request.creator.name}
+        </p>
 
         <p className="text-sm text-gray-400 flex items-center">
           <Calendar className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
           Upload Deadline: {request.transaction && convertFromUtcToLocal(request.transaction.deadline)}
         </p>
-      <div className="flex">
-        <InfoIcon className="w-5 h-5 mr-1 mt-1 flex-shrink-0 text-yellow-500" />
+      <div className="flex text-sm">
+        <InfoIcon className=" w-4 h-4 mr-1 flex-shrink-0 text-yellow-500" />
         <p className="text-md text-yellow-400">
 
         {
@@ -505,9 +577,8 @@ const tabContent = {
       </div>
 
       {
-        request.transaction && !["DRAFT_ACCEPTED", "CANCELED"].includes(request.transaction.status) &&
+        request.transaction && !["PENDING","DRAFT_ACCEPTED", "CANCELED"].includes(request.transaction.status) &&
             <div className="space-y-2 px-1">
-              <Label htmlFor="name">Video Url</Label>
       <div className="flex items-center space-x-2">
             <Input 
       style={{cursor: "pointer"}}
@@ -567,6 +638,7 @@ function ShowButtons(props) {
   const [selectedParams, setSelectedParams] = useState("");
   const [selectedInfo, setSelectedInfo] = useState("");
   const [fnsName, setFnsName] = useState("");
+  const [refuteInfo, setRefuteInfo] = useState("");
 
   const fns = {
     confirmRequest: confirmRequest, 
@@ -652,15 +724,6 @@ function ShowButtons(props) {
 
   }
 
-  const openChat = <Button
-  className="bg-yellow-700 text-gray-300 hover:bg-yellow-800 flex items-center"
-        onClick={()=>{window.open(`${process.env.NEXT_PUBLIC_CLIENT_URL}/chat/${props.request.chatRoom.id}`, '_blank')}}
-        title="Open Direct Message"
-      >
-        <MessageCircle className="w-5 h-5 mr-1" />
-        Open Chat
-      </Button>
-
   const viewProposal = <Button
     variant="outline"
     className="bg-gray-800 text-gray-300 hover:bg-gray-700 border-gray-600 flex items-center"
@@ -727,11 +790,10 @@ function ShowButtons(props) {
     } else { // there is a transaciton
       if(request.transaction) {
 
-        if(activeTab === "ongoing" && status === "FINAL_REVIEW") return <>{approve}{openChat}{refute}</>
-        if(activeTab === "ongoing" && (status === "DRAFT_REVIEW" || status === "DRAFT_REFUSED")) return <>{approveDraftBtn}{openChat}{refuteDraftBtn}</>
+        if(activeTab === "ongoing" && status === "FINAL_REVIEW") return <>{approve}{refute}</>
+        if(activeTab === "ongoing" && (status === "DRAFT_REVIEW" || status === "DRAFT_REFUSED")) return <>{approveDraftBtn}{refuteDraftBtn}</>
         else if(activeTab === "request") return viewProposal
-        else if(!request.transaction.videoUrl && activeTab === "ongoing" && request.transaction.status === "PENDING" && isLate()) return <>{refundBtn}{openChat}</>
-        else if(activeTab === "ongoing") return openChat
+        else if(!request.transaction.videoUrl && activeTab === "ongoing" && request.transaction.status === "PENDING" && isLate()) return <>{refundBtn}</>
 
       }
     }
@@ -757,17 +819,29 @@ function ShowButtons(props) {
               {selectedInfo.info}
             </DialogDescription>
           </div>
+          {
+            fnsName === "refuteDraft" &&
+                <Textarea
+                  onChange={(e) => setRefuteInfo(e.target.value)}
+                  type="text"
+                  placeholder="What would you like the youtuber to change?"
+                  className="border-gray-700 text-gray-300 w-full placeholder-gray-500"
+                />
+          }
           <DialogFooter className="sm:justify-start">
+
             <Button
               disabled={load}
               onClick={() => {
-                fns[fnsName](selectedParams);
+                if(fnsName === "refuteDraft") {
+                  fns[fnsName](selectedParams + "|" + refuteInfo);
+                } else fns[fnsName](selectedParams);
                 setShowConfirm(false);
               }} 
               className="bg-green-600 text-green-100 hover:bg-green-500 border-green-700"
             >
               {
-                load ? "Loading..." : "I understand and accept"
+                load ? "Loading..." : fnsName !== "refuteDraft" ? "I understand and accept" : "Send Refute"
               }
             </Button>
             <Button
