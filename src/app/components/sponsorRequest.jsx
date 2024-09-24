@@ -1,6 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback, act } from 'react';
-import { Label } from "@/components/ui/label";
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,14 +10,16 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { User, Search,FileCheck, DollarSign, 
   Clock, InfoIcon, CheckCircle, Copy, XCircle, Eye, FileText, Check, X, Calendar, 
-  FileIcon, Link2, PlusIcon, Package, MessageSquare, Video, Timer, Gift, MessageCircle } from 'lucide-react';
+  FileIcon, Link2, PlusIcon, Package, MessageSquare, Video, Timer, Gift, MessageCircle, Flag} from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useAppContext } from '@/context';
 import Request from "@/request";
 import { toast } from "sonner";
 import { convertFromUtcToLocal, inPast } from '@/utils';
 import { Textarea } from '@/components/ui/textarea';
-import { Progress } from "@/components/ui/progress"
+import { Progress } from "@/components/ui/progress";
+import { Label } from "@/components/ui/label";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('en-US', {
@@ -36,6 +37,9 @@ export default function Component() {
   const [refreshing, setRefreshing] = useState(true);
   const [load, setLoad] = useState(true);
   const { name, company } = useAppContext();
+
+  const [flagDialog, setFlagDialog] = useState(false);
+  const [flagFormData, setFlagFormData] = useState({ problemType: '', problemDescription: '', requestId: ''});
   const [videoUrls, setVideoUrls] = useState({});
 
   const getStatusIcon = (status) => {
@@ -50,6 +54,8 @@ export default function Component() {
         return <Eye className="w-4 h-4 mr-1" />
       case 'FINAL_REVIEW':
         return <Eye className="w-4 h-4 mr-1" />
+      case 'ACCEPTED':
+        return <CheckCircle className="w-4 h-4 mr-1" />
       case 'ADMIN_REVIEW':
         return <Eye className="w-4 h-4 mr-1" />
       case 'COMPLETED':
@@ -74,6 +80,8 @@ export default function Component() {
       case 'DRAFT_REVIEW':
         return 'bg-yellow-900 text-yellow-300'
       case 'DRAFT_ACCEPTED':
+        return 'bg-green-900 text-green-300'
+      case 'ACCEPTED':
         return 'bg-green-900 text-green-300'
       case 'DRAFT_REFUSED':
         return 'bg-red-900 text-red-300'
@@ -228,6 +236,33 @@ export default function Component() {
     }
   }
 
+  async function handleSubmitProblem() {
+    if(!flagFormData.problemType || !flagFormData.problemDescription) {
+      toast.error("Please enter in all fields");
+      return;
+    }
+
+    setLoad(true);
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/issues`;
+    const response = await Request(url, "POST", flagFormData);
+
+    if(response.success) toast.success(response.message);
+    else toast.error("Failed to send");
+
+    setFlagDialog(false);
+    setFlagFormData({problemType: '', problemDescription: '', requestId: ''});
+    setLoad(false);
+  }
+
+  async function handleAdminAssistance(requestId) {
+    setFlagDialog(true);
+    setFlagFormData({ problemType: '', problemDescription: '', requestId: requestId });
+  }
+
+  const handleInputChange = (field, value) => {
+    setFlagFormData(prev => ({ ...prev, [field]: value }))
+  }
+
   const [copied, setCopied] = useState(false);
   const handleCopy = useCallback((url) => {
     navigator.clipboard.writeText(url).then(() => {
@@ -236,7 +271,7 @@ export default function Component() {
     })
   }, [])
 
-  const steps = ["Pending Draft", "Draft Review", "Pending Final Draft", "Final Review", "Complete"]
+  const steps = ["Pending Draft", "Draft Review", "Pending Final Draft", "Final Review", "Complete"];
 
   function determineStep(status) {
     switch (status) {
@@ -324,7 +359,6 @@ export default function Component() {
             </div>
               }*/}
 
-
                   {Object.entries(tabContent).map(([key, { title, content }]) => (
                     <TabsContent key={key} value={key}>
                       <CardHeader className="relative pb-2">
@@ -340,10 +374,13 @@ export default function Component() {
                               <Clock className="w-4 h-4 mr-2 flex-shrink-0 text-blue-500" />
                               Requested on: {new Date(request.createdAt).toDateString()}
                             </p> : 
-                            <p className="text-sm text-gray-400 flex items-center mb-2">
-                              <Clock className="w-4 h-4 mr-2 flex-shrink-0 text-blue-500" />
-                              Started on: {request.transaction && new Date(request.transaction.createdAt).toDateString()}
-                            </p>
+
+                              <p className="text-sm text-green-500 flex items-center cursor-pointer hover:text-green-400 mb-2"
+                              onClick={()=>{window.open(`${process.env.NEXT_PUBLIC_CLIENT_URL}/chat/${request.chatRoom.id}`, '_blank')}}
+                              >
+                              <MessageCircle className="w-5 h-5 mr-1" />
+                              Open direct messaging with {request.creator.name}
+                              </p>
                             }
                           </div>
                           <div className="flex items-center space-x-2">
@@ -363,8 +400,26 @@ export default function Component() {
                         {request.transaction && request.transaction.status}
                       </Badge>
                       }
-                    </div>
+                    {
+                      activeTab[request.id] === "ongoing" &&
+                    <TooltipProvider>
+                    <Tooltip>
+                    <TooltipTrigger asChild>
 
+                    <Flag
+                    className="w-5 h-5 text-red-500 cursor-pointer hover:text-red-400"
+                    onClick={() => handleAdminAssistance(request.id)}
+                    />
+
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs text-white p-2 rounded shadow-lg">
+                    <p>Request Admin Assistance</p>
+                    <p className="text-xs mt-1">Click this flag to alert our admin team. Use this for urgent issues, disputes, or when you need immediate help with your request.</p>
+                    </TooltipContent>
+                    </Tooltip>
+                    </TooltipProvider>
+                    }
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -381,7 +436,6 @@ export default function Component() {
 
                 </CardFooter>
                 </TabsContent>
-
                 ))}
 
               {
@@ -415,7 +469,7 @@ export default function Component() {
 <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
       <DialogContent className="text-gray-300 max-w-4xl">
         <DialogHeader>
-          <DialogTitle className="text-3xl font-bold text-green-400">Sponsor Proposal</DialogTitle>
+          <DialogTitle className="text-3xl font-bold text-green-400">Request Details</DialogTitle>
         </DialogHeader>
         {selectedRequest && (
           <>
@@ -455,6 +509,7 @@ export default function Component() {
                   <p><strong><DollarSign className="w-4 h-4 inline mr-1" /> Proposed Payment:</strong> ${selectedRequest.requestedPrice/100} {selectedRequest.pricingModel}</p>
                   <p><strong><Timer className="w-4 h-4 inline mr-1" /> Ad Duration:</strong> {selectedRequest.duration} seconds</p>
                   <p><strong><Gift className="w-4 h-4 inline mr-1" /> Sample Product:</strong> {selectedRequest.sendingProduct ? 'Yes' : 'No'}</p>
+                  <p><strong><DollarSign className="w-4 h-4 inline mr-1" /> Payment Cap:</strong> {selectedRequest.hasPaymentCap ? selectedRequest.paymentCap : "none"}</p>
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-green-400 flex items-center">
@@ -475,6 +530,51 @@ export default function Component() {
         )}
       </DialogContent>
     </Dialog>
+    <Dialog open={flagDialog} onOpenChange={setFlagDialog}>
+        <DialogContent className="sm:max-w-[425px] text-white">
+          <DialogHeader>
+            <DialogTitle>Request Admin Assistance</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="problem-type" className="col-span-4">
+                Type of Problem
+              </Label>
+              <Select
+                onValueChange={(value) => handleInputChange('problemType', value)}
+                value={flagFormData.problemType}
+              >
+                <SelectTrigger className="col-span-4">
+                  <SelectValue placeholder="Select the type of problem" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="TECHNICAL">Technical Issue</SelectItem>
+                  <SelectItem value="PAYMENT">Payment Issue</SelectItem>
+                  <SelectItem value="PARTNERSHIP">Partnership Dispute</SelectItem>
+                  <SelectItem value="OTHER">Other</SelectItem>
+                </SelectContent>
+              </Select>
+
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="problem-description" className="col-span-4">
+                Problem Description
+              </Label>
+              <Textarea
+                id="problem-description"
+                placeholder="Please describe the problem you're experiencing..."
+                className="col-span-4"
+                value={flagFormData.problemDescription}
+                onChange={(e) => handleInputChange('problemDescription', e.target.value)}
+              />
+            </div>
+            <span className="text-sm text-gray-400">Please note that this will cause the partnership to pause and be under admin review.</span>
+          </div>
+          <DialogFooter>
+            <Button type="submit" disabled={load} onClick={handleSubmitProblem}>Send to Admin</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
@@ -536,7 +636,14 @@ const tabContent = {
           <FileText className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
           Product: {request.title}
         </p>
-        <p className="text-sm text-gray-300">{request.description}</p>
+      {
+        request.hasPaymentCap && 
+        <p className="text-sm text-red-400 flex items-center">
+          <DollarSign className="w-4 h-4 mr-2 flex-shrink-0 " />
+          The sponsor has setup a payment cap of ${(request.paymentCap / 100).toLocaleString()}
+        </p>
+      }
+        <p className="text-sm text-gray-300">{request.proposal}</p>
       </div>
     )
   },
@@ -545,15 +652,13 @@ const tabContent = {
     content: (request, videoUrls, copied, handleCopy) => (
       <div className="space-y-1">
 
+      <p className="text-sm text-gray-400 flex items-center mb-2">
+      <Clock className="w-4 h-4 mr-2 flex-shrink-0 text-blue-500" />
+      Started on: {request.transaction && new Date(request.transaction.createdAt).toDateString()}
+      </p>
         <p className="text-sm text-gray-400 flex items-center">
           <User className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
           Youtuber: {request.creator.name}
-        </p>
-        <p className="text-sm text-green-500 flex items-center cursor-pointer hover:text-green-400"
-        onClick={()=>{window.open(`${process.env.NEXT_PUBLIC_CLIENT_URL}/chat/${request.chatRoom.id}`, '_blank')}}
-      >
-        <MessageCircle className="w-5 h-5 mr-1" />
-        Open direct messaging with {request.creator.name}
         </p>
 
         <p className="text-sm text-gray-400 flex items-center">
@@ -561,7 +666,7 @@ const tabContent = {
           Upload Deadline: {request.transaction && convertFromUtcToLocal(request.transaction.deadline)}
         </p>
       <div className="flex text-sm">
-        <InfoIcon className=" w-4 h-4 mr-1 flex-shrink-0 text-yellow-500" />
+        <InfoIcon className="w-4 h-4 mr-1 flex-shrink-0 text-yellow-500" />
         <p className="text-md text-yellow-400">
 
         {
@@ -608,7 +713,7 @@ const tabContent = {
   receipt: {
     title: "Transaction Receipt",
     content: (request)=> (
-      <div className="space-y-6">
+      <div className="space-y-2">
         <p className="text-sm text-gray-400 flex items-center ">
           <FileCheck className="w-4 h-4 mr-2 flex-shrink-0 text-green-500" />
           Completed on: {formatDate(new Date())}
@@ -621,6 +726,7 @@ const tabContent = {
             <FileText className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
             Product: {request.title}
           </p>
+
           <p className="text-sm text-gray-300">Thank you for your purchase. This serves as your official receipt.</p>
         </div>
       )
@@ -855,22 +961,22 @@ function ShowButtons(props) {
       </Dialog>
           :
           <Dialog open={showConfirm} onOpenChange={setShowConfirm}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">Checkout - Partnership Step</DialogTitle>
         </DialogHeader>
         <div className="py-4">
-          <div className="flex items-start space-x-2 mb-4 p-3 bg-gray-50 rounded-md">
-            <InfoIcon className="w-5 h-5 text-black mt-0.5 flex-shrink-0" />
-            <p className="text-sm text-black">
+            <div className="flex items-start space-x-2 mb-4 p-3 bg-secondary rounded-md">
+            <InfoIcon className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+            <p className="text-sm text-white-100 font-semibold">
               This will initiate the partnership with the YouTuber. The funds will be held until the video is published and reviewed by you (the sponsor). Only then will the funds be transferred to the YouTuber.
             </p>
           </div>
           {
             request.pricingModel === "CPM" &&
-            <div className="flex items-start space-x-2 mb-4 p-3 bg-gray-50 rounded-md">
-            <InfoIcon className="w-5 h-5 text-black mt-0.5 flex-shrink-0" />
-            <p className="text-sm text-black">
+            <div className="flex items-start space-x-2 mb-4 p-3 bg-secondary rounded-md">
+            <InfoIcon className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+            <p className="text-sm text-white-100 font-semibold">
             The pricing model is based on CPM, meaning you will initially be charged based on the estimated number of views the video is expected to receive. After one month, you will either be charged or refunded the difference, depending on the actual performance of the video.
             </p>
             </div>

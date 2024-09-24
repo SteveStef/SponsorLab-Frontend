@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { Textarea } from '@/components/ui/textarea';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label"
@@ -9,12 +10,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { User, Search,FileCheck, DollarSign, InfoIcon, Video, Link2,
-  Clock, CheckCircle, XCircle, Eye, FileText, Check, X, Calendar, FileIcon, Package, MessageSquare, Timer, Gift, MessageCircle} from 'lucide-react';
+  Clock, CheckCircle, XCircle, Eye, FileText, Check, X, Calendar, FileIcon, Package, MessageSquare, 
+  Timer, Gift, MessageCircle, Flag} from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import Request from "@/request";
 import { toast } from "sonner";
 import { convertFromUtcToLocal } from '@/utils';
-import { Progress } from "@/components/ui/progress"
+import { Progress } from "@/components/ui/progress";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('en-US', {
@@ -30,6 +33,8 @@ export default function Component() {
   const [activeTab, setActiveTab] = useState({});
   const [requests, setRequests] = useState([]);
   const [refreshing, setRefreshing] = useState(true);
+  const [flagDialog, setFlagDialog] = useState(false);
+  const [flagFormData, setFlagFormData] = useState({ problemType: '', problemDescription: '', requestId: ''});
   const [load, setLoad] = useState(true);
 
   const [videoUrls, setVideoUrls] = useState({});
@@ -198,6 +203,33 @@ export default function Component() {
     setLoad(false);
   }
 
+  async function handleSubmitProblem() {
+    if(!flagFormData.problemType || !flagFormData.problemDescription) {
+      toast.error("Please enter in all fields");
+      return;
+    }
+
+    setLoad(true);
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/issues`;
+    const response = await Request(url, "POST", flagFormData);
+
+    if(response.success) toast.success(response.message);
+    else toast.error("Failed to send");
+
+    setFlagDialog(false);
+    setFlagFormData({problemType: '', problemDescription: '', requestId: ''});
+    setLoad(false);
+  }
+
+  async function handleAdminAssistance(requestId) {
+    setFlagDialog(true);
+    setFlagFormData({ problemType: '', problemDescription: '', requestId: requestId });
+  }
+
+  const handleInputChange = (field, value) => {
+    setFlagFormData(prev => ({ ...prev, [field]: value }))
+  }
+
   const steps = ["Pending Draft", "Draft Review", "Pending Final Draft", "Final Review", "Complete"]
 
   function determineStep(status) {
@@ -287,10 +319,14 @@ export default function Component() {
                               <Clock className="w-4 h-4 mr-2 flex-shrink-0 text-blue-500" />
                               Requested on: {new Date(request.createdAt).toDateString()}
                             </p> : 
-                            <p className="text-sm text-gray-400 flex items-center mb-2">
-                              <Clock className="w-4 h-4 mr-2 flex-shrink-0 text-blue-500" />
-                              Started on: {request.transaction && new Date(request.transaction.createdAt).toDateString()}
-                            </p>
+
+
+                              <p className="text-sm text-green-500 flex items-center cursor-pointer hover:text-green-400 mb-2"
+                              onClick={()=>{window.open(`${process.env.NEXT_PUBLIC_CLIENT_URL}/chat/${request.chatRoom.id}`, '_blank')}}
+                              >
+                              <MessageCircle className="w-5 h-5 mr-1" />
+                              Open direct messaging with {request.sponsor.name}
+                              </p>
                             }
                           </div>
                           <div className="flex items-center space-x-2">
@@ -313,6 +349,26 @@ export default function Component() {
                         {request.transaction && request.transaction.status}
                       </Badge>
                       }
+
+                    {
+                      activeTab[request.id] === "ongoing" &&
+                    <TooltipProvider>
+                    <Tooltip>
+                    <TooltipTrigger asChild>
+
+                    <Flag
+                    className="w-5 h-5 text-red-500 cursor-pointer hover:text-red-400"
+                    onClick={() => handleAdminAssistance(request.id)}
+                    />
+
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs text-white p-2 rounded shadow-lg">
+                    <p>Request Admin Assistance</p>
+                    <p className="text-xs mt-1">Click this flag to alert our admin team. Use this for urgent issues, disputes, or when you need immediate help with your request.</p>
+                    </TooltipContent>
+                    </Tooltip>
+                    </TooltipProvider>
+                    }
                     </div>
                   </div>
                 </CardHeader>
@@ -366,7 +422,7 @@ export default function Component() {
 <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
       <DialogContent className="text-gray-300 max-w-4xl">
         <DialogHeader>
-          <DialogTitle className="text-3xl font-bold text-green-400">Sponsor Proposal</DialogTitle>
+          <DialogTitle className="text-3xl font-bold text-green-400">Request Details</DialogTitle>
         </DialogHeader>
         {selectedRequest && (
           <>
@@ -406,6 +462,7 @@ export default function Component() {
                   <p><strong><DollarSign className="w-4 h-4 inline mr-1" /> Proposed Payment:</strong> ${(selectedRequest.requestedPrice / 100).toLocaleString()}</p>
                   <p><strong><Timer className="w-4 h-4 inline mr-1" /> Ad Duration:</strong> {selectedRequest.duration} seconds</p>
                   <p><strong><Gift className="w-4 h-4 inline mr-1" /> Sample Product:</strong> {selectedRequest.sendingProduct ? 'Yes' : 'No'}</p>
+                  <p><strong><DollarSign className="w-4 h-4 inline mr-1" /> Payment Cap:</strong> {selectedRequest.hasPaymentCap ? selectedRequest.paymentCap : "NONE"}</p>
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-green-400 flex items-center">
@@ -427,10 +484,51 @@ export default function Component() {
       </DialogContent>
     </Dialog>
 
+    <Dialog open={flagDialog} onOpenChange={setFlagDialog}>
+        <DialogContent className="sm:max-w-[425px] text-white">
+          <DialogHeader>
+            <DialogTitle>Request Admin Assistance</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="problem-type" className="col-span-4">
+                Type of Problem
+              </Label>
+              <Select
+                onValueChange={(value) => handleInputChange('problemType', value)}
+                value={flagFormData.problemType}
+              >
+                <SelectTrigger className="col-span-4">
+                  <SelectValue placeholder="Select the type of problem" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="TECHNICAL">Technical Issue</SelectItem>
+                  <SelectItem value="PAYMENT">Payment Issue</SelectItem>
+                  <SelectItem value="PARTNERSHIP">Partnership Dispute</SelectItem>
+                  <SelectItem value="OTHER">Other</SelectItem>
+                </SelectContent>
+              </Select>
 
-
-
-
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="problem-description" className="col-span-4">
+                Problem Description
+              </Label>
+              <Textarea
+                id="problem-description"
+                placeholder="Please describe the problem you're experiencing..."
+                className="col-span-4"
+                value={flagFormData.problemDescription}
+                onChange={(e) => handleInputChange('problemDescription', e.target.value)}
+              />
+            </div>
+            <span className="text-sm text-gray-400">Please note that this will cause the partnership to pause and be under admin review.</span>
+          </div>
+          <DialogFooter>
+            <Button type="submit" disabled={load} onClick={handleSubmitProblem}>Send to Admin</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
@@ -492,6 +590,14 @@ const tabContent = {
           <FileText className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
           Product: {request.title}
         </p>
+
+      {
+        request.hasPaymentCap && 
+        <p className="text-sm text-red-400 flex items-center">
+          <DollarSign className="w-4 h-4 mr-2 flex-shrink-0 " />
+          The sponsor has setup a payment cap of ${(request.paymentCap / 100).toLocaleString()}
+        </p>
+      }
         <p className="text-sm text-gray-300">{request.description}</p>
       </div>
     )
@@ -500,16 +606,15 @@ const tabContent = {
     title: "You have partnered with a sponsor!",
     content: (request,videoUrls,setVideoUrls)=> (
       <div className="space-y-2">
+
+      <p className="text-sm text-gray-400 flex items-center">
+        <Clock className="w-4 h-4 mr-2 flex-shrink-0 text-blue-500" />
+        Started on: {request.transaction && new Date(request.transaction.createdAt).toDateString()}
+      </p>
+
         <p className="text-sm text-gray-400 flex items-center">
           <User className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
-          Sponsor: {request.sponsor.name}
-        </p>
-
-        <p className="text-sm text-green-500 flex items-center cursor-pointer hover:text-green-400"
-        onClick={()=>{window.open(`${process.env.NEXT_PUBLIC_CLIENT_URL}/chat/${request.chatRoom.id}`, '_blank')}}
-      >
-        <MessageCircle className="w-5 h-5 mr-1" />
-        Open direct messaging with {request.sponsor.name}
+          Sponsor: {request.sponsor.name} ({request.sponsor.email})
         </p>
 
         <p className="text-sm text-gray-400 flex items-center">
@@ -552,7 +657,7 @@ const tabContent = {
   receipt: {
     title: "Transaction Receipt",
     content: (request)=> (
-      <div className="space-y-5">
+      <div className="space-y-2">
         <p className="text-sm text-gray-400 flex items-center ">
           <FileCheck className="w-4 h-4 mr-2 flex-shrink-0 text-green-500" />
           Completed on: {formatDate(new Date())}
@@ -565,11 +670,11 @@ const tabContent = {
             <FileText className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
             Product: {request.title}
           </p>
+          <p className="text-sm text-gray-300">Thank you for using SponsorLab. This serves as your official receipt.</p>
         <div className="flex text-green-400">
         <InfoIcon className="w-5 h-5 mr-1"/>
           <p className="text-sm text-green-300">The money will hit your bank account within the next 2 weeks, if there are questions or concerns, please contact support@sponsorlab.co</p>
       </div>
-          <p className="text-sm text-gray-300">Thank you for using SponsorLab. This serves as your official receipt.</p>
 
         </div>
       )

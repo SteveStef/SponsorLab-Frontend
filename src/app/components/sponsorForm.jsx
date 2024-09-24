@@ -9,15 +9,19 @@ import { toast } from "sonner";
 import request from "@/request";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge";
-import { InfoIcon , CheckCircleIcon, TrendingUpIcon } from "lucide-react"
+import { InfoIcon } from "lucide-react"
 import { useRouter } from "next/navigation";
 import { convertFromUtcToLocal } from "@/utils";
 import { useAppContext } from "@/context";
 
 export default function Component({listing, setShowSponsorForm}) {
+
+  const PRICE = listing.estimatedPrice / 100 * listing.estimatedViews/1000;
+
   const titleRef = useRef("");
   const timeStampRef = useRef("");
-  const estPriceRef = useRef("");
+  const [estPrice, setEstPrice] = useState(PRICE);
+
   const durationRef = useRef(0);
   const [sendingProduct, setSendingProduct] = useState("NO");
   const [load, setLoad] = useState(false);
@@ -25,6 +29,8 @@ export default function Component({listing, setShowSponsorForm}) {
   const speechRef = useRef("");
   const proposalRef = useRef("");
   const [agreed, setAgreed] = useState(false);
+  const [maxPayment, setMaxPayment] = useState(0);
+  const [wantPaymentCap, setWantPaymentCap] = useState("NO");
   const { name, company } = useAppContext();
 
   const router = useRouter();
@@ -37,6 +43,9 @@ export default function Component({listing, setShowSponsorForm}) {
     else if((parseFloat(body.price) <= 0)) error = "Price must be creater than $0.00";
     else if(!agreed) error = "Please accept the terms of service";
     else if(!body.proposal) error = "Please enter something for the proposal";
+    else if(wantPaymentCap && maxPayment < parseFloat(body.price) * 2) {
+      error = "The payment cap must be atleast 2 times the estimated price";
+    }
 
     if(error) {
       toast.error(error);
@@ -57,10 +66,12 @@ export default function Component({listing, setShowSponsorForm}) {
       timeStampOfAdvertisement: timeStampRef.current.value,
       productDescription: descriptionRef.current.value,
       duration: durationRef.current.value,
-      price: estPriceRef.current.value,
+      price: estPrice,
       creatorName: listing.user.channel.name,
       proposal: proposalRef.current.value,
       sendingProduct: sendingProduct,
+      hasPaymentCap: wantPaymentCap === "YES",
+      paymentCap: maxPayment,
       postId: listing.id,
       pricingModel: listing.pricingModel,
       sponsorName: name,
@@ -123,7 +134,7 @@ export default function Component({listing, setShowSponsorForm}) {
                 {listing.pricingModel === "FLAT" ? "How much are you willing to pay?"
                 : "How much are you willing to pay per 1,000 views?"}
               </Label>
-              <Input ref={estPriceRef} id="price" type="number" placeholder="$" />
+              <Input onChange={(e) => setEstPrice(e.target.value)} value={estPrice} id="price" type="number" placeholder="$" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="ad-duration">Ad Duration (seconds)</Label>
@@ -141,7 +152,36 @@ export default function Component({listing, setShowSponsorForm}) {
                       </SelectContent>
                     </Select>
             </div>
+
+
+    {listing.pricingModel &&
+      <>
+      <div className="space-y-2">
+      <Label htmlFor="sample2">Do you want to add a payment cap?</Label>
+      <Select value={wantPaymentCap} onValueChange={setWantPaymentCap}>
+      <SelectTrigger className="border-gray-600 text-gray-100">
+      <SelectValue placeholder="Select a category" />
+      </SelectTrigger>
+      <SelectContent>
+      <SelectItem value="NO">No</SelectItem>
+      <SelectItem value="YES">Yes</SelectItem>
+      </SelectContent>
+      </Select>
+      </div>
+      </>
+    }
+
+
           </div>
+    {
+      wantPaymentCap === "YES" &&
+        <div className="space-y-2">
+        <Label htmlFor="price2">Payment Cap (must be atleast than ${estPrice*2})</Label>
+        <Input onChange={(e) => setMaxPayment(e.target.value)} id="price2" type="number" value={maxPayment} placeholder="$"
+        className={parseFloat(estPrice)* 2 > maxPayment && `border-red-600`}
+      />
+        </div>
+    }
           <div className="space-y-2">
             <Label htmlFor="feedback">Product/Service</Label>
               <Input ref={descriptionRef} id="price" type="text" placeholder="Short Description of Product/Service" />
