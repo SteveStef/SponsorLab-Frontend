@@ -2,75 +2,79 @@
 import Black from "../../../public/connect.jpg";
 import Image from "next/image";
 import { convertFromUtcToLocal } from "@/utils";
-import { ChevronLeftIcon, FilterIcon, InfoIcon , ChevronRightIcon, AlertTriangleIcon, CheckCircleIcon, 
- EyeIcon, DollarSignIcon, CalendarIcon, TrendingUpIcon, TagIcon  } from "lucide-react";
+import { FilterIcon, InfoIcon, AlertTriangleIcon, CheckCircleIcon, 
+ EyeIcon, DollarSignIcon, CalendarIcon, TrendingUpIcon, TagIcon, X } from "lucide-react";
 import { Badge } from '@/components/ui/badge'
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Select } from "@/components/ui/select";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Slider } from "@/components/ui/slider"
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu"
 import request from "@/request.js";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
-const listingsPerPage = 6;
+const defaultFilter = {dueDate: '', pricingModel: "all", risk: "", viewRange: [0, 1000000]};
+
 export default function Component() {
-  const [listings, setListings] = useState([]);
   const [search, setSearch] = useState("");
   const [filteredListings, setFilteredListings] = useState([]);
-  const [page, setPage] = useState(0);
+
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
+  const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1);
 
-  async function fetchListings() {
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/posts/page/1`;
-    const response = await request(url, "GET", null);
-    console.log(response);
-    //response.body = [...response.body, ...response.body];
-    //response.body = [...response.body, ...response.body];
-    //response.body = [...response.body, ...response.body];
+
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 300);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [search]);
+
+  useEffect(() => {
+    async function searchQuery() {
+      if (debouncedSearch.trim() === "") {
+        await fetchListings(1, defaultFilter);
+      } else {
+        const url = `${process.env.NEXT_PUBLIC_API_URL}/posts/search`;
+        const response = await request(url, "POST", { query: debouncedSearch });
+
+        if (response && response.success) {
+          setFilteredListings(response.body);
+          setTotalPages(1);
+        }
+      }
+    }
+    searchQuery();
+  }, [debouncedSearch]);
+
+  async function fetchListings(page, filters) {
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/posts/page/${page}`;
+    const response = await request(url, "POST", filters);
     if(response && response.success) {
       for(let i = 0; i < response.body.length; i++) {
         response.body[i].riskEvaluation = determindRisk(response.body[i]);
       }
-      setTotalPages((response.body.length % listingsPerPage));
-      setListings(response.body); // this will contain all of the posts that exist
-      updateFilteredListings(response.body, page);
+      setFilteredListings(response.body);
+      setTotalPages(response.totalPages);
     }
   }
 
   useEffect(() => {
-    fetchListings();
+    fetchListings(1, defaultFilter);
   },[]);
-
-  useEffect(() => {
-    const delayDebounceFn = setTimeout(() => {
-      if (!search) {
-        updateFilteredListings(listings, page);
-      } else {
-        const s = search.toLowerCase().trim();
-        const filtered = listings.filter(l => 
-          l.title.toLowerCase().includes(s) || 
-          l.user.name.toLowerCase().includes(s) || 
-          l.tag.toLowerCase().includes(s)
-        );
-
-        const startIndex = page * listingsPerPage;
-        const endIndex = startIndex + listingsPerPage;
-        const paginatedFiltered = filtered.slice(startIndex, endIndex); // Limit to 6 per page
-
-        setFilteredListings(paginatedFiltered);
-      }
-    }, 100);
-
-    return () => clearTimeout(delayDebounceFn);
-  }, [search, listings, page]);
-
-  function updateFilteredListings(listings, page) {
-    const startIndex = page * listingsPerPage;
-    const endIndex = startIndex + listingsPerPage;
-    const paginatedListings = listings.slice(startIndex, endIndex); // Get 6 listings per page
-    setFilteredListings(paginatedListings);
-  }
 
   return (
     <div className="text-gray-100">
@@ -113,41 +117,11 @@ export default function Component() {
               <div className="flex items-center space-x-4 flex-grow">
                 <Input
                   type="search"
-                  placeholder="Search listings..."
+                  placeholder="Search by Youtuber or listing title..."
                   className="text-gray-100 placeholder-gray-400 border-gray-600 focus:border-green-400"
                   onChange={(e) => setSearch(e.target.value)}
                 />
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button className="bg-green-500 hover:bg-green-600">
-                      <FilterIcon className="h-4 w-4 mr-2" />
-                      Filters
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="text-gray-100 border-gray-700">
-                    <DropdownMenuLabel>Apply Filters</DropdownMenuLabel>
-                    <DropdownMenuSeparator className="" />
-                    <DropdownMenuItem>
-                      <Select className="text-gray-100 border-gray-600">
-                        <option value="">Risk Level</option>
-                        <option value="low">Low</option>
-                        <option value="medium">Medium</option>
-                        <option value="high">High</option>
-                      </Select>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Select className="bg-gray-700 text-gray-100 border-gray-600">
-                        <option value="">Price Range</option>
-                        <option value="0-1000">$0 - $1,000</option>
-                        <option value="1000-5000">$1,000 - $5,000</option>
-                        <option value="5000+">$5,000+</option>
-                      </Select>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Button className="w-full bg-green-500 hover:bg-green-600">Apply Filters</Button>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <Filter applyFilters={fetchListings} setCurrentPage={setCurrentPage}/>
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -219,6 +193,53 @@ export default function Component() {
         </Link>
       ))}
             </div>
+    <div className="mt-8 flex justify-center">
+              <nav className="inline-flex rounded-md shadow-sm" aria-label="Pagination">
+                <Button
+                  onClick={() => {
+                    fetchListings(currentPage - 1);
+                    setCurrentPage(currentPage - 1);
+                  }}
+                  disabled={currentPage === 1}
+                  className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-700 bg-gray-800 text-sm font-medium text-gray-400 hover:bg-gray-700 mr-2"
+                >
+                  Previous
+                </Button>
+
+                {[currentPage-1, currentPage, currentPage+1].map((p, i) => {
+                  if(currentPage === 1 && p === 0) return <span key={i}></span>
+                  if(currentPage === 1 && p === 2) return <span key={i}></span>
+                  if(currentPage === totalPages && i === 2) return <span key={i}></span>
+
+                  return (
+                  <Button
+                    key={i}
+                    onClick={() => {
+                      if(p !== currentPage) fetchListings(p);
+                      setCurrentPage(p);
+                    }}
+                    className={`relative inline-flex items-center px-4 py-2 border border-gray-700 bg-gray-800 text-sm font-medium mx-0.5 ${
+                      currentPage === p
+                        ? 'text-green-400 bg-gray-700'
+                        : 'text-gray-400 hover:bg-gray-700'
+                    }`}
+                  >
+                    {p}
+                  </Button>
+                )})}
+
+                <Button
+                  onClick={() => {
+                    fetchListings(currentPage + 1);
+                    setCurrentPage(currentPage + 1);
+                  }}
+                  disabled={currentPage === totalPages}
+                  className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-700 bg-gray-800 text-sm font-medium text-gray-400 hover:bg-gray-700 ml-2"
+                >
+                  Next
+                </Button>
+              </nav>
+            </div>
           </main>
         </div>
       </div>
@@ -242,23 +263,187 @@ function determindRisk(listing) {
 
 }
 
-function Eye(props) {
+
+function Filter({applyFilters, setCurrentPage}) {
+  const [filters, setFilters] = useState({
+    pricingModel: 'all',
+    viewRange: [0, 1000000],
+    flatRange: [0, 1000000],
+    cpmRange: [0, 100],
+    risk: 'all',
+    dueDate: '',
+  })
+
+  const handleFilterChange = (key, value) => {
+    setFilters(prev => ({ ...prev, [key]: value }))
+  }
+
+  const clearFilters = () => {
+    setFilters({
+      pricingModel: 'all',
+      viewRange: [0, 1000000],
+      flatRange: [0, 1000000],
+      cpmRange: [0, 100],
+      risk: 'all',
+      dueDate: '',
+    });
+
+    applyFilters(1, {
+      pricingModel: 'all',
+      viewRange: [0, 1000000],
+      flatRange: [0, 1000000],
+      cpmRange: [0, 100],
+      risk: 'all',
+      dueDate: '',
+    });
+    setCurrentPage(1);
+  }
+
   return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-      <circle cx="12" cy="12" r="3" />
-    </svg>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button className="bg-green-500 hover:bg-green-600">
+          <FilterIcon className="h-4 w-4 mr-2" />
+          Filters
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-80 p-4 text-gray-100 border-gray-700">
+    <div className="flex justify-between items-center mb-4">
+    <DropdownMenuLabel className="text-lg font-bold">Filters</DropdownMenuLabel>
+    <Button variant="ghost" size="sm" onClick={clearFilters} className="text-gray-400 hover:text-gray-100">
+    <X className="h-4 w-4 mr-1" />
+    Clear
+    </Button>
+    </div>
+        <DropdownMenuSeparator className="bg-gray-700 my-2" />
+        
+        <div className="space-y-4">
+          <div>
+            <Label className="text-sm font-medium mb-1 block">Pricing Model</Label>
+            <RadioGroup
+              value={filters.pricingModel}
+              onValueChange={(value) => {
+                handleFilterChange('pricingModel', value);
+                handleFilterChange('priceRange', value === "CPM" ? [0, 100] : [0, 100000]);
+              }}
+              className="flex space-x-4"
+            >
+              <div className="flex items-center">
+                <RadioGroupItem value="all" id="all" />
+                <Label htmlFor="all" className="ml-2">All</Label>
+              </div>
+              <div className="flex items-center">
+                <RadioGroupItem value="CPM" id="cpm" />
+                <Label htmlFor="cpm" className="ml-2">CPM</Label>
+              </div>
+              <div className="flex items-center">
+                <RadioGroupItem value="FLAT" id="flat" />
+                <Label htmlFor="flat" className="ml-2">FLAT</Label>
+              </div>
+            </RadioGroup>
+          </div>
+
+          <div>
+            <Label className="text-sm font-medium mb-1 block">View Range</Label>
+            <Slider
+              min={0}
+              max={1000000}
+              step={1000}
+              value={filters.viewRange}
+              onValueChange={(value) => handleFilterChange('viewRange', value)}
+              className="my-4"
+            />
+            <div className="flex justify-between text-sm">
+              <span>{filters.viewRange[0].toLocaleString()} views</span>
+              <span>{filters.viewRange[1].toLocaleString()} views</span>
+            </div>
+          </div>
+          {
+            filters.pricingModel === 'CPM' &&
+          <div>
+            <Label className="text-sm font-medium mb-1 block">Price Range ({filters.pricingModel})</Label>
+            <Slider
+              min={1}
+              max={100}
+              step={1}
+              value={filters.cpmRange}
+              onValueChange={(value) => handleFilterChange('cpmRange', value)}
+              className="my-4"
+            />
+            <div className="flex justify-between text-sm">
+              <span>${filters.cpmRange[0].toLocaleString()}</span>
+              <span>${filters.cpmRange[1].toLocaleString()}</span>
+            </div>
+          </div>
+          }
+          {
+            filters.pricingModel === 'FLAT' &&
+          <div>
+            <Label className="text-sm font-medium mb-1 block">Price Range ({filters.pricingModel})</Label>
+            <Slider
+              min={1}
+              max={100000}
+              step={50}
+              value={filters.flatRange}
+              onValueChange={(value) => handleFilterChange('flatRange', value)}
+              className="my-4"
+            />
+            <div className="flex justify-between text-sm">
+              <span>${filters.flatRange[0].toLocaleString()}</span>
+              <span>${filters.flatRange[1].toLocaleString()}</span>
+            </div>
+          </div>
+          }
+
+          <div>
+            <Label className="text-sm font-medium mb-1 block">Risk Level</Label>
+            <RadioGroup
+              value={filters.risk}
+              onValueChange={(value) => handleFilterChange('risk', value)}
+              className="flex space-x-4"
+            >
+              <div className="flex items-center">
+                <RadioGroupItem value="all" id="risk-all" />
+                <Label htmlFor="risk-all" className="ml-2">All</Label>
+              </div>
+              <div className="flex items-center">
+                <RadioGroupItem value="Low" id="risk-low" />
+                <Label htmlFor="risk-low" className="ml-2">Low</Label>
+              </div>
+              <div className="flex items-center">
+                <RadioGroupItem value="Medium" id="risk-medium" />
+                <Label htmlFor="risk-medium" className="ml-2">Medium</Label>
+              </div>
+              <div className="flex items-center">
+                <RadioGroupItem value="High" id="risk-high" />
+                <Label htmlFor="risk-high" className="ml-2">High</Label>
+              </div>
+            </RadioGroup>
+          </div>
+
+          <div>
+            <Label htmlFor="due-date" className="text-sm font-medium mb-1 block">Exact upload date</Label>
+            <Input
+              type="date"
+              id="due-date"
+              value={filters.dueDate}
+              onChange={(e) => handleFilterChange('dueDate', e.target.value)}
+              className="w-full bg-gray-800 text-gray-100 border-gray-700"
+            />
+          </div>
+        </div>
+
+        <DropdownMenuSeparator className="bg-gray-700 my-4" />
+        
+        <Button onClick={() => {
+          applyFilters(1, filters)
+          setCurrentPage(1);
+        }} className="w-full bg-green-500 hover:bg-green-600">
+          Apply Filters
+        </Button>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
+
 

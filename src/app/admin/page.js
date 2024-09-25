@@ -38,16 +38,6 @@ export default function AdminDashboard() {
 
   const size = useWindowSize();
 
-  /*
-  const filteredTransactions = transactions.filter(transaction => 
-    (filters.type === 'All' || transaction.type === filters.type) &&
-    (filters.status === 'All' || transaction.status === filters.status) &&
-    (filters.search ? 
-      transaction.creator.toLowerCase().includes(filters.search.toLowerCase()) ||
-      transaction.sponsor.toLowerCase().includes(filters.search.toLowerCase())
-    : true)
-  )*/
-
   async function fetchAdminData() {
     try {
       const url = `${process.env.NEXT_PUBLIC_API_URL}/admin`;
