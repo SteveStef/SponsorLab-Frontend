@@ -30,8 +30,7 @@ export default function Component() {
   const [debouncedSearch, setDebouncedSearch] = useState(search);
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1);
-
-
+  const [load, setLoad] = useState(true);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -61,15 +60,14 @@ export default function Component() {
   }, [debouncedSearch]);
 
   async function fetchListings(page, filters) {
+    setLoad(true);
     const url = `${process.env.NEXT_PUBLIC_API_URL}/posts/page/${page}`;
     const response = await request(url, "POST", filters);
     if(response && response.success) {
-      for(let i = 0; i < response.body.length; i++) {
-        response.body[i].riskEvaluation = determindRisk(response.body[i]);
-      }
       setFilteredListings(response.body);
       setTotalPages(response.totalPages);
     }
+    setLoad(false);
   }
 
   useEffect(() => {
@@ -124,6 +122,10 @@ export default function Component() {
                 <Filter applyFilters={fetchListings} setCurrentPage={setCurrentPage}/>
               </div>
             </div>
+          {
+            load ? 
+              <LoadingComponent />
+            : 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
     {filteredListings.map((listing, idx) => (
         <Link
@@ -193,6 +195,7 @@ export default function Component() {
         </Link>
       ))}
             </div>
+          }
     <div className="mt-8 flex justify-center">
               <nav className="inline-flex rounded-md shadow-sm" aria-label="Pagination">
                 <Button
@@ -246,23 +249,6 @@ export default function Component() {
     </div>
   )
 }
-
-function determindRisk(listing) {
-  const deviations = listing.user.channel.viewDeviations;
-  const views = listing.estimatedViews;
-
-  if(deviations.length < 4) { // this is invalid
-    return "High";
-  }
-
-  if(views <= deviations[deviations.length - 3]) {
-    return "Low";
-  } else if(views <= deviations[deviations.length - 2]) {
-    return "Medium";
-  } else return "High";
-
-}
-
 
 function Filter({applyFilters, setCurrentPage}) {
   const [filters, setFilters] = useState({
@@ -446,4 +432,27 @@ function Filter({applyFilters, setCurrentPage}) {
   )
 }
 
+function LoadingComponent() {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+      {[...Array(6)].map((_, index) => (
+        <div key={index} className="flex flex-col rounded-lg overflow-hidden shadow-lg h-full animate-pulse">
+          <div className="h-48 w-full"></div>
+          <div className="p-4 flex-grow flex flex-col justify-between">
+            <div>
+              <div className="h-6 bg-gray-700 rounded w-3/4 mb-3"></div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="h-4 bg-gray-700 rounded"></div>
+                <div className="h-4 bg-gray-700 rounded"></div>
+                <div className="h-4 bg-gray-700 rounded"></div>
+                <div className="h-4 bg-gray-700 rounded"></div>
+              </div>
+            </div>
+            <div className="h-10 bg-gray-700 rounded mt-4"></div>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
 

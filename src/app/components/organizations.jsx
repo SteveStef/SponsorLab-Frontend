@@ -1,41 +1,92 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {  Select} from "@/components/ui/select";
-import { UsersIcon, FilterIcon,InfoIcon, ChevronRightIcon, AlertTriangleIcon, CheckCircleIcon} from "lucide-react"
-import {useRouter} from "next/navigation";
+import { X, UsersIcon, FilterIcon,InfoIcon, AlertTriangleIcon, CheckCircleIcon, SearchIcon} from "lucide-react"
+import { useRouter } from "next/navigation";
+import { Checkbox } from "@/components/ui/checkbox";
 
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-
 import request from "@/request.js";
 
+const categories = [
+"Technology",
+"Gaming",
+"Fashion",
+"Education",
+"Finance",
+"Lifestyle",
+"Food/Cooking",
+"Family",
+"Music",
+"Vlogs",
+"Business",
+"DIY/Crafts",
+"Travel",
+"Religion",
+"Nature",
+"Garden",
+"Wellness"
+];
+
 export default function Component() {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [memberFilter, setMemberFilter] = useState("all")
+
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1);
+  const [productCategories, setProductCategories] = useState([]);
+  const [load, setLoad] = useState(true);
+
   const [organizations, setOrganizations] = useState([]);
   const router = useRouter();
 
-  async function fetchOrganizations() {
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/users/organizations`;
-    const response = await request(url, "GET", null);
-    console.log(response);
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 300);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [search]);
+
+  useEffect(() => {
+    async function searchQuery() {
+      if (debouncedSearch.trim() === "") {
+        await fetchOrganizations(1, []);
+      } else {
+        const url = `${process.env.NEXT_PUBLIC_API_URL}/users/organizations/search`;
+        const response = await request(url, "POST", { query: debouncedSearch });
+        if (response && response.success) {
+          setOrganizations(response.body);
+          setTotalPages(1);
+        }
+      }
+    }
+    searchQuery();
+  }, [debouncedSearch]);
+
+  async function fetchOrganizations(page, pc) {
+    setLoad(true);
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/users/organizations/page/${page}`;
+    const response = await request(url, "POST", { productCategories: pc});
     if(response && response.success) {
       setOrganizations(response.body);
+      setTotalPages(response.totalPages);
     }
+    setLoad(false);
   }
 
   useEffect(() => {
-    fetchOrganizations();
+    fetchOrganizations(1, []);
   },[])
 
   return (
@@ -80,41 +131,15 @@ export default function Component() {
                 <Input
                   type="search"
                   placeholder="Search listings..."
+                  onChange={(e) => setSearch(e.target.value)}
                   className="text-gray-100 placeholder-gray-400 border-gray-600 focus:border-green-400"
                 />
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button className="bg-green-500 hover:bg-green-600">
-                      <FilterIcon className="h-4 w-4 mr-2" />
-                      Filters
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="text-gray-100 border-gray-700">
-                    <DropdownMenuLabel>Apply Filters</DropdownMenuLabel>
-                    <DropdownMenuSeparator className="" />
-                    <DropdownMenuItem>
-                      <Select className="text-gray-100 border-gray-600">
-                        <option value="">Risk Level</option>
-                        <option value="low">Low</option>
-                        <option value="medium">Medium</option>
-                        <option value="high">High</option>
-                      </Select>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Select className="bg-gray-700 text-gray-100 border-gray-600">
-                        <option value="">Price Range</option>
-                        <option value="0-1000">$0 - $1,000</option>
-                        <option value="1000-5000">$1,000 - $5,000</option>
-                        <option value="5000+">$5,000+</option>
-                      </Select>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Button className="w-full bg-green-500 hover:bg-green-600">Apply Filters</Button>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <Filter productCategories={productCategories} setProductCategories={setProductCategories} fetchOrganizations={fetchOrganizations}/>
               </div>
             </div>
+    {load ? 
+      <LoadingComponent />
+      :
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                 {organizations.map((org) => (
                   <Card key={org.id} className="">
@@ -136,22 +161,170 @@ export default function Component() {
                   </Card>
                 ))}
               </div>
+    }
           </main>
         </div>
-      </div>
-      <div className="fixed right-4 top-1/2 transform -translate-y-1/2">
-        <Button className="rounded-full w-12 h-12 bg-green-500 hover:bg-green-600">
-          <ChevronRightIcon className="h-6 w-6" />
-          <span className="sr-only">Next Page</span>
-        </Button>
+    <div className="mt-8 flex justify-center">
+              <nav className="inline-flex rounded-md shadow-sm" aria-label="Pagination">
+                <Button
+                  onClick={() => {
+                    fetchOrganizations(currentPage - 1, productCategories);
+                    setCurrentPage(currentPage - 1);
+                  }}
+                  disabled={currentPage === 1}
+                  className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-700 bg-gray-800 text-sm font-medium text-gray-400 hover:bg-gray-700 mr-2"
+                >
+                  Previous
+                </Button>
+
+                {[currentPage-1, currentPage, currentPage+1].map((p, i) => {
+                  if(currentPage === 1 && p === 0) return <span key={i}></span>
+                  if(currentPage === 1 && p === 2) return <span key={i}></span>
+                  if(currentPage === totalPages && i === 2) return <span key={i}></span>
+
+                  return (
+                  <Button
+                    key={i}
+                    onClick={() => {
+                      if(p !== currentPage) fetchOrganizations(p,productCategories);
+                      setCurrentPage(p);
+                    }}
+                    className={`relative inline-flex items-center px-4 py-2 border border-gray-700 bg-gray-800 text-sm font-medium mx-0.5 ${
+                      currentPage === p
+                        ? 'text-green-400 bg-gray-700'
+                        : 'text-gray-400 hover:bg-gray-700'
+                    }`}
+                  >
+                    {p}
+                  </Button>
+                )})}
+
+                <Button
+                  onClick={() => {
+                    fetchOrganizations(currentPage + 1, productCategories);
+                    setCurrentPage(currentPage + 1);
+                  }}
+                  disabled={currentPage === totalPages}
+                  className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-700 bg-gray-800 text-sm font-medium text-gray-400 hover:bg-gray-700 ml-2"
+                >
+                  Next
+                </Button>
+              </nav>
+            </div>
       </div>
     </div>
   )
 }
 
+function LoadingComponent() {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+      {[...Array(6)].map((_, index) => (
+        <Card key={index} className="animate-pulse">
+          <CardHeader>
+            <div className="h-6 w-3/4 bg-gray-700 rounded"></div>
+          </CardHeader>
+          <CardContent>
+            <div className="h-4 w-full bg-gray-700 rounded mb-4"></div>
+            <div className="flex items-center">
+              <UsersIcon className="w-5 h-5 mr-2 text-green-400" />
+              <div className="h-4 w-1/2 bg-gray-700 rounded"></div>
+            </div>
+          </CardContent>
+          <CardFooter>
+            <div className="h-10 w-full bg-green-600 rounded"></div>
+          </CardFooter>
+        </Card>
+      ))}
+    </div>
+  )
+}
 
 
+function Filter({ productCategories, setProductCategories, fetchOrganizations}) {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
-/*
- * */
+  const filteredCategories = useMemo(() => {
+    return categories.filter(category =>
+      category.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  }, [searchTerm])
+
+  const handleCategoryToggle = (category) => {
+    setProductCategories(prev =>
+      prev.includes(category)
+        ? prev.filter(c => c !== category)
+        : [...prev, category]
+    )
+  }
+
+  const handleApplyFilters = () => {
+    fetchOrganizations(1,[]);
+    setDropdownOpen(false)
+  }
+
+  function clearFilters() {
+    setProductCategories([]);
+    setDropdownOpen(false)
+    fetchOrganizations(1, []);
+  }
+
+  return (
+    <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
+      <DropdownMenuTrigger asChild>
+        <Button className="bg-green-500 hover:bg-green-600 text-black">
+          <FilterIcon className="h-4 w-4 mr-2" />
+          Filters
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-64 text-gray-100 border-gray-700">
+        <div className='flex justify-between'>
+        <DropdownMenuLabel>Categories</DropdownMenuLabel>
+
+    <Button variant="ghost" size="sm" onClick={clearFilters} className="text-gray-400 hover:text-gray-100">
+    <X className="h-4 w-4 mr-1" />
+    Clear
+    </Button>
+        </div>
+        <DropdownMenuSeparator className="bg-gray-700" />
+        <div className="p-2">
+          <div className="relative">
+            <SearchIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Input
+              type="text"
+              placeholder="Search categories..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-8 text-gray-100 border-gray-600 focus:border-green-400"
+            />
+          </div>
+        </div>
+        <div className="max-h-64 overflow-y-auto">
+          {filteredCategories.map(category => (
+            <div key={category} className="px-2 py-1.5">
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <Checkbox
+                  checked={productCategories.includes(category)}
+                  onCheckedChange={() => handleCategoryToggle(category)}
+                />
+                <span className="text-sm text-gray-200">{category}</span>
+              </label>
+            </div>
+          ))}
+        </div>
+        <DropdownMenuSeparator className="bg-gray-700" />
+        <div className="p-2">
+          <Button
+            className="w-full bg-green-500 hover:bg-green-600 text-white"
+            onClick={handleApplyFilters}
+          >
+            Apply Filters
+          </Button>
+        </div>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+
 
