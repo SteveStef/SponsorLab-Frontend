@@ -1,8 +1,8 @@
 "use client";
-import Link from "next/link";
+//import Link from "next/link";
 import { motion } from 'framer-motion';
 import { Youtube, Briefcase, LogIn, ChevronRight } from 'lucide-react';
-import Header from "../components/nav";
+//import Header from "../components/nav";
 import { Button } from '@/components/ui/button';
 import { useRouter } from "next/navigation";
 
@@ -16,7 +16,6 @@ export default function Component() {
 
   return (
     <div className="min-h-screen flex items-center justify-center text-white p-4">
-      <Header />
       <div>
       <div className="max-w-md w-full space-y-8">
         <motion.div

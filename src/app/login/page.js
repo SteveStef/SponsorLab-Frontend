@@ -79,7 +79,6 @@ export default function Component() {
 
   return (
     <div>
-      <Header />
     <motion.div
       className="min-h-screen flex items-center justify-center p-4 "
       initial="hidden"

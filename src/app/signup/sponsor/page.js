@@ -144,7 +144,6 @@ export default function EnhancedSignUpForm() {
 
   return (
     <>
-    <Header />
 <motion.div
       className="min-h-screen flex items-center justify-center p-4 "
       initial="hidden"
