@@ -110,7 +110,7 @@ export default function Navbar() {
   }
 
   return (
-    <header className="fixed top-0 z-50 w-full bg-background border-b">
+    <header className="bg-gradient-to-br from-green-950 via-background to-background fixed top-0 z-50 w-full bg-background border-b">
       <div className="container flex h-16 items-center justify-between px-4 md:px-6">
 <Link href="../../../" className="flex items-center gap-2" prefetch={false}>
   <Image src={Beaker} alt="LOGO" style={{ width: '32px' }} />

@@ -3,13 +3,14 @@ import Black from "../../../public/connect.jpg";
 import Image from "next/image";
 import { convertFromUtcToLocal } from "@/utils";
 import { FilterIcon, InfoIcon, AlertTriangleIcon, CheckCircleIcon, 
- EyeIcon, DollarSignIcon, CalendarIcon, TrendingUpIcon, TagIcon, X } from "lucide-react";
+ EyeIcon, DollarSignIcon, CalendarIcon, TrendingUpIcon, TagIcon, X, SearchIcon} from "lucide-react";
 import { Badge } from '@/components/ui/badge'
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Slider } from "@/components/ui/slider"
+import { Slider } from "@/components/ui/slider";
+import { motion } from 'framer-motion'
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -22,6 +23,27 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 
 const defaultFilter = {dueDate: '', pricingModel: "all", risk: "", viewRange: [0, 1000000]};
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+}
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      type: 'spring',
+      stiffness: 100
+    }
+  }
+}
 
 export default function Component() {
   const [search, setSearch] = useState("");
@@ -65,14 +87,10 @@ export default function Component() {
     const response = await request(url, "POST", filters);
     if(response && response.success) {
       setFilteredListings(response.body);
-      setTotalPages(response.totalPages);
+      setTotalPages(Math.max(response.totalPages,1));
     }
     setLoad(false);
   }
-
-  useEffect(() => {
-    fetchListings(1, defaultFilter);
-  },[]);
 
   return (
     <div className="text-gray-100">
@@ -125,9 +143,15 @@ export default function Component() {
           {
             load ? 
               <LoadingComponent />
-            : 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            : filteredListings.length > 0 ?
+<motion.div
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6"
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+              >
     {filteredListings.map((listing, idx) => (
+<motion.div key={idx} variants={itemVariants}>
         <Link
           key={idx}
           href={`./listings/${listing.id}`}
@@ -193,9 +217,11 @@ export default function Component() {
             </Button>
           </div>
         </Link>
+      </motion.div>
       ))}
-            </div>
+            </motion.div>: <EmptyListingsState />
           }
+    {filteredListings.length > 0 &&
     <div className="mt-8 flex justify-center">
               <nav className="inline-flex rounded-md shadow-sm" aria-label="Pagination">
                 <Button
@@ -243,6 +269,8 @@ export default function Component() {
                 </Button>
               </nav>
             </div>
+
+    }
           </main>
         </div>
       </div>
@@ -452,6 +480,24 @@ function LoadingComponent() {
           </div>
         </div>
       ))}
+    </div>
+  )
+}
+
+function EmptyListingsState() {
+  return (
+    <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+      <SearchIcon className="w-16 h-16 text-gray-400 mb-4" />
+      <h2 className="text-2xl font-semibold mb-2">No Listings Available</h2>
+      <p className="text-gray-400 mb-6 max-w-md">
+        We couldn't find any listings matching your criteria. Try adjusting your search or filters, or check back later for new opportunities.
+      </p>
+      <Button
+        className="bg-green-500 hover:bg-green-600 transition-colors duration-300"
+        onClick={() => window.location.reload()}
+      >
+        Refresh Listings
+      </Button>
     </div>
   )
 }

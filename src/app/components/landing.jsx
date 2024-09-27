@@ -1,36 +1,36 @@
 
 "use client"
 import Black from "../../../public/connect.jpg";
-import Image from "next/image";
-
+import { motion } from 'framer-motion'
+import Image from 'next/image'
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Play, DollarSign, TrendingUp, Search, Upload, Users, BarChart, Zap, Star, Shield } from "lucide-react"
-import { motion } from "framer-motion"
+import { Play, Upload, Users, BarChart, Search, Zap, Star, Shield, DollarSign, TrendingUp } from 'lucide-react'
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      delayChildren: 0.3,
+      staggerChildren: 0.2
+    }
+  }
+}
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1
+  }
+}
 
 export default function LandingPage() {
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.5
-      }
-    }
-  }
-
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1
-    }
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-950 via-black to-black text-white overflow-hidden relative">
-      <br></br>
-      <br></br>
+    <div className="min-h-screen bg-gradient-to-tr from-green-950 via-background to-background text-white overflow-hidden relative">
+    <br></br>
+    <br></br>
+    <br></br>
       <div className="absolute inset-0 bg-[url('/noise.png')] opacity-5 mix-blend-soft-light"></div>
       <div className="absolute inset-0 bg-gradient-to-t from-green-900/20 via-green-900/10 to-transparent"></div>
       <div className="relative">
@@ -55,6 +55,37 @@ export default function LandingPage() {
             </motion.div>
           </motion.section>
 
+
+          <div className="border-t border-green-800 opacity-30"></div>
+
+          <motion.section
+            className="container mx-auto px-4 py-20"
+            initial="hidden"
+            animate="visible"
+            variants={containerVariants}
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+              <motion.div variants={itemVariants}>
+                <h2 className="text-3xl font-bold mb-6">Revolutionize Your Content Partnerships</h2>
+                <p className="text-xl mb-8 text-gray-300">
+                  SponsorLab provides a unique platform where creators and sponsors can connect, collaborate, and grow together. Our innovative approach streamlines the sponsorship process, making it easier than ever to create meaningful partnerships.
+                </p>
+                <Button className="bg-green-500 hover:bg-green-600 text-gray-900">Learn More</Button>
+              </motion.div>
+              <motion.div variants={itemVariants} className="relative h-[400px] rounded-lg overflow-hidden">
+                <Image
+                  src={Black}
+                  alt="SponsorLab Platform"
+                  layout="fill"
+                  objectFit="cover"
+                  className="rounded-lg"
+                />
+              </motion.div>
+            </div>
+          </motion.section>
+
+          <div className="border-t border-green-800 opacity-30"></div>
+
           <motion.section
             className="container mx-auto px-4 py-20"
             initial="hidden"
@@ -64,7 +95,7 @@ export default function LandingPage() {
             <motion.h2 className="text-3xl font-bold mb-12 text-center" variants={itemVariants}>
               How It Works
             </motion.h2>
-<div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <FeatureCard
                 icon={<Play className="w-8 h-8 text-green-400" />}
                 title="List Your Content"
@@ -108,31 +139,7 @@ export default function LandingPage() {
             </div>
           </motion.section>
 
-          <motion.section
-            className="container mx-auto px-4 py-20"
-            initial="hidden"
-            animate="visible"
-            variants={containerVariants}
-          >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-              <motion.div variants={itemVariants}>
-                <h2 className="text-3xl font-bold mb-6">Revolutionize Your Content Partnerships</h2>
-                <p className="text-xl mb-8 text-gray-300">
-                  SponsorLab provides a unique platform where creators and sponsors can connect, collaborate, and grow together. Our innovative approach streamlines the sponsorship process, making it easier than ever to create meaningful partnerships.
-                </p>
-                <Button className="bg-green-500 hover:bg-green-600 text-gray-900">Learn More</Button>
-              </motion.div>
-              <motion.div variants={itemVariants} className="relative h-[400px] rounded-lg overflow-hidden">
-                <Image
-                  src={Black}
-                  alt="SponsorLab Platform"
-                  layout="fill"
-                  objectFit="cover"
-                  className="rounded-lg"
-                />
-              </motion.div>
-            </div>
-          </motion.section>
+          <div className="border-t border-green-800 opacity-30"></div>
 
           <motion.section
             className="container mx-auto px-4 py-20 text-center"
@@ -155,6 +162,8 @@ export default function LandingPage() {
             </motion.div>
           </motion.section>
         </main>
+
+        <div className="border-t border-green-800 opacity-30"></div>
 
         <footer className="container mx-auto px-4 py-6 text-center text-gray-400">
           <p>&copy; 2024 SponsorLab. All rights reserved.</p>
