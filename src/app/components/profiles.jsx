@@ -59,26 +59,25 @@ export default function Component() {
   useEffect(() => {
     async function searchQuery() {
       if (debouncedSearch.trim() === "") {
-        await fetchCreators(1);
+        await fetchCreators(1, needsSponsor, sortBy, sortOrder);
       } else {
-        const url = `${process.env.NEXT_PUBLIC_API_URL}/posts/search`;
+        const url = `${process.env.NEXT_PUBLIC_API_URL}/users/creators/search`;
         const response = await request(url, "POST", { query: debouncedSearch });
-
+        console.log(response);
         if (response && response.success) {
           setUsers(response.body);
           setTotalPages(1);
         }
       }
     }
-    //searchQuery();
-    fetchCreators(1);
+    searchQuery();
   }, [debouncedSearch]);
 
 
-  async function fetchCreators(page) {
+  async function fetchCreators(page, ns, sb, so) {
     setLoad(true);
     const url = `${process.env.NEXT_PUBLIC_API_URL}/users/creators/page/${page}`;
-    const response = await request(url, "POST", { needsSponsor, sortBy, sortOrder });
+    const response = await request(url, "POST", { needsSponsor: ns, sortBy: sb, sortOrder: so});
     console.log(response);
     if(response && response.success) {
       setUsers(response.body);
@@ -114,7 +113,6 @@ export default function Component() {
                   variant="outline"
                   onClick={() => {
                     setSortBy("subscribers");
-                    fetchCreators(1);
                   }}
                   className={sortBy === "subscribers" ? "bg-green-500 text-primary-foreground" : ""}
                 >
@@ -122,7 +120,9 @@ export default function Component() {
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={() => setSortBy("avgViews")}
+                  onClick={() => {
+                    setSortBy("avgViews");
+                  }}
                   className={sortBy === "avgViews" ? "bg-green-500 text-primary-foreground" : ""}
                 >
                   Avg Views
@@ -133,7 +133,10 @@ export default function Component() {
               <label className="block text-sm font-medium mb-1">Sort Order</label>
               <Button
                 variant="outline"
-                onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+                onClick={() => {
+                  const newSort = sortOrder === "asc" ? "desc" : "asc"
+                  setSortOrder(newSort);
+                }}
                 className="w-full"
               >
                 {sortOrder === "asc" ? <SortAscIcon className="mr-2 h-4 w-4" /> : <SortDescIcon className="mr-2 h-4 w-4" />}
@@ -153,10 +156,18 @@ export default function Component() {
                 Needs Sponsor
               </label>
             </div>
+              <Button
+                disabled={load}
+                onClick={() => fetchCreators(1, needsSponsor, sortBy, sortOrder)}
+                className="w-full bg-green-500 hover:bg-green-600"
+              >
+                Apply Filters
+              </Button>
           </div>
         </aside>
         <main>
           <h1 className="text-2xl font-bold mb-6">Youtubers</h1>
+    {!load && users.length === 0 && <EmptyListingsState />}
           <motion.div
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
             variants={containerVariants}
@@ -164,8 +175,9 @@ export default function Component() {
             animate="visible"
           >
             <AnimatePresence>
-              {users.length === 0 && [1,2,3].map((a) => <ProfileLoad key={a} />)}
-              {users.map((user,idx) => (
+              {
+                load ? [1,2,3,4,5,6,7,8,9].map((a) => <ProfileLoad key={a} />)
+                : users.map((user,idx) => (
                 <motion.div key={idx} variants={itemVariants} layout>
                   <Link href={`./profile/${user.channel.name}`}>
                     <Card className="bg-background p-4 rounded-lg shadow-md hover:bg-muted transition-colors duration-300">
@@ -194,7 +206,8 @@ export default function Component() {
                     </Card>
                   </Link>
                 </motion.div>
-              ))}
+              ))
+              }
             </AnimatePresence>
           </motion.div>
 
@@ -203,7 +216,7 @@ export default function Component() {
               <nav className="inline-flex rounded-md shadow-sm" aria-label="Pagination">
                 <Button
                   onClick={() => {
-                    fetchCreators(currentPage - 1);
+                    fetchCreators(currentPage - 1, needsSponsor, sortBy, sortOrder);
                     setCurrentPage(currentPage - 1);
                   }}
                   disabled={currentPage === 1}
@@ -221,7 +234,7 @@ export default function Component() {
                   <Button
                     key={i}
                     onClick={() => {
-                      if(p !== currentPage) fetchCreators(p);
+                      if(p !== currentPage) fetchCreators(p, needsSponsor, sortBy, sortOrder);
                       setCurrentPage(p);
                     }}
                     className={`relative inline-flex items-center px-4 py-2 border border-gray-700 bg-gray-800 text-sm font-medium mx-0.5 ${
@@ -236,7 +249,7 @@ export default function Component() {
 
                 <Button
                   onClick={() => {
-                    fetchCreators(currentPage + 1);
+                    fetchCreators(currentPage + 1, needsSponsor, sortBy, sortOrder);
                     setCurrentPage(currentPage + 1);
                   }}
                   disabled={currentPage === totalPages}
@@ -253,3 +266,22 @@ export default function Component() {
     </div>
   );
 }
+
+function EmptyListingsState() {
+  return (
+    <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+      <SearchIcon className="w-16 h-16 text-gray-400 mb-4" />
+      <h2 className="text-2xl font-semibold mb-2">No Youtubers Found</h2>
+      <p className="text-gray-400 mb-6 max-w-md">
+        There are no youtubers found under the current search filters, try adjusting your search
+      </p>
+      <Button
+        className="bg-green-500 hover:bg-green-600 transition-colors duration-300"
+        onClick={() => window.location.reload()}
+      >
+        Refresh Listings
+      </Button>
+    </div>
+  )
+}
+

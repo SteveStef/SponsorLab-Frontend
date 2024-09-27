@@ -1,20 +1,18 @@
 "use client";
+
 import Link from "next/link"
-import Header from "../../components/nav";
 import { Button } from "@/components/ui/button"
 import { useSearchParams } from 'next/navigation';
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
-
-import { motion } from 'framer-motion'
-import { Youtube, ArrowRight } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion';
+import { Youtube, AlertCircle } from 'lucide-react';
 
 export default function SignupYoutuber() {
   const params = useSearchParams();
   const handleYoutuberSignup = () => window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/google/auth/creator`;
   const [err, setErr] = useState("");
 
-  
   useEffect(() => {
     if(!params || !params.get("error")) return;
     setErr(params.get("error").replaceAll("_"," "));
@@ -39,10 +37,15 @@ export default function SignupYoutuber() {
     visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
   }
 
+  const errorVariants = {
+    hidden: { opacity: 0, y: -10 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.3 } }
+  }
+
   return (
     <>
     <motion.div
-      className="min-h-screen flex items-center justify-center p-4 "
+      className="min-h-screen flex items-center justify-center p-4"
       initial="hidden"
       animate="visible"
       variants={containerVariants}
@@ -64,8 +67,26 @@ export default function SignupYoutuber() {
             YouTuber Sign Up
           </motion.h3>
 
+          <AnimatePresence>
+            {err && (
+              <motion.div
+                className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4"
+                role="alert"
+                variants={errorVariants}
+                initial="hidden"
+                animate="visible"
+                exit="hidden"
+              >
+                <div className="flex items-center">
+                  <AlertCircle className="mr-2" size={20} />
+                  <span className="block sm:inline">{err}</span>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           <motion.p className="text-gray-300 text-center mb-6" variants={itemVariants}>
-To sign up as a YouTuber, use the Google account linked to your YouTube channel. This helps us verify your channel and offer the best experience on SponsorLab.
+            To sign up as a YouTuber, use the Google account linked to your YouTube channel. This helps us verify your channel and offer the best experience on SponsorLab.
           </motion.p>
 
           <motion.div variants={itemVariants}>

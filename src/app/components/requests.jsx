@@ -29,6 +29,7 @@ const formatDate = (dateString) => {
 
 export default function Component() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [filter, setFilter] = useState("all");
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [activeTab, setActiveTab] = useState({});
   const [requests, setRequests] = useState([]);
@@ -230,6 +231,10 @@ export default function Component() {
     setFlagFormData(prev => ({ ...prev, [field]: value }))
   }
 
+  useEffect(() => {
+    getRequests();
+  },[filter]);
+
   const steps = ["Pending Draft", "Draft Review", "Pending Final Draft", "Final Review", "Complete"]
 
   function determineStep(status) {
@@ -278,15 +283,15 @@ export default function Component() {
                   className="pl-10 border-gray-700 text-gray-300 w-full placeholder-gray-500"
                 />
               </div>
-              <Select defaultValue="all">
+              <Select defaultValue={filter} onValueChange={(value) => setFilter(value)} >
                 <SelectTrigger className="w-full sm:w-[180px] border-gray-700 text-gray-300">
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
                 <SelectContent className="border-gray-700 text-gray-300">
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="accepted">Accepted</SelectItem>
-                  <SelectItem value="declined">Declined</SelectItem>
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="requests">Requests</SelectItem>
+                  <SelectItem value="partnership">Partnerships</SelectItem>
+                  <SelectItem value="receipt">Receipts</SelectItem>
                 </SelectContent>
               </Select>
             </div>
