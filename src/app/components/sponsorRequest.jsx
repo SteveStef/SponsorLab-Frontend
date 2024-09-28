@@ -121,7 +121,7 @@ export default function Component() {
     setRefreshing(true);
     setLoad(true);
     const url = `${process.env.NEXT_PUBLIC_API_URL}/requests/sponsor`;
-    const response = await Request(url, "GET", null);
+    const response = await Request(url, "POST", {filter, query: debouncedSearch});
     if(response && response.success) {
       response.body.sort((a,b) =>  new Date(b.createdAt) - new Date(a.createdAt));
       setRequests(response.body);
