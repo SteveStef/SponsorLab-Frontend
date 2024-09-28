@@ -139,7 +139,7 @@ export default function Component() {
               <div className="flex items-center space-x-4 flex-grow">
                 <Input
                   type="search"
-                  placeholder="Search listings..."
+                  placeholder="Search organizations..."
                   onChange={(e) => setSearch(e.target.value)}
                   className="text-gray-100 placeholder-gray-400 border-gray-600 focus:border-green-400"
                 />
@@ -187,8 +187,8 @@ export default function Component() {
                 </motion.div>
               : <EmptyListingsState />
             }
-          </main>
-        </div>
+
+        {!load && organizations.length > 0 && 
         <div className="mt-8 flex justify-center">
           <nav className="inline-flex rounded-md shadow-sm" aria-label="Pagination">
             <Button
@@ -236,6 +236,9 @@ export default function Component() {
               Next
             </Button>
           </nav>
+        </div>
+        }
+          </main>
         </div>
       </div>
     </div>

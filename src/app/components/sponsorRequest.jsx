@@ -42,6 +42,8 @@ export default function Component() {
   const [flagDialog, setFlagDialog] = useState(false);
   const [flagFormData, setFlagFormData] = useState({ problemType: '', problemDescription: '', requestId: ''});
   const [videoUrls, setVideoUrls] = useState({});
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
 
   const getStatusIcon = (status) => {
     switch (status) {
@@ -100,6 +102,20 @@ export default function Component() {
         return 'bg-gray-700 text-gray-300'
     }
   }
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 300);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [search]);
+
+  useEffect(() => {
+    getRequests();
+  }, [debouncedSearch]);
 
   async function getRequests() {
     setRefreshing(true);
@@ -318,6 +334,7 @@ export default function Component() {
                   type="text"
                   placeholder="Search requests..."
                   className="pl-10 border-gray-700 text-gray-300 w-full placeholder-gray-500"
+                  onChange={(e) => setSearch(e.target.value)}
                 />
               </div>
               <Select defaultValue={filter} onValueChange={(value) => setFilter(value)} >

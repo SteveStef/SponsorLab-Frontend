@@ -28,6 +28,7 @@ const formatDate = (dateString) => {
 }
 
 export default function Component() {
+  const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [filter, setFilter] = useState("all");
   const [selectedRequest, setSelectedRequest] = useState(null);
@@ -37,6 +38,8 @@ export default function Component() {
   const [flagDialog, setFlagDialog] = useState(false);
   const [flagFormData, setFlagFormData] = useState({ problemType: '', problemDescription: '', requestId: ''});
   const [load, setLoad] = useState(true);
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
+
 
   const [videoUrls, setVideoUrls] = useState({});
 
@@ -98,10 +101,24 @@ export default function Component() {
     }
   }
 
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 300);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [search]);
+
+  useEffect(() => {
+    getRequests();
+  }, [debouncedSearch]);
+
   async function getRequests() {
     setRefreshing(true);
     const url = `${process.env.NEXT_PUBLIC_API_URL}/requests/creator`;
-    const response = await Request(url, "GET", null);
+    const response = await Request(url, "POST", { filter, query: debouncedSearch });
     if(response && response.success) {
       response.body.sort((a,b) =>  new Date(b.createdAt) - new Date(a.createdAt));
       setRequests(response.body);
@@ -281,6 +298,7 @@ export default function Component() {
                   type="text"
                   placeholder="Search requests..."
                   className="pl-10 border-gray-700 text-gray-300 w-full placeholder-gray-500"
+                  onChange={(e) => setSearch(e.target.value)}
                 />
               </div>
               <Select defaultValue={filter} onValueChange={(value) => setFilter(value)} >
