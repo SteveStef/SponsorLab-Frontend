@@ -490,7 +490,7 @@ function EmptyListingsState() {
       <SearchIcon className="w-16 h-16 text-gray-400 mb-4" />
       <h2 className="text-2xl font-semibold mb-2">No Listings Available</h2>
       <p className="text-gray-400 mb-6 max-w-md">
-        We couldn't find any listings matching your criteria. Try adjusting your search or filters, or check back later for new opportunities.
+        We could not find any listings matching your criteria. Try adjusting your search or filters, or check back later for new opportunities.
       </p>
       <Button
         className="bg-green-500 hover:bg-green-600 transition-colors duration-300"

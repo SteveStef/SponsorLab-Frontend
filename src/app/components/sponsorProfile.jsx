@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Globe, Target, Video, Flag, LucideYoutube, Clock, FileIcon, XCircle } from "lucide-react";
+import { CheckCircle, Globe, Target, Video, Flag, LucideYoutube, Clock, FileIcon, XCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import request from "@/request";
 import { useAppContext } from "@/context";

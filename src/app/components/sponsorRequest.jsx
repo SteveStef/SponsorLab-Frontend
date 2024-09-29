@@ -1024,7 +1024,7 @@ function ShowButtons(props) {
           </div>
         </div>
         <p className="text-sm text-gray-500 mb-4">
-          By clicking "Confirm Partnership", you agree to the terms of service and privacy policy. Also you may be refunded if the Youtuber does not 
+          By clicking Confirm Partnership, you agree to the terms of service and privacy policy. Also you may be refunded if the Youtuber does not 
           do the agreed terms of the sponsoring.
         </p>
         <DialogFooter className="sm:justify-start">

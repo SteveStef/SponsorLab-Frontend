@@ -882,7 +882,7 @@ return <main className="flex items-center justify-center bg-background p-4 md:p-
           <FileIcon className="h-16 w-16 text-muted-foreground" />
         </div>
         <h1 className="mb-2 text-2xl font-semibold tracking-tight">No requests found</h1>
-        <p className="mb-4 text-muted-foreground">You don't have any requests at the moment.</p>
+        <p className="mb-4 text-muted-foreground">You do not have any requests at the moment.</p>
       </div>
     </main>
 }

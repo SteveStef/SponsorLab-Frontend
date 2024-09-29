@@ -186,7 +186,7 @@ export default function Component() {
 
           <motion.div className="mt-6 text-center" variants={itemVariants}>
             <p className="text-sm text-gray-400">
-              Don't have an account?{' '}
+              Don&apost have an account?{' '}
               <Link href="/signup" className="font-medium text-green-500 hover:text-green-400 transition-colors duration-300">
                 Sign up
               </Link>

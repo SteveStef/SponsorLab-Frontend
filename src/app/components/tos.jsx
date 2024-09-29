@@ -6,13 +6,13 @@ export default function Component() {
     <section>
     <h2 className="mb-4 text-xl font-semibold">Introduction</h2>
     <p className="text-muted-foreground">
-    Welcome to SponsorLab! These Terms of Service ("Terms") govern your access to and use of our website, platform, and services (collectively, the "Services"). By accessing or using our Services, you agree to comply with and be bound by these Terms. If you do not agree to these Terms, you may not access or use the Services.
-    This Agreement is between you ("you" or "User") and SponsorLab, Inc. ("SponsorLab," "we," or "us"), a company incorporated in [Your State], USA. Please read these Terms carefully before using our Services.
+    Welcome to SponsorLab! These Terms of Service (Terms) govern your access to and use of our website, platform, and services (collectively, the Services). By accessing or using our Services, you agree to comply with and be bound by these Terms. If you do not agree to these Terms, you may not access or use the Services.
+    This Agreement is between you (you or User) and SponsorLab, Inc. (SponsorLab, we, or us), a company incorporated in [Your State], USA. Please read these Terms carefully before using our Services.
     </p>
     </section>
     <section>
     <h2 className="mb-4 text-xl font-semibold">Overview of Services</h2>
-    <p className="text-muted-foreground">SponsorLab is an online marketplace designed to connect video content creators ("Creators") with sponsors ("Sponsors"). Through our platform, Creators can list their upcoming video content, and Sponsors can browse, purchase, and sponsor this content. SponsorLab facilitates these transactions by providing a platform that supports secure payments, content delivery, and dispute resolution.
+    <p className="text-muted-foreground">SponsorLab is an online marketplace designed to connect video content creators (Creators) with sponsors (Sponsors). Through our platform, Creators can list their upcoming video content, and Sponsors can browse, purchase, and sponsor this content. SponsorLab facilitates these transactions by providing a platform that supports secure payments, content delivery, and dispute resolution.
     </p>
     </section>
 
