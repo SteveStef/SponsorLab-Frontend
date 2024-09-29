@@ -1,5 +1,5 @@
-
 "use client";
+
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import Link from "next/link";
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
@@ -10,7 +10,7 @@ import Image from "next/image";
 import Beaker from "../../../public/Beaker.png";
 
 import { useState, useEffect } from 'react';
-import { MessageSquare, UserPlus, AlertCircle, Search } from 'lucide-react';
+import { MessageSquare, UserPlus, AlertCircle, Search, BellIcon, LogOut, Settings, PlusCircle } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -32,7 +32,6 @@ export default function Navbar() {
     try {
       const url = `${process.env.NEXT_PUBLIC_API_URL}/notifications`;
       const response = await request(url, "GET", null);
-      console.log(response);
       if(response && response.success) {
         setNotifications(response.body);
         setHasNew(response.hasNew);
@@ -84,23 +83,10 @@ export default function Navbar() {
 
   const links = [
     { url: "../../listings", name: "Listings", auth: true, role: "ANY" },
-    //{ url: "../pricing", name: "Pricing", auth: true, role: "CREATOR" },
     { url: "../organizations", name: "Organizations", auth: true, role: "ANY" },
     { url: "../profiles", name: "Youtubers", auth: true, role: "ANY" },
     { url: "../requests", name: "Sponsorships", auth: true, role: "ANY" },
-    //{ url: "../create", name: "Create", auth: true, role: "CREATOR" },
     { url: "../../signup", name: "Login/Signup", auth: false, role: "ANY" },
-  ];
-
-  const childLinks = [
-    { url: "../../listings", name: "Listings", auth: true, role: "ANY" },
-    //{ url: "../pricing", name: "Pricing", auth: true, role: "CREATOR" },
-    { url: "../profiles", name: "Youtubers", auth: true, role: "ANY" },
-    { url: "../create", name: "Create Listing", auth: true, role: "ANY" },
-    { url: "../organizations", name: "Organizations", auth: true, role: "CREATOR" },
-    { url: "../../signup", name: "Login/Signup", auth: false, role: "ANY" },
-    { url: "../../requests", name: "Requests", auth: true, role: "ANY" },
-    { url: "../../profile/"+organization, name: "Profile", auth: true, role: "ANY" },
   ];
 
   function logout() {
@@ -109,110 +95,49 @@ export default function Navbar() {
     window.location.href = "/login";
   }
 
+  const profileOrOrgLink = role === "SPONSOR" 
+    ? { url: `../../organizations/${organization}`, name: "My Organization" }
+    : { url: `../../profile/${organization}`, name: "My Profile" };
+
   return (
     <header className="bg-gradient-to-br from-green-950 via-background to-background fixed top-0 z-50 w-full bg-background border-b">
       <div className="container flex h-16 items-center justify-between px-4 md:px-6">
-<Link href="../../../" className="flex items-center gap-2" prefetch={false}>
-  <Image src={Beaker} alt="LOGO" style={{ width: '32px' }} />
-  <span className="font-semibold" style={{fontSize: "25px"}}>
-    Sponsor<span className="text-green-500">Lab</span>
-    <span className="ml-2 text-xs bg-green-400 text-black font-bold px-2 py-1 rounded relative" style={{ top: '-3px' }}>Beta</span>
-  </span>
-</Link>
+        <Link href="../../../" className="flex items-center gap-2" prefetch={false}>
+          <Image src={Beaker} alt="LOGO" style={{ width: '32px' }} />
+          <span className="font-semibold" style={{fontSize: "25px"}}>
+            Sponsor<span className="text-green-500">Lab</span>
+            <span className="ml-2 text-xs bg-green-400 text-black font-bold px-2 py-1 rounded relative" style={{ top: '-3px' }}>Beta</span>
+          </span>
+        </Link>
         <nav className="hidden items-center gap-6 md:flex">
-          {
-            links.map((link, idx) => {
-              if ((link.role === "ANY" || role === link.role) && (auth === link.auth)) {
-                if (link.name === "Logout") {
-                  return (
-                    <Link key={idx} href={link.url} onClick={logout} className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
-                      {link.name}
-                    </Link>
-                  )
-                } else {
-                  return (
-                    <Link key={idx} href={link.url} className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
-                      {link.name}
-                    </Link>
-                  )
-                }
-              }
-            })
-          }
-
-          {
-            auth &&
-              <>
-
-              <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative">
-            <BellIcon className="h-5 w-5" />
-              {hasNew && (
-                <span className="absolute top-0 right-0 h-3 w-3 bg-red-500 rounded-full" />
-              )}
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-80 border-gray-700 p-4" align="end">
-            <h2 className="text-lg font-semibold mb-2">Notifications</h2>
-            <ScrollArea className="h-[300px] overflow-y-auto">
-              {notifications.map((notification) => (
-                <DropdownMenuItem key={notification.id} className="p-0 focus:bg-transparent">
-                  <Link href={`${notification.link ? notification.link : ""}`}><NotificationItem notification={notification} /></Link>
-                </DropdownMenuItem>
-              ))}
-            </ScrollArea>
-            {notifications.length === 0 ? (
-              <p className="text-gray-500 text-center py-4">No new notifications</p>
-            ) : (
-              <Button 
-                variant="outline" 
-                className="w-full mt-2 text-green-400 hover:text-green-300 border-green-400 hover:bg-green-400/10"
-                onClick={async() => {
-                  await fetchAllNotifications();
-                  setIsModalOpen(true);
-                  setIsOpen(false);
-                }}
-              >
-                View All
-              </Button>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Avatar className="h-10 w-10 border">
-                <AvatarImage src={profilePic} alt="Profile" />
-                <AvatarFallback>{name[0]}</AvatarFallback>
-              </Avatar>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {
-                role === "CREATOR" &&
-              <DropdownMenuItem>
-                <Link href={`../../create`} className="flex items-center gap-2" prefetch={false}>Create Listing</Link>
-              </DropdownMenuItem>
-              }
-              <DropdownMenuItem>
-                <Link href={`../../${role==="CREATOR"?"profile":"organizations"}/${organization}`} className="flex items-center gap-2" prefetch={false}>My {role==="CREATOR"?"Profile" : "Organization"}</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Link href={`../../settings`} className="flex items-center gap-2" prefetch={false}>Settings</Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <Link onClick={logout} href="#" className="flex items-center gap-2" prefetch={false}>
-                  <span className="flex" ><span style={{position: "absolute", left: "5px", top:"8px"}}><LogInIcon /></span>{" "}
-                    <span style={{marginLeft: "20px"}}>Logout</span></span>
+          {links.map((link, idx) => {
+            if ((link.role === "ANY" || role === link.role) && (auth === link.auth)) {
+              return (
+                <Link key={idx} href={link.url} className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
+                  {link.name}
                 </Link>
-              </DropdownMenuItem>
-
-            </DropdownMenuContent>
-          </DropdownMenu>
-              </>
-          }
-
+              )
+            }
+          })}
+          {auth && (
+            <>
+              <NotificationMenu 
+                isOpen={isOpen} 
+                setIsOpen={setIsOpen} 
+                hasNew={hasNew} 
+                notifications={notifications} 
+                fetchAllNotifications={fetchAllNotifications}
+                setIsModalOpen={setIsModalOpen}
+              />
+              <ProfileMenu 
+                profilePic={profilePic} 
+                name={name} 
+                role={role} 
+                organization={organization} 
+                logout={logout}
+              />
+            </>
+          )}
         </nav>
         <Sheet>
           <SheetTrigger asChild>
@@ -221,25 +146,53 @@ export default function Navbar() {
               <span className="sr-only">Toggle navigation menu</span>
             </Button>
           </SheetTrigger>
-          <SheetContent side="top" className="md:hidden">
+          <SheetContent side="right" className="w-[300px] sm:w-[400px]">
             <nav className="grid gap-4 py-6">
-              {
-                childLinks.map((link, idx) => {
-                  if ((link.role === "ANY" || role === link.role) && (auth === link.auth)) {
-                    return (
-                      <Link key={idx} href={link.url} className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
-                        {link.name}
-                      </Link>
-                    )
-                  }
-                })
-              }
+              {links.map((link, idx) => {
+                if ((link.role === "ANY" || role === link.role) && (auth === link.auth)) {
+                  return (
+                    <Link key={idx} href={link.url} className="flex items-center text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
+                      {link.name}
+                    </Link>
+                  )
+                }
+              })}
+              {auth && (
+                <>
+                  <Link href={profileOrOrgLink.url} className="flex items-center text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
+                    {profileOrOrgLink.name}
+                  </Link>
+                  {role === "CREATOR" && (
+                    <Link href="../../create" className="flex items-center text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
+                      <PlusCircle className="mr-2 h-4 w-4" />
+                      Create Listing
+                    </Link>
+                  )}
+                  <Link href="../../settings" className="flex items-center text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
+                    <Settings className="mr-2 h-4 w-4" />
+                    Settings
+                  </Link>
+                  <NotificationMenu 
+                    isOpen={false} 
+                    setIsOpen={setIsOpen} 
+                    hasNew={hasNew} 
+                    notifications={notifications} 
+                    fetchAllNotifications={fetchAllNotifications}
+                    setIsModalOpen={setIsModalOpen}
+                    isMobile={true}
+                  />
+                  <Button variant="outline" onClick={logout} className="w-full justify-start">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Logout
+                  </Button>
+                </>
+              )}
             </nav>
           </SheetContent>
         </Sheet>
       </div>
 
-    <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="text-white border-gray-700 sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>All Notifications</DialogTitle>
@@ -257,7 +210,9 @@ export default function Navbar() {
           <ScrollArea className="mt-4 max-h-[60vh] overflow-y-auto pr-4">
             {filteredNotifications.length > 0 ? (
               filteredNotifications.map((notification, idx) => (
-                <Link href={`${notification.link ? notification.link : ""}`}><NotificationItem key={idx} notification={notification} /></Link>
+                <Link key={idx} href={`${notification.link ? notification.link : ""}`}>
+                  <NotificationItem notification={notification} />
+                </Link>
               ))
             ) : (
               <p className="text-gray-400 text-center py-4">No notifications found</p>
@@ -291,66 +246,6 @@ function MenuIcon(props) {
   )
 }
 
-function LogInIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
-      <polyline points="10 17 15 12 10 7" />
-      <line x1="15" x2="3" y1="12" y2="12" />
-    </svg>
-  )
-}
-
-function BellIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
-      <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
-    </svg>
-  )
-}
-function InboxIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <polyline points="22 12 16 12 14 15 10 15 8 12 2 12" />
-      <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
-    </svg>
-  )
-}
-
 const getIcon = (type) => {
   switch (type) {
     case 'CHAT': return <MessageSquare className="h-5 w-5 text-blue-400" />
@@ -372,4 +267,86 @@ const NotificationItem = ({ notification }) => (
   </div>
 )
 
+function NotificationMenu({ isOpen, setIsOpen, hasNew, notifications, fetchAllNotifications, setIsModalOpen, isMobile }) {
+  return (
+    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className={`relative ${isMobile ? 'w-full justify-start' : ''}`}>
+          <BellIcon className="h-5 w-5" />
+          {isMobile && <span className="ml-2">Notifications</span>}
+          {hasNew && (
+            <span className="absolute top-0 right-0 h-3 w-3 bg-red-500 rounded-full" />
+          )}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-80 border-gray-700 p-4" align="end">
+        <h2 className="text-lg font-semibold mb-2">Notifications</h2>
+        <ScrollArea className="h-[300px] overflow-y-auto">
+          {notifications.map((notification) => (
+            <DropdownMenuItem key={notification.id} className="p-0 focus:bg-transparent">
+              <Link href={`${notification.link ? notification.link : ""}`}>
+                <NotificationItem notification={notification} />
+              </Link>
+            </DropdownMenuItem>
+          ))}
+        </ScrollArea>
+        {notifications.length === 0 ? (
+          <p className="text-gray-500 text-center py-4">No new notifications</p>
+        ) : (
+          <Button 
+            variant="outline" 
+            className="w-full mt-2 text-green-400 hover:text-green-300 border-green-400 hover:bg-green-400/10"
+            onClick={async() => {
+              await fetchAllNotifications();
+              setIsModalOpen(true);
+              setIsOpen(false);
+            }}
+          >
+            View All
+          </Button>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
 
+function ProfileMenu({ profilePic, name, role, organization, logout }) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Avatar className="h-10 w-10 border">
+          <AvatarImage src={profilePic} alt="Profile" />
+          <AvatarFallback>{name[0]}</AvatarFallback>
+        </Avatar>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem>
+          <Link href={role === "SPONSOR" ? `../../organizations/${organization}` : `../../profile/${organization}`} className="flex items-center gap-2" prefetch={false}>
+            {role === "SPONSOR" ? "My Organization" : "My Profile"}
+          </Link>
+        </DropdownMenuItem>
+        {role === "CREATOR" && (
+          <DropdownMenuItem>
+            <Link href={`../../create`} className="flex items-center gap-2" prefetch={false}>
+              <PlusCircle className="h-4 w-4 mr-2" />
+              Create Listing
+            </Link>
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuItem>
+          <Link href={`../../settings`} className="flex items-center gap-2" prefetch={false}>
+            <Settings className="h-4 w-4 mr-2" />
+            Settings
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem>
+          <Link onClick={logout} href="#" className="flex items-center gap-2" prefetch={false}>
+            <LogOut className="h-4 w-4 mr-2" />
+            Logout
+          </Link>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}

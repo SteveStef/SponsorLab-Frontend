@@ -13,7 +13,7 @@ import Link from "next/link";
 import NotFound from "./NotFound";
 import { convertFromUtcToLocal } from "@/utils";
 import { Badge } from "@/components/ui/badge";
-import { FileIcon, CheckCircle2, CheckCircle,XCircle, Play, ThumbsUp, Video, Users, 
+import { FileIcon, CheckCircle2, CheckCircle,XCircle, Play, Video, Users, 
   DollarSign, Clock, Eye, Share2, EditIcon, Building2 } from "lucide-react";
 
 export default function Component({id}) {
@@ -34,9 +34,13 @@ export default function Component({id}) {
     const response = await request(url, "GET", null);
     if(response && response.success) {
       setUser(response.body);
+      if(!response.body.channel) {
+        setNotFound(true);
+        return;
+      }
       setSponsors(response.body.requestsReceived);
       let tmp = [];
-      let dev = response.body.channel.viewDeviations;
+      let dev = response.body.channel?.viewDeviations || [0,0,0,0];
       const normalDist = [2.2, 13.6, 68.2, 13.6, 2.1, 0.1];
       const skips = 6 - dev.length;
       let start = 0;
@@ -46,7 +50,7 @@ export default function Component({id}) {
         tmp.push({ range, probability: (normalDist[i + skips] + start).toFixed(1)});
         start = 0;
       }
-      tmp.push({ range: ">"+dev[dev.length-1], probability: normalDist[normalDist.length-1]})
+      tmp.push({ range: dev[dev.length-1]+"+", probability: normalDist[normalDist.length-1]})
       setViewRanges(tmp);
       setListings(response.body.posts);
       setOwner(response.body.owner);
@@ -69,13 +73,14 @@ export default function Component({id}) {
   if(notFound) {
     return <NotFound />
   }
-  if(selectedListing) return <Editor listing={selectedListing} viewDeviations={user.channel.viewDeviations} setSelectedListing={setSelectedListing}/>
+
+  if(selectedListing) return <Editor listing={selectedListing} viewDeviations={user?.channel?.viewDeviations} setSelectedListing={setSelectedListing}/>
 
   return (
     <div className={`w-full max-w-6xl mx-auto ${loading ? "animate-pulse rounded" : ""}`}>
     <div className="relative h-32 md:h-40 lg:h-48 flex items-center justify-center overflow-hidden">
         <Image
-          src={user && user.channel.bannerUrl || black}
+          src={user && user?.channel?.bannerUrl || black}
           alt="Channel Banner"
           width={1280}
           height={192}
@@ -95,13 +100,13 @@ export default function Component({id}) {
               {user && user.name}
               <CheckCircle2 className="w-5 h-5 text-green-500" />
             </h1>
-            <p className="text-gray-400">{user && user.channel.name}</p>
+            <p className="text-gray-400">{user && user.channel?.name}</p>
             <div className="flex items-center justify-center md:justify-start gap-4 mt-2">
-              <span>{user && (user.channel.subscribersCount).toLocaleString()} Subscribers</span>
+              <span>{user && (user.channel?.subscribersCount||0).toLocaleString()} Subscribers</span>
               <span>{listings.length} {listings.length == 1 ? "Listing" : "Listings"}</span>
             </div>
             <p className="mt-2 max-w-2xl">
-              {description || (user && user.channel.description)}
+              {description || (user && user.channel?.description)}
             </p>
           </div>
             {
@@ -116,36 +121,31 @@ export default function Component({id}) {
 
 
         {/* Channel Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 mt-8">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-8">
           <Card className="p-4 text-center">
             <Users className="w-8 h-8 mx-auto mb-2 text-green-500" />
-            <h3 className="text-xl font-bold">{user && user.channel.subscribersCount}</h3>
+            <h3 className="text-xl font-bold">{user && user.channel?.subscribersCount}</h3>
             <p className="text-gray-400">Subscribers</p>
           </Card>
           <Card className="p-4 text-center">
+            <Eye className="w-8 h-8 mx-auto mb-2 text-green-500" />
+            <h3 className="text-xl font-bold">{user && (user.channel?.totalViews / user.channel?.videoCount).toLocaleString()}</h3>
+            <p className="text-gray-400">Average Views</p>
+          </Card>
+          <Card className="p-4 text-center">
             <Play className="w-8 h-8 mx-auto mb-2 text-green-500" />
-            <h3 className="text-xl font-bold">{user && user.channel.totalViews}</h3>
+            <h3 className="text-xl font-bold">{user && user.channel?.totalViews}</h3>
             <p className="text-gray-400">Views</p>
           </Card>
           <Card className="p-4 text-center">
-            <ThumbsUp className="w-8 h-8 mx-auto mb-2 text-green-500" />
-            <h3 className="text-xl font-bold">89</h3>
-            <p className="text-gray-400">Likes</p>
-          </Card>
-          <Card className="p-4 text-center">
-            <Share2 className="w-8 h-8 mx-auto mb-2 text-green-500" />
-            <h3 className="text-xl font-bold">3</h3>
-            <p className="text-gray-400">Shares</p>
-          </Card>
-          <Card className="p-4 text-center">
             <Video className="w-8 h-8 mx-auto mb-2 text-green-500" />
-            <h3 className="text-xl font-bold">{user && user.channel.videoCount}</h3>
+            <h3 className="text-xl font-bold">{user && user.channel?.videoCount}</h3>
             <p className="text-gray-400">Videos</p>
           </Card>
           <Card className="p-4 text-center">
-            <Eye className="w-8 h-8 mx-auto mb-2 text-green-500" />
-            <h3 className="text-xl font-bold">{user && (user.channel.totalViews / user.channel.videoCount).toLocaleString()}</h3>
-            <p className="text-gray-400">Average Views</p>
+            <CalendarIcon className="w-8 h-8 mx-auto mb-2 text-green-500" />
+            <h3 className="text-xl font-bold">{user && new Date(user.channel?.joinedDate).toLocaleDateString()}</h3>
+            <p className="text-gray-400">Joined</p>
           </Card>
         </div>
         
