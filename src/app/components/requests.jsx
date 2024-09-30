@@ -657,7 +657,7 @@ const tabContent = {
       }
       </div>
       {
-        request.transaction?.status === "DRAFT_REFUSED" && <div className="mt-2">request.transaction?.refuteUrlInfo</div>
+        request.transaction?.status === "DRAFT_REFUSED" && <div className="mt-2">{request.transaction?.refuteUrlInfo}</div>
       }
       <div className="space-y-2 px-1">
         <Input 
