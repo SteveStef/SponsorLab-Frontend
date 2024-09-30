@@ -16,11 +16,9 @@ import { useAppContext } from "@/context";
 
 export default function Component({listing, setShowSponsorForm}) {
 
-  const PRICE = listing.estimatedPrice / 100 * listing.estimatedViews/1000;
-
   const titleRef = useRef("");
   const timeStampRef = useRef("");
-  const [estPrice, setEstPrice] = useState(PRICE);
+  const [estPrice, setEstPrice] = useState(listing.estimatedPrice);
 
   const durationRef = useRef(0);
   const [sendingProduct, setSendingProduct] = useState("NO");

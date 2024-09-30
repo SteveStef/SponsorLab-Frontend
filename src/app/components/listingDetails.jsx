@@ -99,7 +99,6 @@ return (
           <div className="text-muted-foreground">{listing?.description}</div>
           <div className="flex flex-wrap items-center gap-4 mt-2">
             <div className="text-4xl font-bold">
-              Price:{" "}
               {listing?.pricingModel === "FLAT" ? (
                 <span>${((listing.estimatedPrice || 0) / 100).toLocaleString()} FLAT</span>
               ) : (
