@@ -235,7 +235,7 @@ export default function Component({id}) {
                     ${(listing.estimatedPrice / 100).toLocaleString()}
                     <span className="text-xs ml-1">{listing.pricingModel}</span>
                   </div>
-                  {listing.owner && (
+                  {owner && (
                     <Badge
                       variant={listing.purchased ? "success" : listing.expired ? "destructive" : listing.published ? "success" : "secondary"}
                     >
@@ -243,7 +243,7 @@ export default function Component({id}) {
                     </Badge>
                   )}
                 </div>
-                {listing.owner && (
+                {owner && (
                   <Button 
                     variant="outline" 
                     className="w-full mt-4" 

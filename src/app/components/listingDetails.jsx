@@ -8,15 +8,15 @@ import { useState, useEffect } from "react";
 import request from "@/request";
 import Image from "next/image";
 import SponsorForm from "../components/sponsorForm";
-import { PlayIcon, FileWarning, CalendarIcon, UserIcon, VideoIcon, EyeIcon} from "lucide-react"
+import { PlayIcon, FileWarning, CalendarIcon, VideoIcon, EyeIcon} from "lucide-react"
 import { convertFromUtcToLocal } from "@/utils";
 import { useAppContext } from "@/context";
 
 function calculateDealScore(estimatedViews, estimatedPrice, pricingModel) {
   const viewsScore = Math.log10(estimatedViews) / 10 // Logarithmic scale for views
   const pricePerView = pricingModel === "FLAT" 
-    ? estimatedPrice / estimatedViews 
-    : estimatedPrice / 1000 // CPM
+    ? estimatedPrice / 100 / estimatedViews 
+    : estimatedPrice /100 / 1000 // CPM
   const priceScore = 1 - (pricePerView / 0.1) // Assuming $0.10 per view is the baseline
 
   const score = (viewsScore + priceScore) / 2 * 100
@@ -137,7 +137,7 @@ return (
               </svg>
               <div>
                 <span className="text-sm font-semibold block">Deal Evaluation</span>
-                <span className={`text-sm font-bold px-2 rounded-full text-white ${dealBadge?.color}`}>
+                <span className={`text-sm font-semibold px-2 rounded-full text-black ${dealBadge?.color}`}>
                     {dealBadge?.text}
                 </span>
               </div>

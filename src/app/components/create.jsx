@@ -128,6 +128,7 @@ export default function Component() {
 
     const response = await axiosRequest(url, "POST", formData);
     if(response.status === 200) {
+      toast.success("The listing was created and is privated by default. You can edit this on your profile");
       router.push(`../profile/${organization}`);
     } else {
       toast.error("Something went wrong, try again later");
@@ -226,7 +227,7 @@ export default function Component() {
                   <div className="space-y-2">
                     <Label htmlFor="caption" className="flex items-center">
                       <MessageSquareIcon className="mr-2 text-green-400" />
-                      Caption
+                      Description
                     </Label>
                     <Textarea onChange={(e) => setCaption(e.target.value)} value={caption} id="caption" placeholder="Enter listing caption" className="border-gray-600 text-gray-100" />
                   </div>
@@ -240,8 +241,12 @@ export default function Component() {
                       <ImageIcon className="mr-2 text-green-400" />
                       Thumbnail
                     </Label>
+
                     <div className="flex items-center space-x-4">
-                      <Input onChange={handleImageChange} id="thumbnail" type="file" accept="image/*" className="border-gray-600 text-gray-100" />
+                      <label for="thumbnail" class="bg-gray-600 text-white py-2 px-4 rounded cursor-pointer hover:bg-gray-700">
+                {image ? image.name : "Upload Image Here"}
+                      </label>
+                <input onChange={handleImageChange} id="thumbnail" type="file" accept="image/*" className="hidden" />
                       <div className="w-20 h-10 bg-gray-600 rounded flex items-center justify-center">
                         {
                           selectedImage ?
@@ -328,276 +333,3 @@ export default function Component() {
     </div>
   )
 }
-
-
-
-
-
-/*
-"use client";
-
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { CalendarIcon, Upload, InfoIcon, CheckCircleIcon } from "lucide-react"
-import { format } from "date-fns"
-import { useState, useLayoutEffect, useRef } from "react";
-import { axiosRequest } from "@/request";
-import { toast } from "sonner";
-import { useAppContext } from "@/context";
-import { redirect, useRouter } from 'next/navigation';
-
-export default function Component() {
-  const { role, organization } = useAppContext();
-  const [load, setLoad] = useState(false);
-  const router = useRouter();
-
-  useLayoutEffect(() => {
-    if(role && role !== "CREATOR"){
-      redirect("/");
-    }
-  }, [role]);
-
-  const [selectedCategory, setSelectedCategory] = useState("")
-  const [pricingModel, setPricingModel] = useState("flat")
-
-  const [selectedDate, setSelectedDate] = useState("");
-  const [tag, setTag] = useState("");
-
-  const [image, setImage] = useState(null);
-  const [selectedImage, setSelectedImage] = useState(null);
-
-  const title = useRef("");
-  const caption = useRef("");
-  const estimatedViews = useRef(0);
-  const price = useRef(0.0);
-
-  const handleImageChange = (event) => {
-    if (event.target.files && event.target.files[0]) {
-      setImage(event.target.files[0]);
-      setSelectedImage(URL.createObjectURL(event.target.files[0]));
-    }
-  };
-
-  function validate() {
-    let error = false;
-    let message = "";
-
-    if (!title.current.value) {
-      message = "Listing must have a title";
-      error = true;
-    } else if (!caption.current.value) {
-      message = "Listing must have a caption";
-      error = true;
-
-    } else if(price.current.value <= 0) {
-      message = "Price must be greater than $0.00";
-      error = true;
-
-    } else if(estimatedViews.current.value < 0) {
-      message = "Estimated views can not be negative";
-      error = true;
-    }
-    if(error) {
-      toast.error(message);
-      setLoad(false);
-      return false;
-    }
-    return true;
-  }
-
-  async function uploadListing(e) {
-    setLoad(true);
-    e.preventDefault();
-    if(!validate()) return;
-
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/posts`;
-    const formData = new FormData();
-    setTag("Art");
-    setPricingModel("FLAT");
-    formData.append("tag", tag);
-    formData.append("estimatedPrice", price.current.value+"");
-    formData.append("uploadDate", selectedDate);
-    formData.append("estimatedViews", estimatedViews.current.value);
-    formData.append("caption", caption.current.value);
-    formData.append("title", title.current.value);
-    formData.append("pricingModel", pricingModel);
-    formData.append("file", image);
-
-    const response = await axiosRequest(url, "POST", formData);
-    if(response.status === 200) {
-      router.push(`../profile/${organization}`);
-    } else {
-      toast.error("Something went wrong, try again later");
-    }
-    setLoad(false);
-  }
-
-  return (
-    <div className="text-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-9xl mx-auto">
-        <h1 className="text-3xl font-bold text-center mb-8">Create a New Listing</h1>
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          <Card className="border-gray-700">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <InfoIcon className="mr-2 text-green-400" />
-                CPM vs. Flat Rate
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <h3 className="font-semibold mb-2">CPM (Cost Per Mille)</h3>
-              <p className="text-sm mb-4">You're paid based on every 1,000 views your video receives. Great for videos expected to go viral or have high view counts.</p>
-              <h3 className="font-semibold mb-2">Flat Rate</h3>
-              <p className="text-sm">You're paid a fixed amount regardless of view count. Ideal for niche content or when you want a guaranteed payment.</p>
-            </CardContent>
-          </Card>
-
-          <div className="lg:col-span-2">
-            <form className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <Label htmlFor="title">Title</Label>
-                  <Input ref={title} id="title" placeholder="Enter your video title" className="border-gray-700 text-gray-100" />
-                </div>
-
-                <div>
-                  <Label htmlFor="category">Category</Label>
-<Select value={selectedCategory} onValueChange={setSelectedCategory}>
-          <SelectTrigger className="border-gray-700 text-gray-100">
-            <SelectValue placeholder="Select a category" />
-          </SelectTrigger>
-          <SelectContent className="border-gray-700 text-gray-100">
-            <SelectItem value="tech">Technology</SelectItem>
-            <SelectItem value="gaming">Gaming</SelectItem>
-            <SelectItem value="lifestyle">Lifestyle</SelectItem>
-            <SelectItem value="education">Education</SelectItem>
-            <SelectItem value="entertainment">Entertainment</SelectItem>
-          </SelectContent>
-        </Select>
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="caption">Caption</Label>
-                <Textarea ref={caption} id="caption" placeholder="Enter a brief description of your video" className="border-gray-700 text-gray-100" />
-              </div>
-
-              <div>
-                <Label htmlFor="thumbnail">Thumbnail</Label>
-                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-700 border-dashed rounded-md">
-                  <div className="space-y-1 text-center">
-                    <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                    <div className="flex text-sm text-gray-400">
-                      <label htmlFor="thumbnail-upload" className="relative cursor-pointer rounded-md font-medium text-green-400 hover:text-green-300 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-green-500">
-                        <span>{image ? `Selected: ${image.name}`: "Click to upload a file"}</span>
-                        <input onChange={handleImageChange}id="thumbnail-upload" name="thumbnail-upload" type="file" className="sr-only" />
-                      </label>
-                      <p className="pl-1"></p>
-                    </div>
-                    <p className="text-xs text-gray-400">PNG, JPG, GIF up to 10MB</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <Label htmlFor="estimated-views">Estimated Views</Label>
-                  <Input ref={estimatedViews}id="estimated-views" type="number" placeholder="Enter estimated views" className="border-gray-700 text-gray-100" />
-                </div>
-
-                <div>
-                  <Label htmlFor="upload-date">Upload Date</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant={"outline"}
-                        className={`w-full justify-start text-left font-normal border-gray-700 text-gray-100 ${!selectedDate && "text-muted-foreground"}`}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {selectedDate ? format(selectedDate, "PPP") : "Pick a date"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 border-gray-700">
-                      <Calendar
-                        mode="single"
-                        selected={selectedDate}
-                        onSelect={setSelectedDate}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              </div>
-
-              <div>
-                <Label>Pricing Model</Label>
-<RadioGroup value={pricingModel} onValueChange={setPricingModel} className="flex space-x-4">
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="cpm" id="cpm" />
-            <Label htmlFor="cpm">CPM</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="flat" id="flat" />
-            <Label htmlFor="flat">Flat Rate</Label>
-          </div>
-        </RadioGroup>
-              </div>
-
-              <div>
-                <Label htmlFor="estimated-price">Estimated Price</Label>
-                <Input ref={price} id="estimated-price" type="number" placeholder="Enter estimated price" className="border-gray-700 text-gray-100" />
-              </div>
-
-              <Button disabled={load} onClick={uploadListing} className="w-full bg-green-600 hover:bg-green-700 text-white">
-                Create Listing
-              </Button>
-            </form>
-          </div>
-
-          <Card className="border-gray-700">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <CheckCircleIcon className="mr-2 text-green-400" />
-                Creation Process
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ol className="list-decimal list-inside space-y-2 text-sm">
-                <li>Fill out all the required information in the form.</li>
-                <li>Upload a compelling thumbnail that represents your video.</li>
-                <li>Choose between CPM and Flat Rate pricing models.</li>
-                <li>Set a competitive price based on your audience and content.</li>
-                <li>Review your listing details before submission.</li>
-                <li>Click "Create Listing" to submit your listing for review.</li>
-                <li>Once approved, your listing will be visible to potential sponsors.</li>
-              </ol>
-              <p className="mt-4 text-sm text-green-400">Tip: Detailed and accurate listings tend to attract more sponsors!</p>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    </div>
-  )
-}
- * */
-
-
-
-
-
-
-
-
-
-
-
-
-
-

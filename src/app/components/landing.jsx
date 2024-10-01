@@ -1,10 +1,10 @@
 
-"use client"
+"use client";
 import Black from "../../../public/connect.jpg";
 import { motion } from 'framer-motion'
-import Image from 'next/image'
-import { Button } from "@/components/ui/button"
-import { Play, Upload, Users, BarChart, Search, Zap, Star, Shield, DollarSign, TrendingUp } from 'lucide-react'
+import Image from 'next/image';
+import { Button } from "@/components/ui/button";
+import { Play, Upload, Users, BarChart, Search, Zap, Star, Shield, DollarSign, TrendingUp } from 'lucide-react';
 import Link from "next/link";
 
 const containerVariants = {
@@ -49,10 +49,7 @@ export default function LandingPage() {
               SponsorLab: Where Content Meets Opportunity
             </motion.p>
             <motion.div className="flex justify-center space-x-4" variants={itemVariants}>
-              <Button className="bg-green-500 hover:bg-green-600 text-gray-900">Get Started</Button>
-              <Button variant="outline" className="text-green-400 border-green-400 hover:bg-green-400 hover:text-gray-900">
-                Learn More
-              </Button>
+              <Link href="/signup"><Button className="bg-green-500 hover:bg-green-600 text-gray-900">Get Started</Button></Link>
             </motion.div>
           </motion.section>
 
@@ -71,7 +68,6 @@ export default function LandingPage() {
                 <p className="text-xl mb-8 text-gray-300">
                   SponsorLab provides a unique platform where creators and sponsors can connect, collaborate, and grow together. Our innovative approach streamlines the sponsorship process, making it easier than ever to create meaningful partnerships.
                 </p>
-                <Button className="bg-green-500 hover:bg-green-600 text-gray-900">Learn More</Button>
               </motion.div>
               <motion.div variants={itemVariants} className="relative h-[400px] rounded-lg overflow-hidden">
                 <Image
@@ -120,9 +116,9 @@ export default function LandingPage() {
               <FeatureCard
                 icon={<DollarSign className="w-8 h-8 text-green-400" />}
                 title="Secure Sponsorships"
-                description="Sponsors bid on or purchase sponsorship slots in an eBay-style format."
+                description="Sponsors purchase sponsorship slots in an ecommerce-style format."
                 items={[
-                  { icon: <TrendingUp className="w-4 h-4" />, text: "Place competitive bids" },
+                  { icon: <TrendingUp className="w-4 h-4" />, text: "Send competitive requests" },
                   { icon: <Zap className="w-4 h-4" />, text: "Buy Now options available" },
                   { icon: <Shield className="w-4 h-4" />, text: "Secure payment processing" }
                 ]}
@@ -169,7 +165,9 @@ export default function LandingPage() {
         <div className="border-t border-green-800 opacity-30"></div>
 
         <footer className="container mx-auto px-4 py-6 text-center text-gray-400">
-          <p>&copy; 2024 SponsorLab. All rights reserved.</p>
+          <Link href="/terms-of-service" className="underline mr-5 font-bold">Terms of Service</Link>
+          <Link href="/privacy" className="underline mr-5 font-bold">Privacy Policy</Link>
+          
         </footer>
       </div>
     </div>

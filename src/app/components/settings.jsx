@@ -96,7 +96,6 @@ export default function Component() {
 
   useEffect(() => {
     setName(state.name);
-    setDescription(state.description);
   },[state]);
 
 
@@ -174,7 +173,9 @@ export default function Component() {
         <Tabs defaultValue="account" className="w-full">
           <TabsList>
             <TabsTrigger value="account">Account</TabsTrigger>
-            <TabsTrigger value="profile">Profile</TabsTrigger>
+    {state.role==="SPONSOR"&&
+      <TabsTrigger value="profile">Profile</TabsTrigger>
+    }
             <TabsTrigger value="payment">Payment</TabsTrigger>
           </TabsList>
           <TabsContent value="account" className="space-y-6">
@@ -241,12 +242,12 @@ export default function Component() {
         </div>
           </TabsContent>
 
-          <TabsContent value="profile" className="space-y-6">
             {
-              state && state.company && state.role==="SPONSOR" && 
+              state && state.company && state.role==="SPONSOR" &&
+              <TabsContent value="profile" className="space-y-6">
               <SponsorProfileUpdate formState={state.company} />
+              </TabsContent>
             }
-          </TabsContent>
 
           <TabsContent value="payment" className="space-y-6">
 

@@ -5,8 +5,8 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Progress } from "@/components/ui/progress"
-import { Building2, Globe, PackageOpen, Youtube, Users, Tag, FileText,
-  Banknote, ArrowRight, ArrowLeft, LightbulbIcon, X } from 'lucide-react';
+import { Building2, Globe, PackageOpen, Youtube, Users, Banknote, 
+  ArrowRight, ArrowLeft, LightbulbIcon, X } from 'lucide-react';
 import request from "@/request";
 import { toast } from "sonner";
 import { useAppContext } from '@/context'
@@ -157,7 +157,7 @@ const allCategories  = [
   }, [])
 
   return (
-    <div className="text-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+<div className="text-gray-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-8">Create Your Sponsor Profile</h1>
         
@@ -168,15 +168,15 @@ const allCategories  = [
             {steps.map((s, index) => (
               <div key={index} className={`flex flex-col items-center ${index < step ? 'text-green-500' : 'text-gray-500'}`}>
                 {s.icon}
-                <span className="text-xs mt-1">{s.title}</span>
+                <span className="text-xs mt-1 hidden sm:inline">{s.title}</span>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="flex gap-8">
+        <div className="flex flex-col lg:flex-row gap-8">
           {/* Left side panel */}
-          <div className="w-1/3 p-6 rounded-lg h-fit">
+          <div className="w-full lg:w-1/3 p-6 rounded-lg mb-8 lg:mb-0">
             <div className="flex items-center mb-4">
               <LightbulbIcon className="w-6 h-6 mr-2 text-yellow-400" />
               <h3 className="text-xl font-semibold">Helpful Tips</h3>
@@ -186,7 +186,7 @@ const allCategories  = [
           </div>
 
           {/* Main form */}
-          <form  className="space-y-8 w-2/3">
+          <form className="space-y-8 w-full lg:w-2/3">
             {step === 1 && (
               <div className="space-y-6">
                 <h2 className="text-2xl font-semibold mb-4 flex items-center">
@@ -270,7 +270,7 @@ const allCategories  = [
             )}
 
             {step === 3 && (
-              <div className="grid grid-cols-2 gap-6">
+              <div className="space-y-6 sm:grid sm:grid-cols-2 sm:gap-6 sm:space-y-0">
                 <div>
                   <Label className="flex items-center mb-2">
                     <Youtube className="w-4 h-4 mr-2" />
