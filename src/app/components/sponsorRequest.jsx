@@ -316,16 +316,15 @@ export default function Component() {
   }
 
   return (
-    <div className="text-gray-300 flex justify-center">
-      <div className="max-w-7xl w-full flex">
-
-        <div className="flex-1 p-8 max-w-4xl mx-auto">
+<div className="text-gray-300 flex justify-center p-4">
+      <div className="max-w-7xl w-full">
+        <div className="flex-1 max-w-4xl mx-auto">
           <header className="mb-8">
-            <div className="flex justify-between items-center mb-4">
-              <h1 className="text-3xl font-bold text-gray-100">Managing Requests</h1>
-              <div onClick={getRequests}>
+            <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-100 mb-4 sm:mb-0">Managing Requests</h1>
+              <div onClick={getRequests} className="cursor-pointer">
                 <Refresh animate={refreshing}/>
-                </div>
+              </div>
             </div>
             <div className="flex flex-col sm:flex-row gap-4 items-center">
               <div className="relative flex-1 w-full">
@@ -337,7 +336,7 @@ export default function Component() {
                   onChange={(e) => setSearch(e.target.value)}
                 />
               </div>
-              <Select defaultValue={filter} onValueChange={(value) => setFilter(value)} >
+              <Select defaultValue={filter} onValueChange={(value) => setFilter(value)}>
                 <SelectTrigger className="w-full sm:w-[180px] border-gray-700 text-gray-300">
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
@@ -351,204 +350,176 @@ export default function Component() {
             </div>
           </header>
           <div className="space-y-6">
-            {
-              !refreshing && requests.length === 0 && <NoRequests />
-            }
+            {!refreshing && requests.length === 0 && <NoRequests />}
             {requests.map((request) => (
-              <Card key={request.id} className="w-full max-w-4xl">
+              <Card key={request.id} className="w-full">
                 <Tabs defaultValue="request" value={activeTab[request.id]} onValueChange={(val) => changeTab(request.id, val)} 
                   className="w-full">
-
                   <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="request">Request</TabsTrigger>
-                    <TabsTrigger disabled={!request.transaction} value="ongoing">Parnership</TabsTrigger>
+                    <TabsTrigger disabled={!request.transaction} value="ongoing">Partnership</TabsTrigger>
                     <TabsTrigger disabled={(!request.transaction) || (request.transaction.status!=="COMPLETED")} value="receipt">Receipt</TabsTrigger>
                   </TabsList>
-
-              {/*{
-                activeTab[request.id]=== "ongoing" && 
-            <div className="mt-5 flex justify-between ml-4 mr-4">
-              {[1, 2, 3, 4].map((i) => (
-                <div
-                  key={i}
-                  className={`w-1/4 h-2 rounded ${i <= determineStep(request.transaction?.status) ? 'bg-green-700' : 'bg-gray-500'} transition-all duration-300`}
-                />
-              ))}
-            </div>
-              }*/}
-
                   {Object.entries(tabContent).map(([key, { title, content }]) => (
                     <TabsContent key={key} value={key}>
                       <CardHeader className="relative pb-2">
-                        <div className="flex justify-between items-start">
+                        <div className="flex flex-col sm:flex-row justify-between items-start">
                           <div>
                             <CardTitle className="text-xl font-bold text-gray-100 flex items-center">
                               {title}
                             </CardTitle>
-
-                            {
-                              activeTab[request.id] === "request" ? 
-                            <p className="text-sm text-gray-400 flex items-center mb-2">
-                              <Clock className="w-4 h-4 mr-2 flex-shrink-0 text-blue-500" />
-                              Requested on: {new Date(request.createdAt).toDateString()}
-                            </p> : 
-
+                            {activeTab[request.id] === "request" ? 
+                              <p className="text-sm text-gray-400 flex items-center mb-2">
+                                <Clock className="w-4 h-4 mr-2 flex-shrink-0 text-blue-500" />
+                                Requested on: {new Date(request.createdAt).toDateString()}
+                              </p> : 
                               <p className="text-sm text-green-500 flex items-center cursor-pointer hover:text-green-400 mb-2"
-                              onClick={()=>{window.open(`${process.env.NEXT_PUBLIC_CLIENT_URL}/chat/${request.chatRoom.id}`, '_blank')}}
-                              >
-                              <MessageCircle className="w-5 h-5 mr-1" />
-                              Open direct messaging with {request.creator.name}
+                                onClick={()=>{window.open(`${process.env.NEXT_PUBLIC_CLIENT_URL}/chat/${request.chatRoom.id}`, '_blank')}}>
+                                <MessageCircle className="w-5 h-5 mr-1" />
+                                Open direct messaging with {request.creator.name}
                               </p>
                             }
                           </div>
-                          <div className="flex items-center space-x-2">
+                          <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2 mt-2 sm:mt-0">
                             <p className="text-lg font-bold text-gray-100 flex items-center">
                               <DollarSign className="w-5 h-5 mr-1 flex-shrink-0 text-gray-400" />
-                        {(request.requestedPrice / 100).toLocaleString()} {request.pricingModel === "CPM" ? " CPM" : " FLAT"}
-                      </p>
-                      {
-                        activeTab[request.id] === "request" ? 
-                      <Badge className={`${getStatusColor(request.status)} flex items-center`}>
-                        {getStatusIcon(request.status)}
-                        {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
-                      </Badge> : 
-                        request.transaction && 
-                      <Badge className={`${getStatusColor(request.transaction.status)} flex items-center`}>
-                        {getStatusIcon(request.transaction.status)}
-                        {request.transaction && request.transaction.status}
-                      </Badge>
-                      }
-                    {
-                      activeTab[request.id] === "ongoing" &&
-                    <TooltipProvider>
-                    <Tooltip>
-                    <TooltipTrigger asChild>
-
-                    <Flag
-                    className="w-5 h-5 text-red-500 cursor-pointer hover:text-red-400"
-                    onClick={() => handleAdminAssistance(request.id)}
-                    />
-
-                    </TooltipTrigger>
-                    <TooltipContent className="max-w-xs text-white p-2 rounded shadow-lg">
-                    <p>Request Admin Assistance</p>
-                    <p className="text-xs mt-1">Click this flag to alert our admin team. Use this for urgent issues, disputes, or when you need immediate help with your request.</p>
-                    </TooltipContent>
-                    </Tooltip>
-                    </TooltipProvider>
-                    }
+                              {(request.requestedPrice / 100).toLocaleString()} {request.pricingModel === "CPM" ? " CPM" : " FLAT"}
+                            </p>
+                            {activeTab[request.id] === "request" ? 
+                              <Badge className={`${getStatusColor(request.status)} flex items-center`}>
+                                {getStatusIcon(request.status)}
+                                {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                              </Badge> : 
+                              request.transaction && 
+                              <Badge className={`${getStatusColor(request.transaction.status)} flex items-center`}>
+                                {getStatusIcon(request.transaction.status)}
+                                {request.transaction && request.transaction.status}
+                              </Badge>
+                            }
+                            {activeTab[request.id] === "ongoing" &&
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Flag
+                                      className="w-5 h-5 text-red-500 cursor-pointer hover:text-red-400"
+                                      onClick={() => handleAdminAssistance(request.id)}
+                                    />
+                                  </TooltipTrigger>
+                                  <TooltipContent className="max-w-xs text-white p-2 rounded shadow-lg">
+                                    <p>Request Admin Assistance</p>
+                                    <p className="text-xs mt-1">Click this flag to alert our admin team. Use this for urgent issues, disputes, or when you need immediate help with your request.</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            }
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <ScrollArea className="h-[200px] pr-4">
+                          {key === "ongoing" ? content(request, videoUrls, copied, handleCopy) : content(request)}
+                        </ScrollArea>
+                      </CardContent>
+                      <CardFooter className="flex flex-wrap justify-center sm:justify-between gap-2">
+                        <ShowButtons request={request} load={load} 
+                          activeTab={key} confirmRequest={confirmRequest} cancelRequest={cancelRequest} 
+                          handleViewProposal={handleViewProposal} approveVideo={approveVideo} refuteVideo={refuteVideo} refund={refund}
+                          approveDraft={approveDraft} refuteDraft={refuteDraft}
+                        />
+                      </CardFooter>
+                    </TabsContent>
+                  ))}
+                  {activeTab[request.id] === "ongoing" && 
+                    <div className="px-6 mb-4">
+                      <Progress value={determineStep(request.transaction?.status) * 25} className="w-full h-2" />
+                      <div className="flex justify-between mt-2">
+                        {steps.map((step, index) => {
+                          const s = determineStep(request.transaction?.status);
+                          return (
+                            <span 
+                              key={step} 
+                              className={`text-xs ${index <= s ? 'text-white-500 font-semibold' : 'text-gray-400'}`}
+                            >
+                              {step}
+                            </span>
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <ScrollArea className="h-[200px] pr-4">
-                  {key === "ongoing" ? content(request, videoUrls, copied, handleCopy) : content(request)}
-                  </ScrollArea>
-                </CardContent>
-                <CardFooter className="flex justify-between">
-                  <ShowButtons request={request} load={load} 
-                    activeTab={key} confirmRequest={confirmRequest} cancelRequest={cancelRequest} 
-                    handleViewProposal={handleViewProposal} approveVideo={approveVideo} refuteVideo={refuteVideo} refund={refund}
-                    approveDraft={approveDraft} refuteDraft={refuteDraft}
-                  />
-
-                </CardFooter>
-                </TabsContent>
-                ))}
-
-              {
-                activeTab[request.id]=== "ongoing" && 
-              <div className="px-6 mb-4">
-              <Progress value={determineStep(request.transaction?.status) * 25} 
-              className="w-full h-2" />
-              <div className="flex justify-between mt-2">
-                    {steps.map((step, index) => {
-                      const s = determineStep(request.transaction?.status);
-                      return (
-                      <span 
-                        key={step} 
-                        className={`text-xs ${index <= s ? 'text-white-500 font-semibold' : 'text-gray-400'}`}
-                      >
-                        {step}
-                      </span>
-                    )})}
-                  </div>
-              </div>
-              }
-              </Tabs>
+                  }
+                </Tabs>
               </Card>
             ))}
           </div>
-
         </div>
       </div>
 
       {/* Proposal Modal */}
-<Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-      <DialogContent className="text-gray-300 max-w-4xl">
-        <DialogHeader>
-          <DialogTitle className="text-3xl font-bold text-green-400">Request Details</DialogTitle>
-        </DialogHeader>
-        {selectedRequest && (
-          <>
-            <div className="grid grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-lg font-semibold text-green-400 flex items-center">
-                    <User className="w-5 h-5 mr-2" />
-                    Sender Information
-                  </h3>
-                  <p><strong>Name:</strong> {name}</p>
-                  <p><strong>Company:</strong> {company.orginization.indexOf(".") > 0 ? company.orginization : "individual"}</p>
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="text-gray-300 max-w-4xl">
+          <DialogHeader>
+            <DialogTitle className="text-3xl font-bold text-green-400">Request Details</DialogTitle>
+          </DialogHeader>
+          {selectedRequest && (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-green-400 flex items-center">
+                      <User className="w-5 h-5 mr-2" />
+                      Sender Information
+                    </h3>
+                    <p><strong>Name:</strong> {name}</p>
+                    <p><strong>Company:</strong> {company.orginization.indexOf(".") > 0 ? company.orginization : "individual"}</p>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-green-400 flex items-center">
+                      <Package className="w-5 h-5 mr-2" />
+                      Product/Service Details
+                    </h3>
+                    <p><strong>Title:</strong> {selectedRequest.title}</p>
+                    <p><strong>Short Description:</strong> {selectedRequest.productDescription}</p>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-green-400 flex items-center">
+                      <MessageSquare className="w-5 h-5 mr-2" />
+                      Speech Requirements
+                    </h3>
+                    <p>{selectedRequest.description}</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-green-400 flex items-center">
-                    <Package className="w-5 h-5 mr-2" />
-                    Product/Service Details
-                  </h3>
-                  <p><strong>Title:</strong> {selectedRequest.title}</p>
-                  <p><strong>Short Description:</strong> {selectedRequest.productDescription}</p>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-green-400 flex items-center">
-                    <MessageSquare className="w-5 h-5 mr-2" />
-                    Speech Requirements
-                  </h3>
-                  <p>{selectedRequest.description}</p>
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-green-400 flex items-center">
+                      <Video className="w-5 h-5 mr-2" />
+                      Advertisement Details
+                    </h3>
+                    <p><strong><Clock className="w-4 h-4 inline mr-1" /> Timestamp:</strong> {selectedRequest.timeStamp}</p>
+                    <p><strong><DollarSign className="w-4 h-4 inline mr-1" /> Proposed Payment:</strong> ${selectedRequest.requestedPrice/100} {selectedRequest.pricingModel}</p>
+                    <p><strong><Timer className="w-4 h-4 inline mr-1" /> Ad Duration:</strong> {selectedRequest.duration} seconds</p>
+                    <p><strong><Gift className="w-4 h-4 inline mr-1" /> Sample Product:</strong> {selectedRequest.sendingProduct ? 'Yes' : 'No'}</p>
+                    <p><strong><DollarSign className="w-4 h-4 inline mr-1" /> Payment Cap:</strong> {selectedRequest.hasPaymentCap ? selectedRequest.paymentCap : "none"}</p>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-green-400 flex items-center">
+                      <FileText className="w-5 h-5 mr-2" />
+                      Proposal Message
+                    </h3>
+                    <p className="max-h-40 overflow-y-auto">{selectedRequest.proposal}</p>
+                  </div>
                 </div>
               </div>
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-lg font-semibold text-green-400 flex items-center">
-                    <Video className="w-5 h-5 mr-2" />
-                    Advertisement Details
-                  </h3>
-                  <p><strong><Clock className="w-4 h-4 inline mr-1" /> Timestamp:</strong> {selectedRequest.timeStamp}</p>
-                  <p><strong><DollarSign className="w-4 h-4 inline mr-1" /> Proposed Payment:</strong> ${selectedRequest.requestedPrice/100} {selectedRequest.pricingModel}</p>
-                  <p><strong><Timer className="w-4 h-4 inline mr-1" /> Ad Duration:</strong> {selectedRequest.duration} seconds</p>
-                  <p><strong><Gift className="w-4 h-4 inline mr-1" /> Sample Product:</strong> {selectedRequest.sendingProduct ? 'Yes' : 'No'}</p>
-                  <p><strong><DollarSign className="w-4 h-4 inline mr-1" /> Payment Cap:</strong> {selectedRequest.hasPaymentCap ? selectedRequest.paymentCap : "none"}</p>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-green-400 flex items-center">
-                    <FileText className="w-5 h-5 mr-2" />
-                    Proposal Message
-                  </h3>
-                  <p className="max-h-40 overflow-y-auto">{selectedRequest.proposal}</p>
-                </div>
+              <div className="flex justify-end gap-4 mt-6">
+                <Button onClick={() => setIsModalOpen(false)} variant="outline" className="bg-gray-800 text-green-400 hover:bg-gray-700 border-green-600 flex items-center">
+                  <X className="w-4 h-4 mr-2" />
+                  Close
+                </Button>
               </div>
-            </div>
-            <div className="flex justify-end gap-4 mt-6">
-              <Button onClick={() => setIsModalOpen(false)} variant="outline" className="bg-gray-800 text-green-400 hover:bg-gray-700 border-green-600 flex items-center">
-                <X className="w-4 h-4 mr-2" />
-                Close
-              </Button>
-            </div>
-          </>
-        )}
-      </DialogContent>
-    </Dialog>
-    <Dialog open={flagDialog} onOpenChange={setFlagDialog}>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+      <Dialog open={flagDialog} onOpenChange={setFlagDialog}>
         <DialogContent className="sm:max-w-[425px] text-white">
           <DialogHeader>
             <DialogTitle>Request Admin Assistance</DialogTitle>
@@ -572,7 +543,6 @@ export default function Component() {
                   <SelectItem value="OTHER">Other</SelectItem>
                 </SelectContent>
               </Select>
-
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="problem-description" className="col-span-4">

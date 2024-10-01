@@ -48,16 +48,11 @@ export default function Component({ params }) {
       setListing(response.body);
       let tmp = [];
       let dev = response.body.user.channel.viewDeviations;
-      const normalDist = [2.2, 13.6, 68.2, 13.6, 2.1, 0.1];
-      const skips = 6 - dev.length;
-      let start = 0;
-      for(let i = 0; i < skips; i++) start += normalDist[i];
+      const normalDist = [21, 63, 13.6, 2.1, 0];
       for(let i = 0; i < dev.length - 1; i++) {
-        let range = dev[i] + "-" + dev[i + 1];
-        tmp.push({ range, probability: (normalDist[i + skips] + start).toFixed(1)});
-        start = 0;
+        let range = dev[i] + "-" + dev[i + 1] + (i === dev.length - 2? "+":"");
+        tmp.push({ range, probability: (normalDist[i]).toFixed(1)});
       }
-      tmp.push({ range: dev[dev.length-1]+"+", probability: normalDist[normalDist.length-1]})
       setViewRanges(tmp);
       const score = calculateDealScore(response.body.estimatedViews, response.body.estimatedPrice, response.body.pricingModel);
       setDealBadge(getDealBadge(score));

@@ -14,7 +14,7 @@ import NotFound from "./NotFound";
 import { convertFromUtcToLocal } from "@/utils";
 import { Badge } from "@/components/ui/badge";
 import { FileIcon, CheckCircle2, CheckCircle,XCircle, Play, Video, Users, 
-  DollarSign, Clock, Eye, Share2, EditIcon, Building2 } from "lucide-react";
+  DollarSign, Clock, Eye, EditIcon, Building2 } from "lucide-react";
 
 export default function Component({id}) {
   const [user, setUser] = useState(null);
@@ -40,17 +40,12 @@ export default function Component({id}) {
       }
       setSponsors(response.body.requestsReceived);
       let tmp = [];
-      let dev = response.body.channel?.viewDeviations || [0,0,0,0];
-      const normalDist = [2.2, 13.6, 68.2, 13.6, 2.1, 0.1];
-      const skips = 6 - dev.length;
-      let start = 0;
-      for(let i = 0; i < skips; i++) start += normalDist[i];
+      let dev = response.body.channel?.viewDeviations;
+      const normalDist = [21, 63, 13.6, 2.1, 0];
       for(let i = 0; i < dev.length - 1; i++) {
-        let range = dev[i] + "-" + dev[i + 1];
-        tmp.push({ range, probability: (normalDist[i + skips] + start).toFixed(1)});
-        start = 0;
+        let range = dev[i] + "-" + dev[i + 1] + (i === dev.length - 2? "+":"");
+        tmp.push({ range, probability: (normalDist[i]).toFixed(1)});
       }
-      tmp.push({ range: dev[dev.length-1]+"+", probability: normalDist[normalDist.length-1]})
       setViewRanges(tmp);
       setListings(response.body.posts);
       setOwner(response.body.owner);
@@ -77,8 +72,8 @@ export default function Component({id}) {
   if(selectedListing) return <Editor listing={selectedListing} viewDeviations={user?.channel?.viewDeviations} setSelectedListing={setSelectedListing}/>
 
   return (
-    <div className={`w-full max-w-6xl mx-auto ${loading ? "animate-pulse rounded" : ""}`}>
-    <div className="relative h-32 md:h-40 lg:h-48 flex items-center justify-center overflow-hidden">
+<div className={`w-full max-w-6xl mx-auto ${loading ? "animate-pulse rounded" : ""}`}>
+      <div className="relative h-32 md:h-40 lg:h-48 flex items-center justify-center overflow-hidden">
         <Image
           src={user && user?.channel?.bannerUrl || black}
           alt="Channel Banner"
@@ -91,10 +86,10 @@ export default function Component({id}) {
       {/* Profile Info */}
       <div className="max-w-6xl mx-auto px-4 py-6">
         <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-            <Avatar className="w-32 h-32 ring-4 ring-background">
-              <AvatarImage src={user && user.googleImage || ""} alt="Profile Picture" />
-              <AvatarFallback>{user && user.name[0]}</AvatarFallback>
-            </Avatar>
+          <Avatar className="w-32 h-32 ring-4 ring-background">
+            <AvatarImage src={user && user.googleImage || ""} alt="Profile Picture" />
+            <AvatarFallback>{user && user.name[0]}</AvatarFallback>
+          </Avatar>
           <div className="flex-1 text-center md:text-left">
             <h1 className="text-2xl font-bold flex items-center justify-center md:justify-start gap-2">
               {user && user.name}
@@ -109,16 +104,15 @@ export default function Component({id}) {
               {description || (user && user.channel?.description)}
             </p>
           </div>
-            {
-              organization === id.replace("%40", "@") &&
-                <Link  href="../../settings">
-                  <Button variant="outline" className="shrink-0">
-                    Edit Profile
-                  </Button>
-                </Link>
-            }
+          {
+            organization === id.replace("%40", "@") &&
+              <Link href="../../settings">
+                <Button variant="outline" className="shrink-0">
+                  Edit Profile
+                </Button>
+              </Link>
+          }
         </div>
-
 
         {/* Channel Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-8">
@@ -149,120 +143,120 @@ export default function Component({id}) {
           </Card>
         </div>
         
-        <div className="flex">
-        <Card className="w-3/5 p-6 rounded-lg mt-5 mr-2">
-          <h2 className="text-xl font-semibold mb-4">View Range Probabilities</h2>
-          <div className="space-y-2">
-            {viewRanges.map((item, index) => (
-              <div key={index} className="flex items-center">
-                <span className="w-24 text-sm">{item.range}</span>
-                <div className="flex-1 h-6 bg-gray-700 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-green-500"
-                    style={{ width: `${item.probability}%` }}
-                  ></div>
+        <div className="flex flex-col md:flex-row gap-4 mt-5">
+          <Card className="w-full md:w-3/5 p-6 rounded-lg">
+            <h2 className="text-xl font-semibold mb-4">View Range Probabilities</h2>
+            <div className="space-y-2">
+              {viewRanges.map((item, index) => (
+                <div key={index} className="flex items-center">
+                  <span className="w-24 text-sm">{item.range}</span>
+                  <div className="flex-1 h-6 bg-gray-700 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-green-500"
+                      style={{ width: `${item.probability}%` }}
+                    ></div>
+                  </div>
+                  <span className="w-12 text-right text-sm">{item.probability}%</span>
                 </div>
-                <span className="w-12 text-right text-sm">{item.probability}%</span>
-              </div>
-            ))}
-          </div>
-        </Card>
-    <Card className="w-full md:w-2/5 p-4 rounded-lg mt-5">
-      <h2 className="text-lg font-semibold mb-3 flex items-center">
-        <DollarSign className="w-5 h-5 mr-2 text-green-500" />
-        Recent Sponsors
-      </h2>
-        {
-          !loading && sponsors.length === 0 && <NoRequests />
-        }
-      <div className="grid grid-cols-2 gap-3">
-        {sponsors.map((sponsor, index) => (
-          <div key={index} className="border rounded-md p-2 flex flex-col justify-between text-xs">
-            <div>
-              <p className="font-medium text-gray-100 truncate dark:text-white">
-                {sponsor.sponsorName}
-              </p>
-              <p className="text-gray-500 truncate dark:text-gray-400 flex items-center mt-0.5">
-                <Building2 className="w-3 h-3 mr-1" />
-                {sponsor.sponsorCompany}
-              </p>
+              ))}
             </div>
-            <div className="flex items-center justify-between mt-1">
-              <Badge variant="secondary" className={`text-[10px] px-1 py-0 my-1 ${getStatusColor(sponsor.transaction.status)}`}>
-                {getStatusIcon(sponsor.transaction.status)}
-                <span className="ml-0.5 capitalize">{sponsor.transaction.status}</span>
-              </Badge>
+          </Card>
+          <Card className="w-full md:w-2/5 p-4 rounded-lg">
+            <h2 className="text-lg font-semibold mb-3 flex items-center">
+              <DollarSign className="w-5 h-5 mr-2 text-green-500" />
+              Recent Sponsors
+            </h2>
+            {
+              !loading && sponsors.length === 0 && <NoRequests />
+            }
+            <div className="grid grid-cols-2 gap-3">
+              {sponsors.map((sponsor, index) => (
+                <div key={index} className="border rounded-md p-2 flex flex-col justify-between text-xs">
+                  <div>
+                    <p className="font-medium text-gray-100 truncate dark:text-white">
+                      {sponsor.sponsorName}
+                    </p>
+                    <p className="text-gray-500 truncate dark:text-gray-400 flex items-center mt-0.5">
+                      <Building2 className="w-3 h-3 mr-1" />
+                      {sponsor.sponsorCompany}
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-between mt-1">
+                    <Badge variant="secondary" className={`text-[10px] px-1 py-0 my-1 ${getStatusColor(sponsor.transaction.status)}`}>
+                      {getStatusIcon(sponsor.transaction.status)}
+                      <span className="ml-0.5 capitalize">{sponsor.transaction.status}</span>
+                    </Badge>
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
-        ))}
-      </div>
-    </Card>
+          </Card>
         </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-8">
-        {
-          listings.length === 0 && organization === id.replace("%40", "@") ?
-          <Link href="../../create">
-          <Button style={{marginLeft: "140%"}}>Create Listing</Button>
-          </Link> : listings.length === 0 && <div className="font-semibold" style={{marginLeft: "140%"}} >No Listings Yet...</div>
-        }
-{listings.map((listing, idx) => (
-        <div key={idx} className="bg-card text-card-foreground rounded-lg overflow-hidden shadow-lg transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
-          <div className="relative aspect-video">
-            <Image
-              src={listing.thumbnailName || "/placeholder.svg"}
-              alt={listing.title}
-              layout="fill"
-              objectFit="cover"
-              className="cursor-pointer"
-              onClick={() => handleListingClick(listing)}
-            />
-            <Badge className="absolute top-2 left-2 bg-primary text-primary-foreground">
-              {listing.tag}
-            </Badge>
-          </div>
-          <div className="p-6 space-y-2">
-            <h3 
-              className="text-xl font-semibold line-clamp-2 cursor-pointer hover:underline" 
-              onClick={() => handleListingClick(listing)}
-            >
-              {listing.title}
-            </h3>
-            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-              <EyeIcon className="w-4 h-4" />
-              <span>{new Intl.NumberFormat().format(listing.estimatedViews)} views</span>
-            </div>
-            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-              <CalendarIcon className="w-4 h-4" />
-              <span>{convertFromUtcToLocal(listing.uploadDate)}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="text-lg font-semibold">
-                ${(listing.estimatedPrice / 100).toLocaleString()}
-                <span className="text-xs ml-1">{listing.pricingModel}</span>
-              </div>
-              {owner && (
-                <Badge
-                  variant={listing.purchased ? "success" : listing.expired ? "destructive" : listing.published ? "success" : "secondary"}
-                >
-                  {listing.purchased ? "Purchased" : listing.expired ? "Expired" : listing.published ? "Public" : "Private"}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-8">
+          {
+            listings.length === 0 && organization === id.replace("%40", "@") ?
+            <Link href="../../create">
+              <Button className="ml-auto">Create Listing</Button>
+            </Link> : listings.length === 0 && <div className="font-semibold text-center">No Listings Yet...</div>
+          }
+          {listings.map((listing, idx) => (
+            <div key={idx} className="bg-card text-card-foreground rounded-lg overflow-hidden shadow-lg transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
+              <div className="relative aspect-video">
+                <Image
+                  src={listing.thumbnailName || "/placeholder.svg"}
+                  alt={listing.title}
+                  layout="fill"
+                  objectFit="cover"
+                  className="cursor-pointer"
+                  onClick={() => handleListingClick(listing)}
+                />
+                <Badge className="absolute top-2 left-2 bg-primary text-primary-foreground">
+                  {listing.tag}
                 </Badge>
-              )}
+              </div>
+              <div className="p-6 space-y-2">
+                <h3 
+                  className="text-xl font-semibold line-clamp-2 cursor-pointer hover:underline" 
+                  onClick={() => handleListingClick(listing)}
+                >
+                  {listing.title}
+                </h3>
+                <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                  <EyeIcon className="w-4 h-4" />
+                  <span>{new Intl.NumberFormat().format(listing.estimatedViews)} views</span>
+                </div>
+                <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                  <CalendarIcon className="w-4 h-4" />
+                  <span>{convertFromUtcToLocal(listing.uploadDate)}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="text-lg font-semibold">
+                    ${(listing.estimatedPrice / 100).toLocaleString()}
+                    <span className="text-xs ml-1">{listing.pricingModel}</span>
+                  </div>
+                  {listing.owner && (
+                    <Badge
+                      variant={listing.purchased ? "success" : listing.expired ? "destructive" : listing.published ? "success" : "secondary"}
+                    >
+                      {listing.purchased ? "Purchased" : listing.expired ? "Expired" : listing.published ? "Public" : "Private"}
+                    </Badge>
+                  )}
+                </div>
+                {listing.owner && (
+                  <Button 
+                    variant="outline" 
+                    className="w-full mt-4" 
+                    onClick={() => setSelectedListing(listing)}
+                  >
+                    <EditIcon className="w-4 h-4 mr-2" />
+                    Edit Listing
+                  </Button>
+                )}
+              </div>
             </div>
-            {owner && (
-              <Button 
-                variant="outline" 
-                className="w-full mt-4" 
-                onClick={() => setSelectedListing(listing)}
-              >
-                <EditIcon className="w-4 h-4 mr-2" />
-                Edit Listing
-              </Button>
-            )}
-          </div>
+          ))}
         </div>
-      ))}
-      </div>
       </div>
     </div>
   )

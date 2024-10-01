@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import Image from 'next/image'
 import { Button } from "@/components/ui/button"
 import { Play, Upload, Users, BarChart, Search, Zap, Star, Shield, DollarSign, TrendingUp } from 'lucide-react'
+import Link from "next/link";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -155,9 +156,11 @@ export default function LandingPage() {
             </motion.p>
             <motion.div className="max-w-md mx-auto" variants={itemVariants}>
               <form className="flex space-x-4 justify-center">
+                <Link href="/signup">
                 <Button type="submit" className="bg-green-500 hover:bg-green-600 text-gray-900">
                   Sign Up
                 </Button>
+                </Link>
               </form>
             </motion.div>
           </motion.section>
