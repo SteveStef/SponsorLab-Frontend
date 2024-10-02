@@ -5,7 +5,6 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import Header from "../components/nav";
 import request from "@/request";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";

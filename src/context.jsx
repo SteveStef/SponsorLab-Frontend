@@ -47,7 +47,7 @@ export function AppWrapper({children}) {
       setCompany(response.body.company);
       setOrganization(response.body.company.id);
       localStorage.setItem("organization", response.body.company.id);
-    } else {
+    } else if(response.body.role === "CREATOR"){
       setOrganization(response.body.channel.name);
       localStorage.setItem("organization", response.body.channel.name);
     }

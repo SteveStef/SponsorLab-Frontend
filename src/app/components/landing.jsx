@@ -1,11 +1,11 @@
-
 "use client";
-import Black from "../../../public/connect.jpg";
+import BG from "../../../public/SponsorLab-Background.png";
+import Connect from "../../../public/connect.jpg"
+import Image from 'next/image'
+import Link from 'next/link'
 import { motion } from 'framer-motion'
-import Image from 'next/image';
-import { Button } from "@/components/ui/button";
-import { Play, Upload, Users, BarChart, Search, Zap, Star, Shield, DollarSign, TrendingUp } from 'lucide-react';
-import Link from "next/link";
+import { Button } from "@/components/ui/button"
+import { Play, Upload, Users, BarChart, Search, Zap, Star, Shield, DollarSign, TrendingUp } from 'lucide-react'
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -26,33 +26,73 @@ const itemVariants = {
   }
 }
 
-export default function LandingPage() {
+const FeatureCard = ({ icon, title, description, items }) => (
+  <div className="bg-green-900/20 p-6 rounded-lg">
+    <div className="flex items-center mb-4">
+      {icon}
+      <h3 className="text-xl font-semibold ml-2">{title}</h3>
+    </div>
+    <p className="text-gray-300 mb-4">{description}</p>
+    <ul className="space-y-2">
+      {items.map((item, index) => (
+        <li key={index} className="flex items-center">
+          {item.icon}
+          <span className="ml-2">{item.text}</span>
+        </li>
+      ))}
+    </ul>
+  </div>
+)
+
+export default function Component() {
   return (
     <div className="min-h-screen bg-gradient-to-tr from-green-950 via-background to-background text-white overflow-hidden relative">
-    <br></br>
-    <br></br>
-    <br></br>
       <div className="absolute inset-0 bg-[url('/noise.png')] opacity-5 mix-blend-soft-light"></div>
-      <div className="absolute inset-0 bg-gradient-to-t from-green-900/20 via-green-900/10 to-transparent"></div>
+      <div className="absolute inset-0 bg-gradient-to-t from-green-900/20 via-green-950/10 to-transparent"></div>
       <div className="relative">
+        <header className="absolute top-0 left-0 right-0 z-30">
+          <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+            <Link href="/">
+              <span className="text-2xl font-bold">SponsorLab</span>
+            </Link>
+            <div className="space-x-4">
+              <Link href="/login">
+                <Button variant="outline" className="text-white border-white hover:bg-white hover:text-green-900">
+                  Log In
+                </Button>
+              </Link>
+              <Link href="/signup">
+                <Button className="bg-green-500 hover:bg-green-600 text-gray-900">
+                  Sign Up
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </header>
         <main>
           <motion.section
-            className="container mx-auto px-4 py-20 text-center"
+            className="w-full h-[60vh] relative"
             initial="hidden"
             animate="visible"
             variants={containerVariants}
           >
-            <motion.h1 className="text-5xl font-bold mb-6" variants={itemVariants}>
-              Connect Creators with Sponsors
-            </motion.h1>
-            <motion.p className="text-xl mb-8 text-gray-300" variants={itemVariants}>
-              SponsorLab: Where Content Meets Opportunity
-            </motion.p>
-            <motion.div className="flex justify-center space-x-4" variants={itemVariants}>
-              <Link href="/signup"><Button className="bg-green-500 hover:bg-green-600 text-gray-900">Get Started</Button></Link>
-            </motion.div>
+            <Image
+              src={BG}
+              alt="SponsorLab Hero"
+              layout="fill"
+              objectFit="cover"
+              className="z-0"
+            />
+            <div className="absolute inset-0 flex flex-col justify-center items-center z-20">
+              <motion.div variants={itemVariants}>
+                <Link href="/signup">
+                  <Button className="bg-green-500 hover:bg-green-600 text-gray-900 text-lg py-6 px-8 mt-80">
+                    Get Started
+                  </Button>
+                </Link>
+              </motion.div>
+            </div>
           </motion.section>
-
 
           <div className="border-t border-green-800 opacity-30"></div>
 
@@ -71,7 +111,7 @@ export default function LandingPage() {
               </motion.div>
               <motion.div variants={itemVariants} className="relative h-[400px] rounded-lg overflow-hidden">
                 <Image
-                  src={Black}
+                  src={Connect}
                   alt="SponsorLab Platform"
                   layout="fill"
                   objectFit="cover"
@@ -153,9 +193,9 @@ export default function LandingPage() {
             <motion.div className="max-w-md mx-auto" variants={itemVariants}>
               <form className="flex space-x-4 justify-center">
                 <Link href="/signup">
-                <Button type="submit" className="bg-green-500 hover:bg-green-600 text-gray-900">
-                  Sign Up
-                </Button>
+                  <Button type="submit" className="bg-green-500 hover:bg-green-600 text-gray-900">
+                    Sign Up
+                  </Button>
                 </Link>
               </form>
             </motion.div>
@@ -167,34 +207,8 @@ export default function LandingPage() {
         <footer className="container mx-auto px-4 py-6 text-center text-gray-400">
           <Link href="/terms-of-service" className="underline mr-5 font-bold">Terms of Service</Link>
           <Link href="/privacy" className="underline mr-5 font-bold">Privacy Policy</Link>
-          
         </footer>
       </div>
     </div>
-  )
-}
-
-function FeatureCard({ icon, title, description, items }) {
-  return (
-    <motion.div
-      className="bg-black bg-opacity-50 p-6 rounded-lg"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      <div className="flex items-center mb-4">
-        {icon}
-        <h3 className="text-xl font-semibold ml-4">{title}</h3>
-      </div>
-      <p className="text-gray-300 mb-4">{description}</p>
-      <ul className="space-y-2">
-        {items.map((item, index) => (
-          <li key={index} className="flex items-center text-gray-300">
-            <span className="mr-2 text-green-400">{item.icon}</span>
-            {item.text}
-          </li>
-        ))}
-      </ul>
-    </motion.div>
   )
 }
