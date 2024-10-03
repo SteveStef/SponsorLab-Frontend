@@ -71,7 +71,7 @@ export default function Component() {
         </header>
         <main>
           <motion.section
-            className="w-full h-[60vh] relative"
+            className="w-full h-[50vh] relative"
             initial="hidden"
             animate="visible"
             variants={containerVariants}

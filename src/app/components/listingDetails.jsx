@@ -45,6 +45,7 @@ export default function Component({ params }) {
     const url = `${process.env.NEXT_PUBLIC_API_URL}/posts/${params.id}`;
     const response = await request(url, "GET", null);
     if(response && response.success) {
+      console.log(response.body);
       setListing(response.body);
       let tmp = [];
       let dev = response.body.user.channel.viewDeviations;
@@ -119,7 +120,7 @@ return (
                 <span className="text-sm font-semibold block">Risk Evaluation</span>
                 <span className="text-2xl font-bold">
 
-            {listing && displayBadge(listing)}
+            {listing && displayBadge(listing.riskEvaluation)}
   </span>
               </div>
             </div>
@@ -233,7 +234,7 @@ return (
                   <span className="sr-only">View</span>
                 </Link>
                 <Image
-                  src={listing?.thumbnailName || "/place.svg"}
+                  src={list?.thumbnailName || "/place.svg"}
                   alt="Thumbnail"
                   width={120}
                   height={67}
@@ -296,36 +297,27 @@ function Eye(props) {
   )
 }
 
-function displayBadge(listing) {
-  const deviations = listing.user.channel.viewDeviations;
-  const views = listing.estimatedViews;
+function displayBadge(riskEval) {
   const details = [
     {backgroundColor: "green", color: "white"},
     {backgroundColor: "#FDDA0D", color: "black"},
     {backgroundColor: "red", color: "white"}
   ];
   const text = [
-    "Low Risk",
-    "Medium Risk",
-    "High Risk",
+    "Low",
+    "Medium",
+    "High",
   ];
-  for(let i = 0; i < deviations.length - 1; i++) {
-    if(views >= deviations[i] && views <= deviations[i + 1]) {
+  for(let i = 0; i < text.length; i++) {
+    if(text[i] === riskEval) {
       return <Badge
-        variant="solid"
-        className="px-3 py-1 rounded-md text-xs font-medium"
-        style={details[i]}
-      >
-        { text[i] }
+      variant="solid"
+      className="px-3 py-1 rounded-md text-xs font-medium"
+      style={{ backgroundColor: details[i].backgroundColor, color: details[i].color}}>
+        {text[i]} Risk
       </Badge>
     }
   }
-  return <Badge
-    variant="solid"
-    className="px-3 py-1 rounded-md text-xs font-medium"
-    style={{ backgroundColor: "red", color: "white" }}
-  >
-    High Risk
-  </Badge>
+  return <></>
 }
 
