@@ -1,6 +1,6 @@
+
 "use client";
 import BG from "../../../public/SponsorLab-Background.png";
-import Connect from "../../../public/connect.jpg"
 import Image from 'next/image'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
@@ -47,51 +47,27 @@ const FeatureCard = ({ icon, title, description, items }) => (
 export default function Component() {
   return (
     <div className="min-h-screen bg-gradient-to-tr from-green-950 via-background to-background text-white overflow-hidden relative">
-      <div className="absolute inset-0 bg-[url('/noise.png')] opacity-5 mix-blend-soft-light"></div>
-      <div className="absolute inset-0 bg-gradient-to-t from-green-900/20 via-green-950/10 to-transparent"></div>
+      <div className="absolute inset-0 opacity-5 mix-blend-soft-light"></div>
+      <div className="absolute inset-0 bg-gradient-to-tl from-green-900/20 via-green-950/10 to-transparent"></div>
       <div className="relative">
-        <header className="absolute top-0 left-0 right-0 z-30">
-          <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-            <Link href="/">
-              <span className="text-2xl font-bold">SponsorLab</span>
-            </Link>
-            <div className="space-x-4">
-              <Link href="/login">
-                <Button variant="outline" className="text-white border-white hover:bg-white hover:text-green-900">
-                  Log In
-                </Button>
-              </Link>
-              <Link href="/signup">
-                <Button className="bg-green-500 hover:bg-green-600 text-gray-900">
-                  Sign Up
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </header>
         <main>
           <motion.section
-            className="w-full h-[50vh] relative"
+            className="container mx-auto px-4 py-20 text-center"
             initial="hidden"
             animate="visible"
             variants={containerVariants}
           >
-            <Image
-              src={BG}
-              alt="SponsorLab Hero"
-              layout="fill"
-              objectFit="cover"
-              className="z-0"
-            />
-            <div className="absolute inset-0 flex flex-col justify-center items-center z-20">
-              <motion.div variants={itemVariants}>
-                <Link href="/signup">
-                  <Button className="bg-green-500 hover:bg-green-600 text-gray-900 text-lg py-6 px-8 mt-80">
-                    Get Started
-                  </Button>
-                </Link>
-              </motion.div>
-            </div>
+            <motion.h1 className="text-5xl font-bold mb-6" variants={itemVariants}>
+              Connect Creators with Sponsors
+            </motion.h1>
+            <motion.p className="text-xl mb-8 text-gray-300" variants={itemVariants}>
+              SponsorLab: Where Content Meets Opportunity
+            </motion.p>
+            <motion.div className="flex justify-center space-x-4" variants={itemVariants}>
+              <Link href="/signup">
+              <Button className="bg-green-500 hover:bg-green-600 text-gray-900">Get Started</Button>
+              </Link>
+            </motion.div>
           </motion.section>
 
           <div className="border-t border-green-800 opacity-30"></div>
@@ -110,13 +86,16 @@ export default function Component() {
                 </p>
               </motion.div>
               <motion.div variants={itemVariants} className="relative h-[400px] rounded-lg overflow-hidden">
-                <Image
-                  src={Connect}
-                  alt="SponsorLab Platform"
-                  layout="fill"
-                  objectFit="cover"
-                  className="rounded-lg"
-                />
+            <iframe
+            src="https://www.youtube.com/embed/So4xsqEIhsM"
+            className="w-full h-full object-cover rounded-lg"
+            autoPlay
+            loop
+            muted
+            playsInline
+          >
+            Your browser does not support the video tag.
+          </iframe>
               </motion.div>
             </div>
           </motion.section>
