@@ -1,14 +1,14 @@
 "use client";
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import request from "@/request";
 import Image from "next/image";
 import SponsorForm from "../components/sponsorForm";
-import { PlayIcon, FileWarning, CalendarIcon, VideoIcon, EyeIcon} from "lucide-react"
+import { PlayIcon, FileWarning, CalendarIcon, VideoIcon, EyeIcon } from "lucide-react";
 import { convertFromUtcToLocal } from "@/utils";
 import { useAppContext } from "@/context";
 
@@ -83,7 +83,7 @@ return (
       <div className="lg:col-span-2 grid gap-4">
         <div className="rounded-xl overflow-hidden">
           <Image
-            src={listing?.thumbnailName || "/place.svg"}
+            src={listing?.thumbnailName}
             alt="Video Thumbnail"
             width={800}
             height={450}
@@ -205,7 +205,7 @@ return (
             <Separator />
             <Link href={`/profile/${listing?.user.channel.name}`} className="flex items-center gap-4">
               <Image
-                src={listing?.user.googleImage || listing?.user.channel.imageUrl || "/place.svg"}
+                src={listing?.user.googleImage || listing?.user.channel.imageUrl }
                 alt="Author"
                 width={40}
                 height={40}
@@ -230,11 +230,11 @@ return (
             }
             {relatedListings.map((list, index) => (
               <div key={index} className="flex items-start gap-4 relative ">
-                <Link href="#" className="absolute inset-0" prefetch={false}>
+                <Link href={`/listings/${list.id}`} className="absolute inset-0" prefetch={false}>
                   <span className="sr-only">View</span>
                 </Link>
                 <Image
-                  src={list?.thumbnailName || "/place.svg"}
+                  src={list?.thumbnailName }
                   alt="Thumbnail"
                   width={120}
                   height={67}

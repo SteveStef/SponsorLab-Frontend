@@ -18,7 +18,7 @@ export default function Component({listing, setShowSponsorForm}) {
 
   const titleRef = useRef("");
   const timeStampRef = useRef("");
-  const [estPrice, setEstPrice] = useState(listing.estimatedPrice);
+  const [estPrice, setEstPrice] = useState(listing.estimatedPrice / 100);
 
   const durationRef = useRef(0);
   const [sendingProduct, setSendingProduct] = useState("NO");

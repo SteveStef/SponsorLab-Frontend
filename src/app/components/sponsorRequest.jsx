@@ -498,7 +498,7 @@ export default function Component() {
                     <p><strong><DollarSign className="w-4 h-4 inline mr-1" /> Proposed Payment:</strong> ${selectedRequest.requestedPrice/100} {selectedRequest.pricingModel}</p>
                     <p><strong><Timer className="w-4 h-4 inline mr-1" /> Ad Duration:</strong> {selectedRequest.duration} seconds</p>
                     <p><strong><Gift className="w-4 h-4 inline mr-1" /> Sample Product:</strong> {selectedRequest.sendingProduct ? 'Yes' : 'No'}</p>
-                    <p><strong><DollarSign className="w-4 h-4 inline mr-1" /> Payment Cap:</strong> {selectedRequest.hasPaymentCap ? selectedRequest.paymentCap : "none"}</p>
+                    <p><strong><DollarSign className="w-4 h-4 inline mr-1" /> Payment Cap:</strong> {selectedRequest.hasPaymentCap ? "$"+(selectedRequest.paymentCap / 100).toLocaleString(): "none"}</p>
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-green-400 flex items-center">
