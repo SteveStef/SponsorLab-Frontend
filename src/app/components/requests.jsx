@@ -606,7 +606,7 @@ const tabContent = {
           The sponsor has setup a payment cap of ${(request.paymentCap / 100).toLocaleString()}
         </p>
       }
-        <p className="text-sm text-gray-300">{request.description}</p>
+        <p className="text-sm text-gray-300">{request.proposal}</p>
       </div>
     )
   },
@@ -804,7 +804,7 @@ function ShowButtons(props) {
       } else if(request.status === "CANCELED" || request.status === "DECLINED") {
         return <>{viewProposal}</>
       } else if(request.status === "ACCEPTED") {
-        return <>{decline}</>
+        return <>{decline}{viewProposal}</>
       }
     } else { // there is a transaciton
       if(props.activeTab === "request") {

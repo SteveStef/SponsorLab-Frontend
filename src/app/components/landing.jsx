@@ -86,16 +86,14 @@ export default function Component() {
                 </p>
               </motion.div>
               <motion.div variants={itemVariants} className="relative h-[400px] rounded-lg overflow-hidden">
+
             <iframe
             src="https://www.youtube.com/embed/So4xsqEIhsM"
             className="w-full h-full object-cover rounded-lg"
-            autoPlay
-            loop
-            muted
-            playsInline
           >
             Your browser does not support the video tag.
           </iframe>
+
               </motion.div>
             </div>
           </motion.section>

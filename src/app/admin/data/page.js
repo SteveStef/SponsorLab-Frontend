@@ -12,6 +12,7 @@ import { convertFromUtcToLocal } from "@/utils";
 import Header from "../../components/nav";
 import request from "@/request";
 import { toast } from "sonner";
+import NotFound from "@/app/components/NotFound";
 
 export default function AdminDashboard() {
   const [selectedTransaction, setSelectedTransaction] = useState(null);
@@ -20,6 +21,7 @@ export default function AdminDashboard() {
   const [transfers, setTransfers] = useState([]);
   const [transactionsHistory, setTransactionHistory] = useState([]);
   const [profitsMade, setProfitsMade] = useState(0);
+  const [startingUp, setStartingUp] = useState(true);
   const [loading, setLoading] = useState(false);
 
   const [stats, setStats] = useState({
@@ -42,19 +44,23 @@ export default function AdminDashboard() {
     try {
       const url = `${process.env.NEXT_PUBLIC_API_URL}/admin`;
       const response = await request(url, "GET", null);
-      setStats((prev) => ({ 
-        ...prev, totalUsers: response.body.userCount,
-        sponsors: response.body.sponsors, stripeBalance: response.body.balance,
-        userGrowth: response.body.userGrowth, youtubers: response.body.channels,
-        profits: response.body.profits
-      }));
+      console.log(response);
+      if(response && response.success) {
+        setStartingUp(false);
+        setStats((prev) => ({ 
+          ...prev, totalUsers: response.body.userCount,
+          sponsors: response.body.sponsors, stripeBalance: response.body.balance,
+          userGrowth: response.body.userGrowth, youtubers: response.body.channels,
+          profits: response.body.profits
+        }));
 
-      let sum = 0;
-      for(let i = 0; i < response.body.profits.length; i++) sum += response.body.profits[i].amount;
-      setProfitsMade(sum);
+        let sum = 0;
+        for(let i = 0; i < response.body.profits.length; i++) sum += response.body.profits[i].amount;
+        setProfitsMade(sum);
 
-      setTransfers(response.body.transfers);
-      setTransactionHistory(response.body.transactions);
+        setTransfers(response.body.transfers);
+        setTransactionHistory(response.body.transactions);
+      }
     } catch(err) {
       console.log(err);
     }
@@ -99,6 +105,8 @@ export default function AdminDashboard() {
   useEffect(() => {
     fetchAdminData()
   },[]);
+
+  if(startingUp) return <NotFound />
 
   return (
     <>

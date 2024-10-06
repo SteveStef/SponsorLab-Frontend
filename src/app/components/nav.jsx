@@ -320,11 +320,20 @@ function ProfileMenu({ profilePic, name, role, organization, logout }) {
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
+    {
+      role !== "ADMIN" ?
         <DropdownMenuItem>
           <Link href={role === "SPONSOR" ? `../../organizations/${organization}` : `../../profile/${organization}`} className="flex items-center gap-2" prefetch={false}>
             {role === "SPONSOR" ? "My Organization" : "My Profile"}
           </Link>
         </DropdownMenuItem>
+      :
+        <DropdownMenuItem>
+          <Link href={`/admin/data`} className="flex items-center gap-2" prefetch={false}>
+            Dashboard
+          </Link>
+        </DropdownMenuItem>
+    }
         {role === "CREATOR" && (
           <DropdownMenuItem>
             <Link href={`../../create`} className="flex items-center gap-2" prefetch={false}>

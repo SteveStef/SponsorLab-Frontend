@@ -174,7 +174,7 @@ export default function Component({listing, setShowSponsorForm}) {
     {
       wantPaymentCap === "YES" &&
         <div className="space-y-2">
-        <Label htmlFor="price2">Payment Cap (must be atleast than ${estPrice*2})</Label>
+        <Label htmlFor="price2">Payment Cap (must be atleast ${estPrice*2})</Label>
         <Input onChange={(e) => setMaxPayment(e.target.value)} id="price2" type="number" value={maxPayment} placeholder="$"
         className={parseFloat(estPrice)* 2 > maxPayment && `border-red-600`}
       />

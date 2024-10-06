@@ -145,7 +145,7 @@ export default function EnhancedSignUpForm() {
   return (
     <>
 <motion.div
-      className="min-h-screen flex items-center justify-center p-4 "
+className="min-h-screen flex items-center justify-center text-white p-4 bg-gradient-to-br from-black to-green-950"
       initial="hidden"
       animate="visible"
       variants={containerVariants}
