@@ -149,7 +149,7 @@ export default function Component() {
       <span>Individual Account: Best suited for sponsors representing themselves personally, not as part of a company.</span>
     </li>
     <li className="flex items-center">
-      <span>Company Account: Registered under a business entity, typically managed by the company's marketing team members.</span>
+      <span>Company Account: Registered under a business entity, typically managed by the company&apos;s marketing team members.</span>
     </li>
   </ul>
 </aside>

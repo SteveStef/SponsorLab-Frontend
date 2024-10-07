@@ -2,7 +2,7 @@
 import Black from "../../../public/connect.jpg";
 import Image from "next/image";
 import { convertFromUtcToLocal } from "@/utils";
-import { Search, FilterIcon, InfoIcon, AlertTriangleIcon, CheckCircleIcon, 
+import { FilterIcon, InfoIcon, AlertTriangleIcon, CheckCircleIcon, 
  EyeIcon, DollarSignIcon, CalendarIcon, TrendingUpIcon, TagIcon, X, SearchIcon} from "lucide-react";
 import { Badge } from '@/components/ui/badge'
 import { Input } from "@/components/ui/input";
@@ -128,7 +128,7 @@ export default function Component() {
     <span className="flex items-start">
       <InfoIcon className="w-5 h-5 mr-2 text-green-400 mt-1 flex-shrink-0" />
     <span>
-    Our risk assessment is grounded in view range probabilities and the historical performance of their channel's viewership.
+    Our risk assessment is grounded in view range probabilities and the historical performance of their channel&apos;s viewership.
     </span>
             </span>
             </p>
@@ -148,7 +148,7 @@ export default function Component() {
               </li>
             </ul>
             <p className="text-gray-300">
-    These evaluations are not guaranteed to be fully accurate, as they are solely based on the channel's historical performance.
+    These evaluations are not guaranteed to be fully accurate, as they are solely based on the channel&apos;s historical performance.
             </p>
           </aside>
           <main>
