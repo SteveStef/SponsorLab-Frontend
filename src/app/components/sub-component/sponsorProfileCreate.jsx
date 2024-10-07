@@ -12,23 +12,24 @@ import { toast } from "sonner";
 import { useAppContext } from '@/context'
 
 const contentTypes = [
-"Technology",
-"Gaming",
-"Fashion",
-"Education",
-"Finance",
-"Lifestyle",
-"Food/Cooking",
-"Family",
-"Music",
-"Vlogs",
-"Business",
-"DIY/Crafts",
-"Travel",
-"Religion",
-"Nature",
-"Garden",
-"Wellness"
+  "Technology",
+  "Gaming",
+  "Pets",
+  "Fashion",
+  "Education",
+  "Finance",
+  "Lifestyle",
+  "Food/Cooking",
+  "Family",
+  "Music",
+  "Vlogs",
+  "Business",
+  "DIY/Crafts",
+  "Travel",
+  "Religion",
+  "Nature",
+  "Garden",
+  "Wellness"
 ];
 
 export default function Component(props) {
@@ -302,7 +303,7 @@ const allCategories  = [
                       Target Audience Age
                     </Label>
                     <div className="space-y-2">
-                      {['13-17', '18-24', '25-34', '35+'].map((age) => (
+                      {['13-17', '18-24', '25-34', '35-44', "45+", "ALL"].map((age) => (
                         <label key={age} className="flex items-center space-x-2 cursor-pointer">
                           <input
                             type="radio"

@@ -17,23 +17,24 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 
 const contentTypes = [
-"Technology & Gadgets",
-"Gaming",
-"Beauty & Fashion",
-"Education & How-To",
-"Finance & Investing",
-"Travel & Lifestyle",
-"Food & Cooking",
-"Parenting & Family",
-"Music",
-"Vlogs",
-"Business & Entrepreneurship",
-"DIY & Crafts",
-"Travel & Adventure",
-"Religious & Spiritual",
-"Wildlife & Nature",
-"Home & Garden",
-"Mental Health & Wellness"
+  "Technology",
+  "Gaming",
+  "Pets",
+  "Fashion",
+  "Education",
+  "Finance",
+  "Lifestyle",
+  "Food/Cooking",
+  "Family",
+  "Music",
+  "Vlogs",
+  "Business",
+  "DIY/Crafts",
+  "Travel",
+  "Religion",
+  "Nature",
+  "Garden",
+  "Wellness"
 ];
 
 const productCategories = [
@@ -497,6 +498,7 @@ function SponsorProfileUpdate({ formState }) {
                       <SelectItem value="25-34">25-34</SelectItem>
                       <SelectItem value="35-44">35-44</SelectItem>
                       <SelectItem value="45+">45+</SelectItem>
+                      <SelectItem value="ALL">All ages</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

@@ -2,12 +2,13 @@
 import Black from "../../../public/connect.jpg";
 import Image from "next/image";
 import { convertFromUtcToLocal } from "@/utils";
-import { FilterIcon, InfoIcon, AlertTriangleIcon, CheckCircleIcon, 
+import { Search, FilterIcon, InfoIcon, AlertTriangleIcon, CheckCircleIcon, 
  EyeIcon, DollarSignIcon, CalendarIcon, TrendingUpIcon, TagIcon, X, SearchIcon} from "lucide-react";
 import { Badge } from '@/components/ui/badge'
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Slider } from "@/components/ui/slider";
 import { motion } from 'framer-motion'
@@ -22,6 +23,27 @@ import request from "@/request.js";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
+
+const tags = [
+  "Technology",
+  "Gaming",
+  "Pets",
+  "Fashion",
+  "Education",
+  "Finance",
+  "Lifestyle",
+  "Food/Cooking",
+  "Family",
+  "Music",
+  "Vlogs",
+  "Business",
+  "DIY/Crafts",
+  "Travel",
+  "Religion",
+  "Nature",
+  "Garden",
+  "Wellness"
+];
 const defaultFilter = {dueDate: '', pricingModel: "all", risk: "", viewRange: [0, 1000000]};
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -82,6 +104,7 @@ export default function Component() {
   }, [debouncedSearch]);
 
   async function fetchListings(page, filters) {
+    console.log(filters);
     setLoad(true);
     const url = `${process.env.NEXT_PUBLIC_API_URL}/posts/page/${page}`;
     const response = await request(url, "POST", filters);
@@ -105,7 +128,7 @@ export default function Component() {
     <span className="flex items-start">
       <InfoIcon className="w-5 h-5 mr-2 text-green-400 mt-1 flex-shrink-0" />
     <span>
-      Our risk evaluation is based on multiple factors including content type, creator history, and market trends.
+    Our risk assessment is grounded in view range probabilities and the historical performance of their channel's viewership.
     </span>
             </span>
             </p>
@@ -113,19 +136,19 @@ export default function Component() {
             <ul className="space-y-2 text-gray-300 mb-4">
               <li className="flex items-center">
                 <CheckCircleIcon className="h-6 w-6 mr-2 text-green-400" />
-                <span>Low: Safe investment, high probability of return</span>
+                <span>Low: Strong likelihood of achieving the projected views </span>
               </li>
               <li className="flex items-center">
                 <AlertTriangleIcon className="h-7 w-7 mr-2 text-yellow-400" />
-                <span>Medium: Moderate risk, potential for high returns</span>
+    <span>Medium: Reasonable likelihood of reaching the projected views</span>
               </li>
               <li className="flex items-center">
                   <AlertTriangleIcon className="h-8 w-8 mr-2 text-red-400" />
-                <span>High: Speculative, high risk but potential for exceptional returns</span>
+            <span>High: Low probability of reaching the projected view count</span>
               </li>
             </ul>
             <p className="text-gray-300">
-              We recommend a balanced portfolio with a mix of risk levels tailored to your risk tolerance and investment goals.
+    These evaluations are not guaranteed to be fully accurate, as they are solely based on the channel's historical performance.
             </p>
           </aside>
           <main>
@@ -279,6 +302,7 @@ export default function Component() {
 }
 
 function Filter({applyFilters, setCurrentPage}) {
+  const [searchValue, setSearchValue] = useState("");
   const [filters, setFilters] = useState({
     pricingModel: 'all',
     viewRange: [0, 1000000],
@@ -286,6 +310,7 @@ function Filter({applyFilters, setCurrentPage}) {
     cpmRange: [0, 100],
     risk: 'all',
     dueDate: '',
+    tags: []
   })
 
   const handleFilterChange = (key, value) => {
@@ -293,6 +318,7 @@ function Filter({applyFilters, setCurrentPage}) {
   }
 
   const clearFilters = () => {
+    setSearchValue("");
     setFilters({
       pricingModel: 'all',
       viewRange: [0, 1000000],
@@ -300,6 +326,7 @@ function Filter({applyFilters, setCurrentPage}) {
       cpmRange: [0, 100],
       risk: 'all',
       dueDate: '',
+      tags: []
     });
 
     applyFilters(1, {
@@ -309,12 +336,20 @@ function Filter({applyFilters, setCurrentPage}) {
       cpmRange: [0, 100],
       risk: 'all',
       dueDate: '',
+      tags: []
     });
     setCurrentPage(1);
   }
 
+const handleTagSelect = (tag) => {
+    const newTags = filters.tags.includes(tag)
+      ? filters.tags.filter(t => t !== tag)
+      : [...filters.tags, tag]
+    handleFilterChange('tags', newTags)
+  }
+
   return (
-    <DropdownMenu>
+<DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button className="bg-green-500 hover:bg-green-600">
           <FilterIcon className="h-4 w-4 mr-2" />
@@ -322,16 +357,41 @@ function Filter({applyFilters, setCurrentPage}) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-80 p-4 text-gray-100 border-gray-700">
-    <div className="flex justify-between items-center mb-4">
-    <DropdownMenuLabel className="text-lg font-bold">Filters</DropdownMenuLabel>
-    <Button variant="ghost" size="sm" onClick={clearFilters} className="text-gray-400 hover:text-gray-100">
-    <X className="h-4 w-4 mr-1" />
-    Clear
-    </Button>
-    </div>
+        <div className="flex justify-between items-center mb-4">
+          <DropdownMenuLabel className="text-lg font-bold">Filters</DropdownMenuLabel>
+          <Button variant="ghost" size="sm" onClick={clearFilters} className="text-gray-400 hover:text-gray-100">
+            <X className="h-4 w-4 mr-1" />
+            Clear
+          </Button>
+        </div>
         <DropdownMenuSeparator className="bg-gray-700 my-2" />
         
         <div className="space-y-4">
+          <div>
+            <Label className="text-sm font-medium mb-1 block">Tags</Label>
+            <Command className="rounded-lg border border-gray-700">
+              <CommandInput placeholder="Search tags..." value={searchValue} onValueChange={setSearchValue} />
+    <CommandList className="max-h-[100px] overflow-y-auto">
+                <CommandEmpty>No tags found.</CommandEmpty>
+                <CommandGroup>
+                  {tags
+                    .filter(tag => tag.toLowerCase().includes(searchValue.toLowerCase()))
+                    .map(tag => (
+                      <CommandItem
+                        key={tag}
+                        onSelect={() => handleTagSelect(tag)}
+                        className="cursor-pointer"
+                      >
+                        <div className={`mr-2 h-4 w-4 rounded-sm border ${filters.tags.includes(tag) ? 'bg-green-500' : 'border-gray-700'}`} />
+                        {tag}
+                      </CommandItem>
+                    ))
+                  }
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </div>
+
           <div>
             <Label className="text-sm font-medium mb-1 block">Pricing Model</Label>
             <RadioGroup
@@ -374,39 +434,39 @@ function Filter({applyFilters, setCurrentPage}) {
           </div>
           {
             filters.pricingModel === 'CPM' &&
-          <div>
-            <Label className="text-sm font-medium mb-1 block">Price Range ({filters.pricingModel})</Label>
-            <Slider
-              min={1}
-              max={100}
-              step={1}
-              value={filters.cpmRange}
-              onValueChange={(value) => handleFilterChange('cpmRange', value)}
-              className="my-4"
-            />
-            <div className="flex justify-between text-sm">
-              <span>${filters.cpmRange[0].toLocaleString()}</span>
-              <span>${filters.cpmRange[1].toLocaleString()}</span>
+            <div>
+              <Label className="text-sm font-medium mb-1 block">Price Range (CPM)</Label>
+              <Slider
+                min={1}
+                max={100}
+                step={1}
+                value={filters.cpmRange}
+                onValueChange={(value) => handleFilterChange('cpmRange', value)}
+                className="my-4"
+              />
+              <div className="flex justify-between text-sm">
+                <span>${filters.cpmRange[0].toLocaleString()}</span>
+                <span>${filters.cpmRange[1].toLocaleString()}</span>
+              </div>
             </div>
-          </div>
           }
           {
             filters.pricingModel === 'FLAT' &&
-          <div>
-            <Label className="text-sm font-medium mb-1 block">Price Range ({filters.pricingModel})</Label>
-            <Slider
-              min={1}
-              max={100000}
-              step={50}
-              value={filters.flatRange}
-              onValueChange={(value) => handleFilterChange('flatRange', value)}
-              className="my-4"
-            />
-            <div className="flex justify-between text-sm">
-              <span>${filters.flatRange[0].toLocaleString()}</span>
-              <span>${filters.flatRange[1].toLocaleString()}</span>
+            <div>
+              <Label className="text-sm font-medium mb-1 block">Price Range (FLAT)</Label>
+              <Slider
+                min={1}
+                max={100000}
+                step={50}
+                value={filters.flatRange}
+                onValueChange={(value) => handleFilterChange('flatRange', value)}
+                className="my-4"
+              />
+              <div className="flex justify-between text-sm">
+                <span>${filters.flatRange[0].toLocaleString()}</span>
+                <span>${filters.flatRange[1].toLocaleString()}</span>
+              </div>
             </div>
-          </div>
           }
 
           <div>

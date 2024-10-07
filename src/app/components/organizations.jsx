@@ -20,6 +20,7 @@ import request from "@/request.js";
 const categories = [
   "Technology",
   "Gaming",
+  "Pets",
   "Fashion",
   "Education",
   "Finance",
@@ -34,7 +35,28 @@ const categories = [
   "Religion",
   "Nature",
   "Garden",
-  "Wellness"
+  "Wellness",
+
+  "Electronics",
+  "Home & Kitchen",
+  "Fashion & Apparel",
+  "Beauty & Personal Care",
+  "Health & Wellness",
+  "Toys & Games",
+  "Sports & Outdoors",
+  "Automotive",
+  "Office Supplies",
+  "Baby Products",
+  "Pet Supplies",
+  "Grocery & Gourmet Food",
+  "Tools & Home Improvement",
+  "Books & Media",
+  "Garden & Outdoors",
+  "Jewelry & Accessories",
+  "Crafts & DIY",
+  "Travel & Luggage",
+  "Music Instruments & Gear",
+  "Home Decor"
 ];
 
 const containerVariants = {
@@ -111,29 +133,26 @@ export default function Component() {
     <div className="text-gray-100">
       <div className="container px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-8">
-          <aside className="p-6 rounded-lg">
-            <h2 className="text-xl font-semibold mb-4">Account Type Guide</h2>
-            <p className="text-gray-300 mb-4">
-              <span className="flex"></span>
-              <span className="flex items-start">
-                <InfoIcon className="w-5 h-5 mr-2 text-green-400 mt-1 flex-shrink-0" />
-                <span>
-                  Understanding the key differences between a company and an individual account is essential for making the right choice for your needs.
-                </span>
-              </span>
-            </p>
-            <h3 className="text-lg font-semibold mb-2">Account Types:</h3>
-            <ul className="space-y-2 text-gray-300 mb-4">
-              <li className="flex items-center">
-                <CheckCircleIcon className="h-6 w-6 mr-2 text-green-400" />
-                <span>Individual Account: Designed for personal use, this account is registered under your personal name and offers limited tax and liability benefits.</span>
-              </li>
-              <li className="flex items-center">
-                <CheckCircleIcon className="h-6 w-6 mr-2 text-blue-400" />
-                <span>Company Account: This account is registered under a business entity. It provides added benefits such as tax advantages, liability protection, and the ability to separate personal and business finances.</span>
-              </li>
-            </ul>
-          </aside>
+<aside className="p-6 rounded-lg">
+  <h2 className="text-xl font-semibold mb-4">Guide to Account Types</h2>
+  <p className="text-gray-300 mb-4">
+    <span className="flex items-start">
+      <InfoIcon className="w-5 h-5 mr-2 text-green-400 mt-1 flex-shrink-0" />
+      <span>
+        Learn the key distinctions between individual and company accounts to gain a clearer understanding of how our platform works.
+      </span>
+    </span>
+  </p>
+  <h3 className="text-lg font-semibold mb-2">Types of Accounts:</h3>
+  <ul className="space-y-2 text-gray-300 mb-4">
+    <li className="flex items-center">
+      <span>Individual Account: Best suited for sponsors representing themselves personally, not as part of a company.</span>
+    </li>
+    <li className="flex items-center">
+      <span>Company Account: Registered under a business entity, typically managed by the company's marketing team members.</span>
+    </li>
+  </ul>
+</aside>
           <main>
             <div className="flex justify-between items-center mb-6">
               <div className="flex items-center space-x-4 flex-grow">
@@ -157,31 +176,50 @@ export default function Component() {
                 >
                   <AnimatePresence>
                     {organizations.map((org) => (
-                      <motion.div key={org.id} variants={itemVariants} layout>
-                        <Card className="">
-                          <CardHeader>
-                            <CardTitle className="">{org.user.name}</CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <p className="text-gray-400 mb-4">
-                              {(org.description ? org.description.split(' ').slice(0, 20).join(' ') + (org.description.split(' ').length > 20 ? '...' : '') : "No description set")}
-                            </p>
-                            <div className="flex items-center text-gray-300">
-                      {
-                        org.orginization === "individual" ? 
-                      <UserIcon className="w-5 h-5 mr-2 text-green-400" /> 
-                        :<Building2 className="w-5 h-5 mr-2 text-green-400" />
-                      }
-                              <span>{org.orginization}</span>
-                            </div>
-                          </CardContent>
-                          <CardFooter>
-                            <Button onClick={() => router.push(`./organizations/${org.id}`)} className="w-full bg-green-600 hover:bg-green-700 text-white">
-                              View Details
-                            </Button>
-                          </CardFooter>
-                        </Card>
-                      </motion.div>
+<motion.div key={org.id} variants={itemVariants} layout>
+      <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg dark:hover:shadow-green-900/30">
+        <CardHeader className="bg-gradient-to-r from-green-600 to-green-700 text-white py-2 px-4">
+
+          <CardTitle className="text-lg font-semibold truncate flex">
+              <Building2 className="w-6 h-6 mr-2 text-black" />
+                      {org.orginization}</CardTitle>
+        </CardHeader>
+        <CardContent className="p-4">
+          <p className="text-muted-foreground mb-4 h-14 overflow-hidden relative text-sm">
+{org.description ? (
+  (() => {
+    const chars = org.description;
+    const charLimit = 123;
+    const truncatedDescription = chars.substring(0, charLimit);
+
+    return (
+      <>
+        {truncatedDescription}
+        {chars.length > charLimit && (
+          <span className="absolute bottom-0 right-0 bg-gradient-to-l from-background to-transparent px-1">...</span>
+        )}
+      </>
+    );
+  })()
+) : (
+  "No description set"
+)}
+          </p>
+          <div className="flex items-center text-muted-foreground text-sm">
+                      <UserIcon className="w-4 h-4 mr-2 text-green-500" />
+            <span className="">{org.user.name}</span>
+          </div>
+        </CardContent>
+        <CardFooter className="bg-muted/50 p-3">
+          <Button 
+            onClick={() => router.push(`./organizations/${org.id}`)} 
+            className="w-full bg-green-600 hover:bg-green-700 text-white transition-colors duration-300 text-sm"
+          >
+            View Details
+          </Button>
+        </CardFooter>
+      </Card>
+    </motion.div>
                     ))}
                   </AnimatePresence>
                 </motion.div>

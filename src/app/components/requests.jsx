@@ -287,7 +287,7 @@ export default function Component() {
             <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-100 mb-4 sm:mb-0">Incoming Sponsor Requests</h1>
               <div onClick={getRequests} className="cursor-pointer">
-                <Refresh className={refreshing ? 'animate-spin' : ''} />
+                <Refresh animate={refreshing}/>
               </div>
             </div>
             <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
@@ -314,7 +314,7 @@ export default function Component() {
             </div>
           </header>
           <div className="space-y-6">
-            {!refreshing && requests.length === 0 && <div>No requests found.</div>}
+            {!refreshing && requests.length === 0 && <NoRequests />}
             {requests.map((request) => (
               <Card key={request.id} className="w-full">
                 <Tabs defaultValue="request" value={activeTab[request.id]} onValueChange={(val) => changeTab(request.id, val)} 
