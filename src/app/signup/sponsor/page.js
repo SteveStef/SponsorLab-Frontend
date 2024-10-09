@@ -11,7 +11,6 @@ import { useAppContext } from "@/context";
 import { useSearchParams } from 'next/navigation';
 import { UserPlus, Mail, Lock, Eye, EyeOff, CheckCircle, ArrowRight, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
-import Header from "../../components/nav";
 
 export default function EnhancedSignUpForm() {
   const { setCompany, setOrganization, setAuth, setName, setEmail, setRole, setAccountType } = useAppContext();

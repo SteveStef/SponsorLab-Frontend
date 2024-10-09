@@ -113,11 +113,7 @@ export default function Component() {
     };
   }, [search]);
 
-  useEffect(() => {
-    getRequests();
-  }, [debouncedSearch]);
-
-  async function getRequests() {
+  const getRequests = useCallback(async () => {
     setRefreshing(true);
     setLoad(true);
     const url = `${process.env.NEXT_PUBLIC_API_URL}/requests/sponsor`;
@@ -139,7 +135,7 @@ export default function Component() {
     }
     setLoad(false);
     setRefreshing(false);
-  }
+  }, [debouncedSearch, filter]);
 
   async function cancelRequest(requestId) {
     setLoad(true);
@@ -153,6 +149,10 @@ export default function Component() {
       toast.error("Request failed to cancel");
     }
   }
+
+  useEffect(() => {
+    getRequests();
+  },[getRequests]);
 
   async function confirmRequest(request) {
     const requestId = request.id;
@@ -179,9 +179,6 @@ export default function Component() {
     setLoad(false);
   }
 
-  useEffect(() => {
-    getRequests();
-  },[]);
 
   function changeTab(requestId, value) {
     let tmp = {...activeTab};
@@ -288,9 +285,6 @@ export default function Component() {
     })
   }, [])
 
-  useEffect(() => {
-    getRequests();
-  },[filter]);
 
   const steps = ["Pending Draft", "Draft Review", "Pending Final Draft", "Final Review", "Complete"];
 

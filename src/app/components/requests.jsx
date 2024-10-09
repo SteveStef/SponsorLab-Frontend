@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from "@/components/ui/badge";
@@ -111,11 +111,7 @@ export default function Component() {
     };
   }, [search]);
 
-  useEffect(() => {
-    getRequests();
-  }, [debouncedSearch]);
-
-  async function getRequests() {
+  const getRequests = useCallback(async () => {
     setRefreshing(true);
     const url = `${process.env.NEXT_PUBLIC_API_URL}/requests/creator`;
     const response = await Request(url, "POST", { filter, query: debouncedSearch });
@@ -136,7 +132,12 @@ export default function Component() {
     }
     setLoad(false);
     setRefreshing(false);
-  }
+  }, [debouncedSearch, filter]);
+
+  useEffect(() => {
+    getRequests();
+  }, [getRequests]);
+
 
   async function acceptRequest(requestId) {
     setLoad(true);
@@ -176,10 +177,6 @@ export default function Component() {
     }
     setLoad(false);
   }
-
-  useEffect(() => {
-    getRequests();
-  },[]);
 
   function changeTab(requestId, value) {
     let tmp = {...activeTab};
@@ -247,10 +244,6 @@ export default function Component() {
   const handleInputChange = (field, value) => {
     setFlagFormData(prev => ({ ...prev, [field]: value }))
   }
-
-  useEffect(() => {
-    getRequests();
-  },[filter]);
 
   const steps = ["Pending Draft", "Draft Review", "Pending Final Draft", "Final Review", "Complete"]
 

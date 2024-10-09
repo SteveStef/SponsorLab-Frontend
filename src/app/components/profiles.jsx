@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -46,6 +46,18 @@ export default function Component() {
   const [load, setLoad] = useState(true);
   const [needsSponsor, setNeedsSponsor] = useState(false);
 
+  const fetchCreators = useCallback(async (page, ns, sb, so) => {
+    setLoad(true);
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/users/creators/page/${page}`;
+    const response = await request(url, "POST", { needsSponsor: ns, sortBy: sb, sortOrder: so});
+    console.log(response);
+    if(response && response.success) {
+      setUsers(response.body);
+      setTotalPages(Math.max(1, response.totalPages));
+    }
+    setLoad(false);
+  },[]);
+
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearch(search);
@@ -71,20 +83,7 @@ export default function Component() {
       }
     }
     searchQuery();
-  }, [debouncedSearch]);
-
-
-  async function fetchCreators(page, ns, sb, so) {
-    setLoad(true);
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/users/creators/page/${page}`;
-    const response = await request(url, "POST", { needsSponsor: ns, sortBy: sb, sortOrder: so});
-    console.log(response);
-    if(response && response.success) {
-      setUsers(response.body);
-      setTotalPages(Math.max(1, response.totalPages));
-    }
-    setLoad(false);
-  }
+  }, [debouncedSearch, fetchCreators, needsSponsor, sortBy, sortOrder]);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -156,13 +155,6 @@ export default function Component() {
                 Needs Sponsor
               </label>
             </div>
-              <Button
-                disabled={load}
-                onClick={() => fetchCreators(1, needsSponsor, sortBy, sortOrder)}
-                className="w-full bg-green-500 hover:bg-green-600"
-              >
-                Apply Filters
-              </Button>
           </div>
         </aside>
         <main>

@@ -34,15 +34,21 @@ export default function Component({ room, participant, chatMessages }) {
   }, [messages]);
 
   useEffect(() => {
+    function connectToSocket() {
+      if(!socket) {
+        const socketConn = io.connect(process.env.NEXT_PUBLIC_API_URL);
+        setSocket(socketConn);
+      }
+    }
     connectToSocket();
-  },[])
+  },[socket])
 
   useEffect(() => {
     if(socket) {
       socket.emit("join_room", { room: room.id });
       setJoined(true)
     }
-  },[socket]);
+  },[socket, room.id]);
 
   useEffect(() => {
     if(joined && socket) {
@@ -52,14 +58,8 @@ export default function Component({ room, participant, chatMessages }) {
         }
       });
     }
-  },[joined]);
+  },[joined, room.id, socket]);
 
-  function connectToSocket() {
-    if(!socket) {
-      const socketConn = io.connect(process.env.NEXT_PUBLIC_API_URL);
-      setSocket(socketConn);
-    }
-  }
 
   const handleSendMessage = async () => {
     if (newMessage.trim()) {

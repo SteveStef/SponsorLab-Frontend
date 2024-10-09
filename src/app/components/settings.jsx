@@ -275,35 +275,27 @@ function PaymentSection({ role, addPaymentMethod, addBankAccount, loadingRedirec
     }
   }
 
-  async function fetchCustomer() {
-    try {
+
+  useEffect(() => {
+    async function fetchCustomer() {
       const url = `${process.env.NEXT_PUBLIC_API_URL}/stripe/customer`;
       const response = await request(url, "GET", null);
       if(response && response.success) {
         setCardInfo(response.customer);
       }
-    } catch(err) {
-      console.log(err);
     }
-  }
 
-  async function fetchBankAccountInfo() {
-    try {
+    async function fetchBankAccountInfo() {
       const url = `${process.env.NEXT_PUBLIC_API_URL}/stripe/account`;
       const response = await request(url, "GET", null);
-      console.log(response);
       if(response && response.success) {
         setBankAccountInfo(response.account);
       }
-    } catch(err) {
-      console.log(err);
     }
-  }
 
-  useEffect(() => {
     if(role === "SPONSOR") fetchCustomer();
     else if(role === "CREATOR") fetchBankAccountInfo();
-  },[]);
+  },[role]);
 
   if(role === "SPONSOR") {
     return <Card>

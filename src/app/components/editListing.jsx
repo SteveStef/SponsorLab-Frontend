@@ -170,7 +170,7 @@ export default function Component({listing, setSelectedListing, viewDeviations})
             <div className="space-y-2">
 
               <Label htmlFor="thumbnail" className="flex items-center">
-    <Image className="mr-2 text-green-400 h-5" />
+    <Image alt="Image" className="mr-2 text-green-400 h-5" />
 Change Thumbnail
     </Label>
               

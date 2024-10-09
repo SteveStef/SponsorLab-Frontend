@@ -9,7 +9,7 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import Image from "next/image";
 import Beaker from "../../../public/Beaker.png";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { MessageSquare, UserPlus, AlertCircle, Search, BellIcon, LogOut, Settings, PlusCircle } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -28,46 +28,41 @@ export default function Navbar() {
   const [notifications, setNotifications] = useState([]);
   const [allNotifications, setAllNotifications] = useState([]);
 
-  async function fetchNotifications() {
-    try {
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/notifications`;
-      const response = await request(url, "GET", null);
-      if(response && response.success) {
-        setNotifications(response.body);
-        setHasNew(response.hasNew);
-      }
-    } catch(err) {
-      console.log(err);
-    }
-  }
 
-  async function fetchAllNotifications() {
-    try {
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/notifications/all`;
-      const response = await request(url, "GET", null);
-      if(response && response.success) {
-        setAllNotifications(response.body);
-      }
-    } catch(err) {
-      console.log(err);
+  const fetchAllNotifications = useCallback(async () => {
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/notifications/all`;
+    const response = await request(url, "GET", null);
+    if(response && response.success) {
+      setAllNotifications(response.body);
     }
-  }
-
-  async function viewNotifications() {
-    try {
-      setHasNew(false);
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/notifications/view`;
-      await request(url, "put", {});
-    } catch(err) {
-      console.log(err);
-    }
-  }
+  },[]);
 
   useEffect(() => {
+    fetchAllNotifications();
+  },[fetchAllNotifications]);
+
+  useEffect(() => {
+    async function fetchNotifications() {
+      try {
+        const url = `${process.env.NEXT_PUBLIC_API_URL}/notifications`;
+        const response = await request(url, "GET", null);
+        if(response && response.success) {
+          setNotifications(response.body);
+          setHasNew(response.hasNew);
+        }
+      } catch(err) {
+        console.log(err);
+      }
+    }
     fetchNotifications();
   }, [])
 
   useEffect(() => {
+    async function viewNotifications() {
+      setHasNew(false);
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/notifications/view`;
+      await request(url, "put", {});
+    }
     if(isOpen) viewNotifications();
   },[isOpen]);
 
@@ -78,8 +73,8 @@ export default function Navbar() {
         typeof value === "string" && value.toLowerCase().includes(lowercasedFilter)
       )
     })
-    setFilteredNotifications(filtered)
-  }, [searchTerm, isModalOpen])
+    setFilteredNotifications(filtered);
+  }, [searchTerm, isModalOpen, allNotifications])
 
   const links = [
     { url: "../../listings", name: "Listings", auth: true, role: "ANY" },

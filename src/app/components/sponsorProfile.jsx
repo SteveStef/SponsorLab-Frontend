@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CheckCircle, Globe, Target, Video, Flag, LucideYoutube, Clock, FileIcon, XCircle } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import request from "@/request";
 import { useAppContext } from "@/context";
 import NotFound from "./NotFound";
@@ -18,7 +18,7 @@ export default function Component({params}) {
   const [showCreateFlow, setShowCreateFlow] = useState(false);
   const [reqs, setReqs] = useState([]);
 
-  async function fetchProfile() {
+  const fetchProfile = useCallback(async () => {
     const url = `${process.env.NEXT_PUBLIC_API_URL}/users/sponsor/${id}`;
     const response = await request(url ,"GET", null);
     if(response && response.success) {
@@ -27,7 +27,7 @@ export default function Component({params}) {
     } else {
       setNotFound(true);
     }
-  }
+  }, [id]);
 
   useEffect(() => {
     if(!role) return;
@@ -42,7 +42,7 @@ export default function Component({params}) {
       if(!company.setup) setShowCreateFlow(true);
       setOwner(true);
     }
-  },[id,company,role]);
+  },[id,company,role,fetchProfile]);
 
   if(showCreateFlow) {
     return <CreateSponsorFlow refresh={fetchProfile} setShowCreateFlow={setShowCreateFlow}/>

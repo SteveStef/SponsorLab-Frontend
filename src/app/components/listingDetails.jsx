@@ -41,34 +41,35 @@ export default function Component({ params }) {
 
   const { role } = useAppContext();
 
-  async function fetchListing() {
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/posts/${params.id}`;
-    const response = await request(url, "GET", null);
-    if(response && response.success) {
-      console.log(response.body);
-      setListing(response.body);
-      let tmp = [];
-      let dev = response.body.user.channel.viewDeviations;
-      const normalDist = [21, 63, 13.6, 2.1, 0];
-      for(let i = 0; i < dev.length - 1; i++) {
-        let range = dev[i] + "-" + dev[i + 1] + (i === dev.length - 2? "+":"");
-        tmp.push({ range, probability: (normalDist[i]).toFixed(1)});
-      }
-      setViewRanges(tmp);
-      const score = calculateDealScore(response.body.estimatedViews, response.body.estimatedPrice, response.body.pricingModel);
-      setDealBadge(getDealBadge(score));
-    }
-  }
-
-  async function fetchRelated() {
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/posts/sponsor/recommended`;
-    const response = await request(url, "GET", null);
-    if(response && response.success) {
-      setRelatedListings(response.body);
-    }
-  }
-
   useEffect(() => {
+
+    async function fetchListing() {
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/posts/${params.id}`;
+      const response = await request(url, "GET", null);
+      if(response && response.success) {
+        console.log(response.body);
+        setListing(response.body);
+        let tmp = [];
+        let dev = response.body.user.channel.viewDeviations;
+        const normalDist = [21, 63, 13.6, 2.1, 0];
+        for(let i = 0; i < dev.length - 1; i++) {
+          let range = dev[i] + "-" + dev[i + 1] + (i === dev.length - 2? "+":"");
+          tmp.push({ range, probability: (normalDist[i]).toFixed(1)});
+        }
+        setViewRanges(tmp);
+        const score = calculateDealScore(response.body.estimatedViews, response.body.estimatedPrice, response.body.pricingModel);
+        setDealBadge(getDealBadge(score));
+      }
+    }
+
+    async function fetchRelated() {
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/posts/sponsor/recommended`;
+      const response = await request(url, "GET", null);
+      if(response && response.success) {
+        setRelatedListings(response.body);
+      }
+    }
+
     if(params.id) {
       fetchListing();
       fetchRelated();

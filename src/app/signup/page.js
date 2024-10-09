@@ -6,21 +6,21 @@ import { useRouter } from "next/navigation";
 
 export default function Component() {
   const router = useRouter();
-const formVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      delayChildren: 0.3,
-      staggerChildren: 0.2
+  const formVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        delayChildren: 0.3,
+        staggerChildren: 0.2
+      }
     }
   }
-}
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 }
-}
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 }
+  }
 
   return (
 <div className="min-h-screen flex items-center justify-center text-white p-4 bg-gradient-to-br from-black to-green-950">

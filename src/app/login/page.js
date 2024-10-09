@@ -7,17 +7,18 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import request from "@/request";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAppContext } from "@/context";
 import { motion } from 'framer-motion'
-import { useState } from "react";
-
+import { useState, useEffect } from "react";
 
 export default function Component() {
   const [email, setTheEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [errMsg, setErrMsg] = useState("");
+  const searchParams = useSearchParams();
 
   const { setDescription, setEmail, setAccountType, setName, 
     setRole, setOrganization, setAuth, setProfilePic } = useAppContext();
@@ -38,6 +39,15 @@ export default function Component() {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
   }
+
+
+  useEffect(() => {
+    if(searchParams.get("error")) {
+      const msg = (searchParams.get("error") || "").replaceAll("_", " ");
+      setErrMsg(msg);
+      toast.error(msg);
+    }
+  }, [searchParams]);
 
   async function login(e) {
     e.preventDefault();
@@ -85,7 +95,7 @@ className="min-h-screen flex items-center justify-center text-white p-4 bg-gradi
       variants={containerVariants}
     >
       <motion.div className="w-full max-w-md space-y-8 rounded-xl shadow-2xl overflow-hidden " variants={containerVariants}>
-        <motion.div className="px-8 pt-8 pb-4" variants={itemVariants}>
+        <motion.div className="px-8 pt-8 " variants={itemVariants}>
           <motion.div className="flex items-center justify-center space-x-2" variants={itemVariants}>
             <motion.div
               className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center"
@@ -96,9 +106,17 @@ className="min-h-screen flex items-center justify-center text-white p-4 bg-gradi
             </motion.div>
             <h2 className="text-3xl font-bold text-white">SponsorLab</h2>
           </motion.div>
+          {
+            errMsg ? 
+          <motion.p className="mt-2 text-center text-md text-red-400" variants={itemVariants}>
+            {errMsg}
+          </motion.p>
+            :
           <motion.p className="mt-2 text-center text-sm text-gray-400" variants={itemVariants}>
             Log in to your account
           </motion.p>
+          }
+
         </motion.div>
         
         <div className="px-8 py-6">
