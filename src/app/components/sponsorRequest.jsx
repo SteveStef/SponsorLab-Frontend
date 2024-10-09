@@ -288,6 +288,10 @@ export default function Component() {
     })
   }, [])
 
+  useEffect(() => {
+    getRequests();
+  },[filter]);
+
   const steps = ["Pending Draft", "Draft Review", "Pending Final Draft", "Final Review", "Complete"];
 
   function determineStep(status) {
