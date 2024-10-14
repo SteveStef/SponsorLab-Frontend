@@ -36,7 +36,6 @@ export default function Component({listing, setShowSponsorForm}) {
   function validate(body) {
     let error = "";
     if(!body.title) error = "Purchase must have a title";
-    else if(!body.timeStampOfAdvertisement) error = "Purchase must have a title";
     else if((parseInt(body.duration) <= 0)) error = "duration must be creater than 0 seconds";
     else if((parseFloat(body.price) <= 0)) error = "Price must be creater than $0.00";
     else if(!agreed) error = "Please accept the terms of service";
@@ -227,7 +226,17 @@ export default function Component({listing, setShowSponsorForm}) {
           }
           <div className="flex items-center justify-between">
             <div className="text-muted-foreground">Risk</div>
-            {displayBadge(listing)}
+                  <span
+                    className={`font-semibold ${
+                      listing.riskEvaluation === 'Low'
+                        ? 'text-green-400'
+                        : listing.riskEvaluation === "Medium"
+                        ? 'text-yellow-400'
+                        : 'text-red-400'
+                    }`}
+                  >
+                    {listing.riskEvaluation}
+                  </span>
           </div>
           <div className="flex items-center justify-between">
             <div className="text-muted-foreground">Estimated Views</div>
