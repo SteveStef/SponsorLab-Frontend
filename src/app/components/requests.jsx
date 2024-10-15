@@ -591,6 +591,10 @@ const tabContent = {
           <FileText className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
           Product: {request.title}
         </p>
+        <p className="text-sm text-yellow-400 flex items-center">
+          <Calendar className="w-4 h-4 mr-2 flex-shrink-0 text-yellow-500" />
+          Upload Deadline: {convertFromUtcToLocal(request.post.uploadDeadline)}
+        </p>
 
       {
         request.hasPaymentCap && 

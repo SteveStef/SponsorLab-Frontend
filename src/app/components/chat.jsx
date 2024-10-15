@@ -41,6 +41,13 @@ export default function Component({ room, participant, chatMessages }) {
       }
     }
     connectToSocket();
+    return () => {
+      if (socket) {
+        socket.emit('leave_room', { room: room.id }); // Optionally notify the server you're leaving
+        socket.disconnect(); // Disconnect from the socket
+        setSocket(null); // Reset socket state
+      }
+    };
   },[socket])
 
   useEffect(() => {
@@ -58,8 +65,12 @@ export default function Component({ room, participant, chatMessages }) {
         }
       });
     }
+    return () => {
+      if (socket) {
+        socket.off("recieve_message");
+      }
+    };
   },[joined, room.id, socket]);
-
 
   const handleSendMessage = async () => {
     if (newMessage.trim()) {

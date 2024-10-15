@@ -561,6 +561,7 @@ export default function Component() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
     </div>
   )
 }
@@ -621,6 +622,10 @@ const tabContent = {
         <p className="text-sm text-gray-400 flex items-center">
           <FileText className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
           Product: {request.title}
+        </p>
+        <p className="text-sm text-yellow-400 flex items-center">
+          <Calendar className="w-4 h-4 mr-2 flex-shrink-0 text-yellow-500" />
+          Upload Deadline: {convertFromUtcToLocal(request.post.uploadDeadline)}
         </p>
       {
         request.hasPaymentCap && 
@@ -920,6 +925,7 @@ function ShowButtons(props) {
                   className="border-gray-700 text-gray-300 w-full placeholder-gray-500"
                 />
           }
+
           <DialogFooter className="sm:justify-start">
 
             <Button
