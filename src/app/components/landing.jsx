@@ -4,8 +4,25 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, DollarSign, Search, Zap } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import {useState, useEffect} from "react";
+
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768); // You can set the width for mobile devices
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  return isMobile;
+}
 
 export default function LandingPage() {
+  const isMobile = useIsMobile();
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -72,12 +89,16 @@ export default function LandingPage() {
                 </Link>
             </motion.div>
           </div>
+
+    {!isMobile && 
           <motion.div
             variants={itemVariants}
             className="relative h-[600px] w-full"
           >
             <NetworkAnimation />
           </motion.div>
+
+    }
         </div>
       </motion.section>
 
@@ -155,11 +176,7 @@ export default function LandingPage() {
           >
             Frequently Asked Questions
           </h2>
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.8 }}
+          <div
             className="grid md:grid-cols-2 gap-8"
           >
             <FAQItem
@@ -178,7 +195,7 @@ export default function LandingPage() {
               question="What fees does SponsorLab charge?"
               answer="SponsorLab charges a small percentage fee on successful sponsorship deals. Our fee structure is transparent and competitive, ensuring that both creators and brands get maximum value from our platform. For detailed pricing, please check our pricing page."
             />
-          </motion.div>
+          </div>
         </div>
       </section>
 
@@ -238,16 +255,12 @@ function FeatureCard({ icon, title, description }) {
 
 function FAQItem({ question, answer }) {
   return (
-    <motion.div
-      variants={{
-        hidden: { opacity: 0, y: 20 },
-        visible: { opacity: 1, y: 0 },
-      }}
+    <div
       className="bg-green-900 bg-opacity-10 p-6 rounded-lg"
     >
       <h3 className="text-xl font-semibold mb-2">{question}</h3>
       <p className="text-gray-400">{answer}</p>
-    </motion.div>
+    </div>
   )
 }
 
@@ -260,8 +273,8 @@ function NetworkAnimation() {
     >
       <defs>
         <linearGradient id="nodeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#4ade80" />
-          <stop offset="100%" stopColor="#22c55e" />
+         <stop offset="0%" stopColor="#10b981" />
+          <stop offset="100%" stopColor="#059669" />
         </linearGradient>
       </defs>
       
@@ -269,16 +282,16 @@ function NetworkAnimation() {
       <circle cx="400" cy="300" r="60" fill="url(#nodeGradient)" stroke="#fff" strokeWidth="3">
         <animate attributeName="r" values="60;65;60" dur="3s" repeatCount="indefinite" />
       </circle>
-      <text x="400" y="305" textAnchor="middle" fill="white" fontSize="20" fontWeight="bold">SponsorLab</text>
+      <text x="400" y="305" textAnchor="middle" fill="#ecfdf5" fontSize="20" fontWeight="bold">SponsorLab</text>
 
       {/* Creator nodes */}
       <g>
-        <circle cx="150" cy="150" r="40" fill="#4ade80" stroke="#fff" strokeWidth="3" />
-        <text x="150" y="155" textAnchor="middle" fill="white" fontSize="14">Creator 1</text>
+        <circle cx="150" cy="150" r="40" fill="#10b981" stroke="#ecfdf5" strokeWidth="3" />
+        <text x="150" y="155" textAnchor="middle" fill="#ecfdf5" fontSize="14">Creator 1</text>
         <motion.path
           d="M190 170 Q295 235 360 290"
           fill="none"
-          stroke="#4ade80"
+          stroke="#10b981"
           strokeWidth="4"
           initial={{ pathLength: 0 }}
           animate={{ pathLength: 1 }}
@@ -286,12 +299,12 @@ function NetworkAnimation() {
         />
       </g>
       <g>
-        <circle cx="200" cy="500" r="40" fill="#4ade80" stroke="#fff" strokeWidth="3" />
-        <text x="200" y="505" textAnchor="middle" fill="white" fontSize="14">Creator 2</text>
+        <circle cx="200" cy="500" r="40" fill="#10b981" stroke="#ecfdf5" strokeWidth="3" />
+        <text x="200" y="505" textAnchor="middle" fill="#ecfdf5" fontSize="14">Creator 2</text>
         <motion.path
           d="M240 480 Q320 390 370 340"
           fill="none"
-          stroke="#4ade80"
+          stroke="#10b981"
           strokeWidth="4"
           initial={{ pathLength: 0 }}
           animate={{ pathLength: 1 }}
@@ -299,12 +312,12 @@ function NetworkAnimation() {
         />
       </g>
       <g>
-        <circle cx="100" cy="350" r="40" fill="#4ade80" stroke="#fff" strokeWidth="3" />
+        <circle cx="100" cy="350" r="40" fill="#10b981" stroke="#fff" strokeWidth="3" />
         <text x="100" y="355" textAnchor="middle" fill="white" fontSize="14">Creator 3</text>
         <motion.path
           d="M140 350 Q270 325 340 310"
           fill="none"
-          stroke="#4ade80"
+          stroke="#10b981"
           strokeWidth="4"
           initial={{ pathLength: 0 }}
           animate={{ pathLength: 1 }}
@@ -314,12 +327,12 @@ function NetworkAnimation() {
 
       {/* Brand nodes */}
       <g>
-        <circle cx="650" cy="150" r="40" fill="#22c55e" stroke="#fff" strokeWidth="3" />
+        <circle cx="650" cy="150" r="40" fill="#10b981" stroke="#fff" strokeWidth="3" />
         <text x="650" y="155" textAnchor="middle" fill="white" fontSize="14">Brand 1</text>
         <motion.path
           d="M610 170 Q505 235 440 290"
           fill="none"
-          stroke="#22c55e"
+          stroke="#10b981"
           strokeWidth="4"
           initial={{ pathLength: 0 }}
           animate={{ pathLength: 1 }}
@@ -327,13 +340,13 @@ function NetworkAnimation() {
         />
       </g>
       <g>
-        <circle cx="600" cy="500" r="40" fill="#22c55e" stroke="#fff" strokeWidth="3" />
+        <circle cx="600" cy="500" r="40" fill="#10b981" stroke="#fff" strokeWidth="3" />
         <text x="600" y="505" textAnchor="middle" fill="white" fontSize="14">Brand 2</text>
         <motion.path
           d="M560 480 Q480 390 430 340"
           fill="none"
           
-          stroke="#22c55e"
+          stroke="#10b981"
           strokeWidth="4"
           initial={{ pathLength: 0 }}
           animate={{ pathLength: 1 }}
@@ -341,12 +354,12 @@ function NetworkAnimation() {
         />
       </g>
       <g>
-        <circle cx="700" cy="350" r="40" fill="#22c55e" stroke="#fff" strokeWidth="3" />
+        <circle cx="700" cy="350" r="40" fill="#10b981" stroke="#fff" strokeWidth="3" />
         <text x="700" y="355" textAnchor="middle" fill="white" fontSize="14">Brand 3</text>
         <motion.path
           d="M660 350 Q530 325 460 310"
           fill="none"
-          stroke="#22c55e"
+          stroke="#10b981"
           strokeWidth="4"
           initial={{ pathLength: 0 }}
           animate={{ pathLength: 1 }}
