@@ -1,5 +1,4 @@
 "use client";
-import Black from "../../../public/connect.jpg";
 import Image from "next/image";
 import { convertFromUtcToLocal } from "@/utils";
 import { FilterIcon, InfoIcon, AlertTriangleIcon, CheckCircleIcon, 
@@ -182,7 +181,7 @@ export default function Component() {
         >
           <div className="relative">
             <Image
-              src={listing.thumbnailName || Black}
+              src={listing.thumbnailName}
               alt={listing.title}
               width={576}
               height={284}
