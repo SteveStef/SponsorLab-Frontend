@@ -1,27 +1,153 @@
-"use client";
+'use client'
 
-import { Button } from "@/components/ui/button";
-import { ArrowRight, DollarSign, Search, Zap } from "lucide-react";
-import { motion } from "framer-motion";
-import Link from "next/link";
-import {useState, useEffect} from "react";
+import { Button } from "@/components/ui/button"
+import { ArrowRight, DollarSign, Search, Zap } from "lucide-react"
+import { motion } from "framer-motion"
+import Link from "next/link"
+import { useState, useEffect } from "react";
 
 function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(false)
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768); // You can set the width for mobile devices
-    };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+      setIsMobile(window.innerWidth <= 768)
+    }
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
-  return isMobile;
+  return isMobile
+}
+
+function AnimatedBackground() {
+  const lines = Array.from({ length: 10 }, (_, i) => (
+    <motion.div
+      key={i}
+      className="absolute bg-green-500 opacity-20"
+      initial={{
+        left: `${Math.random() * 100}%`,
+        top: "-5%",
+        width: `${Math.random() * 2 + 1}px`,
+        height: "0%",
+      }}
+      animate={{
+        top: "105%",
+        height: "110%",
+        transition: {
+          duration: Math.random() * 2 + 3,
+          repeat: Infinity,
+          repeatType: "loop",
+          ease: "linear",
+        },
+      }}
+    />
+  ))
+
+  const glowingDots = Array.from({ length: 20 }, (_, i) => (
+    <motion.div
+      key={`dot-${i}`}
+      className="absolute rounded-full bg-green-400"
+      initial={{
+        left: `${Math.random() * 100}%`,
+        top: `${Math.random() * 100}%`,
+        width: "2px",
+        height: "2px",
+      }}
+      animate={{
+        opacity: [0.2, 1, 0.2],
+        scale: [1, 1.5, 1],
+        transition: {
+          duration: Math.random() * 2 + 1,
+          repeat: Infinity,
+          repeatType: "reverse",
+        },
+      }}
+    />
+  ))
+
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {lines}
+      {glowingDots}
+    </div>
+  )
+}
+
+function ConnectAnimation() {
+  const pathVariants = {
+    hidden: { pathLength: 0 },
+    visible: { 
+      pathLength: 1,
+      transition: { 
+        duration: 2,
+        ease: "easeInOut",
+        repeat: Infinity,
+        repeatType: "reverse",
+        repeatDelay: 0.5
+      }
+    }
+  }
+
+  const circleVariants = {
+    hidden: { scale: 0, opacity: 0 },
+    visible: { 
+      scale: 1, 
+      opacity: 1,
+      transition: { 
+        duration: 0.5,
+        ease: "easeOut",
+        delay: 1
+      }
+    }
+  }
+
+  return (
+    <svg width="200" height="200" viewBox="0 0 200 200" className="w-full h-full">
+      {/* Circles */}
+      <motion.circle cx="50" cy="40" r="20" fill="#10B981" variants={circleVariants} initial="hidden" animate="visible" />
+      <motion.circle cx="20" cy="160" r="20" fill="#10B981" variants={circleVariants} initial="hidden" animate="visible" />
+      <motion.circle cx="170" cy="160" r="20" fill="#10B981" variants={circleVariants} initial="hidden" animate="visible" />
+      
+      {/* Labels outside each node */}
+      <text x="50" y="15" textAnchor="middle" fill="#FFF" fontSize="12px">SponsorLab</text>
+      <text x="20" y="195" textAnchor="middle" fill="#FFF" fontSize="12px">Sponsors</text>
+      <text x="170" y="195" textAnchor="middle" fill="#FFF" fontSize="12px">Youtubers</text>
+
+      {/* Curved Paths connecting all circles */}
+      <motion.path
+        d="M 50 40 Q 35 100 20 160"  // Curved path from first circle to second
+        stroke="#10B981"
+        strokeWidth="4"
+        fill="none"
+        variants={pathVariants}
+        initial="hidden"
+        animate="visible"
+      />
+      <motion.path
+        d="M 50 40 Q 110 50 170 160"  // Curved path from first circle to third
+        stroke="#10B981"
+        strokeWidth="4"
+        fill="none"
+        variants={pathVariants}
+        initial="hidden"
+        animate="visible"
+      />
+      <motion.path
+        d="M 20 160 Q 95 200 170 160"  // Curved path from second circle to third
+        stroke="#10B981"
+        strokeWidth="4"
+        fill="none"
+        variants={pathVariants}
+        initial="hidden"
+        animate="visible"
+      />
+    </svg>
+  )
 }
 
 export default function LandingPage() {
-  const isMobile = useIsMobile();
+  const isMobile = useIsMobile()
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -52,16 +178,14 @@ export default function LandingPage() {
       >
         <div className="text-2xl font-bold text-green-400">SponsorLab</div>
         <div className="space-x-4">
-
-                <Link href="/login">
-          <Button variant="ghost" className="text-gray-300 hover:text-white">
-            Login
-          </Button>
-
-                </Link>
-                <Link href="/signup">
-    <Button className="bg-green-500 hover:bg-green-600 text-white">Sign Up</Button>
-                </Link>
+          <Link href="/login">
+            <Button variant="ghost" className="text-gray-300 hover:text-white">
+              Login
+            </Button>
+          </Link>
+          <Link href="/signup">
+            <Button className="bg-green-500 hover:bg-green-600 text-white">Sign Up</Button>
+          </Link>
         </div>
       </motion.nav>
 
@@ -70,9 +194,10 @@ export default function LandingPage() {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="container mx-auto px-6 py-1 pb-16"
+        className="container mx-auto px-6 py-1 pb-16 relative overflow-hidden"
       >
-        <div className="grid md:grid-cols-2 gap-8 items-center">
+        <AnimatedBackground />
+        <div className="grid md:grid-cols-2 gap-8 items-center relative z-10">
           <div className="space-y-6">
             <motion.h1 variants={itemVariants} className="text-5xl font-bold">
               Connect Creators with Brands
@@ -81,24 +206,19 @@ export default function LandingPage() {
               SponsorLab is the innovative platform streamlining sponsorships for content creators and brands.
             </motion.p>
             <motion.div variants={itemVariants}>
-
-                <Link href="/signup">
-              <Button className="bg-green-500 hover:bg-green-600 text-white text-lg px-8 py-6">
-                Get Started <ArrowRight className="ml-2" />
-              </Button>
-                </Link>
+              <Link href="/signup">
+                <Button className="bg-green-500 hover:bg-green-600 text-white text-lg px-8 py-6">
+                  Get Started <ArrowRight className="ml-2" />
+                </Button>
+              </Link>
             </motion.div>
           </div>
-
-    {!isMobile && 
           <motion.div
             variants={itemVariants}
-            className="relative h-[600px] w-full"
+            className="relative h-[400px] w-full"
           >
-            <NetworkAnimation />
+            <ConnectAnimation />
           </motion.div>
-
-    }
         </div>
       </motion.section>
 
@@ -157,12 +277,12 @@ export default function LandingPage() {
             className="aspect-video w-full max-w-3xl mx-auto rounded-lg overflow-hidden shadow-2xl"
           >
             <div className="relative w-full h-full bg-gray-800 flex items-center justify-center">
-            <iframe
-            src="https://www.youtube.com/embed/So4xsqEIhsM"
-            className="w-full h-full object-cover rounded-lg"
-          >
-            Your browser does not support the video tag.
-          </iframe>
+              <iframe
+                src="https://www.youtube.com/embed/So4xsqEIhsM"
+                className="w-full h-full object-cover rounded-lg"
+              >
+                Your browser does not support the video tag.
+              </iframe>
             </div>
           </motion.div>
         </div>
@@ -171,14 +291,10 @@ export default function LandingPage() {
       {/* FAQ Section */}
       <section className="bg-black bg-opacity-50 py-16">
         <div className="container mx-auto px-6">
-          <h2
-            className="text-3xl font-bold mb-12 text-center"
-          >
+          <h2 className="text-3xl font-bold mb-12 text-center">
             Frequently Asked Questions
           </h2>
-          <div
-            className="grid md:grid-cols-2 gap-8"
-          >
+          <div className="grid md:grid-cols-2 gap-8">
             <FAQItem
               question="How does SponsorLab work?"
               answer="SponsorLab is an open marketplace where content creators list their upcoming content, and brands can browse and select the videos or content that align with their marketing goals. Our platform uses automated matching algorithms to connect the right creators with the right brands."
@@ -212,14 +328,14 @@ export default function LandingPage() {
         </p>
         <div className="flex justify-center space-x-4">
           <Link href="/signup/youtuber">
-          <Button className="bg-green-500 hover:bg-green-600 text-white text-lg px-8 py-6">
-            I am a Creator
-          </Button>
+            <Button className="bg-green-500 hover:bg-green-600 text-white text-lg px-8 py-6">
+              I am a Creator
+            </Button>
           </Link>
           <Link href="/signup/sponsor">
-          <Button className="bg-gray-700 hover:bg-gray-600 text-white text-lg px-8 py-6">
-            I am a Brand
-          </Button>
+            <Button className="bg-gray-700 hover:bg-gray-600 text-white text-lg px-8 py-6">
+              I am a Brand
+            </Button>
           </Link>
         </div>
       </motion.section>
@@ -255,310 +371,9 @@ function FeatureCard({ icon, title, description }) {
 
 function FAQItem({ question, answer }) {
   return (
-    <div
-      className="bg-green-900 bg-opacity-10 p-6 rounded-lg"
-    >
+    <div className="bg-green-900 bg-opacity-10 p-6 rounded-lg">
       <h3 className="text-xl font-semibold mb-2">{question}</h3>
       <p className="text-gray-400">{answer}</p>
     </div>
   )
 }
-
-function NetworkAnimation() {
-  return (
-    <svg
-      viewBox="0 0 800 600"
-      xmlns="http://www.w3.org/2000/svg"
-      className="w-full h-full"
-    >
-      <defs>
-        <linearGradient id="nodeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-         <stop offset="0%" stopColor="#10b981" />
-          <stop offset="100%" stopColor="#059669" />
-        </linearGradient>
-      </defs>
-      
-      {/* Central SponsorLab node */}
-      <circle cx="400" cy="300" r="60" fill="url(#nodeGradient)" stroke="#fff" strokeWidth="3">
-        <animate attributeName="r" values="60;65;60" dur="3s" repeatCount="indefinite" />
-      </circle>
-      <text x="400" y="305" textAnchor="middle" fill="#ecfdf5" fontSize="20" fontWeight="bold">SponsorLab</text>
-
-      {/* Creator nodes */}
-      <g>
-        <circle cx="150" cy="150" r="40" fill="#10b981" stroke="#ecfdf5" strokeWidth="3" />
-        <text x="150" y="155" textAnchor="middle" fill="#ecfdf5" fontSize="14">Creator 1</text>
-        <motion.path
-          d="M190 170 Q295 235 360 290"
-          fill="none"
-          stroke="#10b981"
-          strokeWidth="4"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }}
-        />
-      </g>
-      <g>
-        <circle cx="200" cy="500" r="40" fill="#10b981" stroke="#ecfdf5" strokeWidth="3" />
-        <text x="200" y="505" textAnchor="middle" fill="#ecfdf5" fontSize="14">Creator 2</text>
-        <motion.path
-          d="M240 480 Q320 390 370 340"
-          fill="none"
-          stroke="#10b981"
-          strokeWidth="4"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ duration: 2, repeat: Infinity, repeatType: "reverse", delay: 0.5 }}
-        />
-      </g>
-      <g>
-        <circle cx="100" cy="350" r="40" fill="#10b981" stroke="#fff" strokeWidth="3" />
-        <text x="100" y="355" textAnchor="middle" fill="white" fontSize="14">Creator 3</text>
-        <motion.path
-          d="M140 350 Q270 325 340 310"
-          fill="none"
-          stroke="#10b981"
-          strokeWidth="4"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ duration: 2, repeat: Infinity, repeatType: "reverse", delay: 1 }}
-        />
-      </g>
-
-      {/* Brand nodes */}
-      <g>
-        <circle cx="650" cy="150" r="40" fill="#10b981" stroke="#fff" strokeWidth="3" />
-        <text x="650" y="155" textAnchor="middle" fill="white" fontSize="14">Brand 1</text>
-        <motion.path
-          d="M610 170 Q505 235 440 290"
-          fill="none"
-          stroke="#10b981"
-          strokeWidth="4"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ duration: 2, repeat: Infinity, repeatType: "reverse", delay: 0.7 }}
-        />
-      </g>
-      <g>
-        <circle cx="600" cy="500" r="40" fill="#10b981" stroke="#fff" strokeWidth="3" />
-        <text x="600" y="505" textAnchor="middle" fill="white" fontSize="14">Brand 2</text>
-        <motion.path
-          d="M560 480 Q480 390 430 340"
-          fill="none"
-          
-          stroke="#10b981"
-          strokeWidth="4"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ duration: 2, repeat: Infinity, repeatType: "reverse", delay: 1.2 }}
-        />
-      </g>
-      <g>
-        <circle cx="700" cy="350" r="40" fill="#10b981" stroke="#fff" strokeWidth="3" />
-        <text x="700" y="355" textAnchor="middle" fill="white" fontSize="14">Brand 3</text>
-        <motion.path
-          d="M660 350 Q530 325 460 310"
-          fill="none"
-          stroke="#10b981"
-          strokeWidth="4"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ duration: 2, repeat: Infinity, repeatType: "reverse", delay: 1.7 }}
-        />
-      </g>
-    </svg>
-  )
-}
-
-/*
-"use client";
-import BG from "../../../public/SponsorLab-Background.png";
-import Image from 'next/image'
-import Link from 'next/link'
-import { motion } from 'framer-motion'
-import { Button } from "@/components/ui/button"
-import { Play, Upload, Users, BarChart, Search, Zap, Star, Shield, DollarSign, TrendingUp } from 'lucide-react'
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      delayChildren: 0.3,
-      staggerChildren: 0.2
-    }
-  }
-}
-
-const itemVariants = {
-  hidden: { y: 20, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1
-  }
-}
-
-const FeatureCard = ({ icon, title, description, items }) => (
-  <div className="bg-green-900/20 p-6 rounded-lg">
-    <div className="flex items-center mb-4">
-      {icon}
-      <h3 className="text-xl font-semibold ml-2">{title}</h3>
-    </div>
-    <p className="text-gray-300 mb-4">{description}</p>
-    <ul className="space-y-2">
-      {items.map((item, index) => (
-        <li key={index} className="flex items-center">
-          {item.icon}
-          <span className="ml-2">{item.text}</span>
-        </li>
-      ))}
-    </ul>
-  </div>
-)
-
-export default function Component() {
-  return (
-    <div className="min-h-screen bg-gradient-to-tr from-green-950 via-background to-background text-white overflow-hidden relative">
-      <div className="absolute inset-0 opacity-5 mix-blend-soft-light"></div>
-      <div className="absolute inset-0 bg-gradient-to-tl from-green-900/20 via-green-950/10 to-transparent"></div>
-      <div className="relative">
-        <main>
-          <motion.section
-            className="container mx-auto px-4 py-20 text-center"
-            initial="hidden"
-            animate="visible"
-            variants={containerVariants}
-          >
-            <motion.h1 className="text-5xl font-bold mb-6" variants={itemVariants}>
-              Connect Creators with Sponsors
-            </motion.h1>
-            <motion.p className="text-xl mb-8 text-gray-300" variants={itemVariants}>
-              SponsorLab: Where Content Meets Opportunity
-            </motion.p>
-            <motion.div className="flex justify-center space-x-4" variants={itemVariants}>
-              <Link href="/signup">
-              <Button className="bg-green-500 hover:bg-green-600 text-gray-900">Get Started</Button>
-              </Link>
-            </motion.div>
-          </motion.section>
-
-          <div className="border-t border-green-800 opacity-30"></div>
-
-          <motion.section
-            className="container mx-auto px-4 py-20"
-            initial="hidden"
-            animate="visible"
-            variants={containerVariants}
-          >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-              <motion.div variants={itemVariants}>
-                <h2 className="text-3xl font-bold mb-6">Revolutionize Your Content Partnerships</h2>
-                <p className="text-xl mb-8 text-gray-300">
-                  SponsorLab provides a unique platform where creators and sponsors can connect, collaborate, and grow together. Our innovative approach streamlines the sponsorship process, making it easier than ever to create meaningful partnerships.
-                </p>
-              </motion.div>
-              <motion.div variants={itemVariants} className="relative h-[400px] rounded-lg overflow-hidden">
-
-            <iframe
-            src="https://www.youtube.com/embed/So4xsqEIhsM"
-            className="w-full h-full object-cover rounded-lg"
-          >
-            Your browser does not support the video tag.
-          </iframe>
-
-              </motion.div>
-            </div>
-          </motion.section>
-
-          <div className="border-t border-green-800 opacity-30"></div>
-
-          <motion.section
-            className="container mx-auto px-4 py-20"
-            initial="hidden"
-            animate="visible"
-            variants={containerVariants}
-          >
-            <motion.h2 className="text-3xl font-bold mb-12 text-center" variants={itemVariants}>
-              How It Works
-            </motion.h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <FeatureCard
-                icon={<Play className="w-8 h-8 text-green-400" />}
-                title="List Your Content"
-                description="Creators showcase upcoming videos with title previews and projected views."
-                items={[
-                  { icon: <Upload className="w-4 h-4" />, text: "Upload video details" },
-                  { icon: <Users className="w-4 h-4" />, text: "Set target audience" },
-                  { icon: <BarChart className="w-4 h-4" />, text: "Estimate view count" }
-                ]}
-              />
-              <FeatureCard
-                icon={<Search className="w-8 h-8 text-green-400" />}
-                title="Browse Opportunities"
-                description="Sponsors explore a marketplace of upcoming content from various creators."
-                items={[
-                  { icon: <Zap className="w-4 h-4" />, text: "Filter by niche" },
-                  { icon: <Star className="w-4 h-4" />, text: "Sort by popularity" },
-                  { icon: <Shield className="w-4 h-4" />, text: "Verify creator credentials" }
-                ]}
-              />
-              <FeatureCard
-                icon={<DollarSign className="w-8 h-8 text-green-400" />}
-                title="Secure Sponsorships"
-                description="Sponsors purchase sponsorship slots in an ecommerce-style format."
-                items={[
-                  { icon: <TrendingUp className="w-4 h-4" />, text: "Send competitive requests" },
-                  { icon: <Zap className="w-4 h-4" />, text: "Buy Now options available" },
-                  { icon: <Shield className="w-4 h-4" />, text: "Secure payment processing" }
-                ]}
-              />
-              <FeatureCard
-                icon={<TrendingUp className="w-8 h-8 text-green-400" />}
-                title="Grow Together"
-                description="Creators and sponsors benefit from targeted, efficient partnerships."
-                items={[
-                  { icon: <BarChart className="w-4 h-4" />, text: "Track campaign performance" },
-                  { icon: <Users className="w-4 h-4" />, text: "Expand audience reach" },
-                  { icon: <Star className="w-4 h-4" />, text: "Build long-term relationships" }
-                ]}
-              />
-            </div>
-          </motion.section>
-
-          <div className="border-t border-green-800 opacity-30"></div>
-
-          <motion.section
-            className="container mx-auto px-4 py-20 text-center"
-            initial="hidden"
-            animate="visible"
-            variants={containerVariants}
-          >
-            <motion.h2 className="text-3xl font-bold mb-6" variants={itemVariants}>
-              Ready to Get Started?
-            </motion.h2>
-            <motion.p className="text-xl mb-8 text-gray-300" variants={itemVariants}>
-              Join SponsorLab today and revolutionize your content partnerships.
-            </motion.p>
-            <motion.div className="max-w-md mx-auto" variants={itemVariants}>
-              <form className="flex space-x-4 justify-center">
-                <Link href="/signup">
-                  <Button type="submit" className="bg-green-500 hover:bg-green-600 text-gray-900">
-                    Sign Up
-                  </Button>
-                </Link>
-              </form>
-            </motion.div>
-          </motion.section>
-        </main>
-
-        <div className="border-t border-green-800 opacity-30"></div>
-
-        <footer className="container mx-auto px-4 py-6 text-center text-gray-400">
-          <Link href="/terms-of-service" className="underline mr-5 font-bold">Terms of Service</Link>
-          <Link href="/privacy" className="underline mr-5 font-bold">Privacy Policy</Link>
-        </footer>
-      </div>
-    </div>
-  )
-}
-*/
