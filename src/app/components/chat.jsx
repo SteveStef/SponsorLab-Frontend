@@ -48,7 +48,7 @@ export default function Component({ room, participant, chatMessages }) {
         setSocket(null); // Reset socket state
       }
     };
-  },[socket])
+  },[socket,room.id])
 
   useEffect(() => {
     if(socket) {

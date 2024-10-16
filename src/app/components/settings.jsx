@@ -129,7 +129,8 @@ export default function Component() {
       setLoadingRedirect(false)
       return
     }
-    window.location.href = response.body.url
+    //window.location.href = response.body.url
+    window.open(response.body.url, '_blank')
   }
 
   const addPaymentMethod = async () => {
@@ -145,7 +146,8 @@ export default function Component() {
     }
 
     if (response.url) {
-      window.location.href = response.url;
+      //window.location.href = response.url;
+      window.open(response.url, '_blank');
       return
     }
 

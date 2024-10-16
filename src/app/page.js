@@ -4,10 +4,6 @@ export default function Home() {
 
   return (
     <div>
-    <Header />
-    <br></br>
-    <br></br>
-    <br></br>
       <Landing />
     </div>
   );
