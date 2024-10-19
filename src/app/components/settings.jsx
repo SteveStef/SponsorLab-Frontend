@@ -382,7 +382,9 @@ function PaymentSection({ role, addPaymentMethod, addBankAccount, loadingRedirec
                   </Badge>
                 </div>
                 <Button onClick={addBankAccount} variant="outline" className="w-full">
-                  Update Bank Account
+                  {
+                    !loadingRedirect ? "Update Bank Account" : "Loading..."
+                  }
                 </Button>
               </CardContent>
             </Card>

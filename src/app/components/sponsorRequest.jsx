@@ -117,6 +117,7 @@ export default function Component() {
     setRefreshing(true);
     setLoad(true);
     const url = `${process.env.NEXT_PUBLIC_API_URL}/requests/sponsor`;
+    console.log(filter);
     const response = await Request(url, "POST", {filter, query: debouncedSearch});
     if(response && response.success) {
       response.body.sort((a,b) =>  new Date(b.createdAt) - new Date(a.createdAt));
@@ -286,7 +287,7 @@ export default function Component() {
   }, [])
 
 
-  const steps = ["Pending Draft", "Draft Review", "Pending Final Draft", "Final Review", "Complete"];
+  const steps = ["Pending Draft", "Draft Review", "Pending Published YT Url", "Final Review", "Complete"];
 
   function determineStep(status) {
     switch (status) {
@@ -554,7 +555,7 @@ export default function Component() {
                 onChange={(e) => handleInputChange('problemDescription', e.target.value)}
               />
             </div>
-            <span className="text-sm text-gray-400">Please note that this will cause the partnership to pause and be under admin review.</span>
+            <span className="text-sm text-gray-400">Please note that you and the sponsor will get an email about the result of the dispute.</span>
           </div>
           <DialogFooter>
             <Button type="submit" disabled={load} onClick={handleSubmitProblem}>Send to Admin</Button>
