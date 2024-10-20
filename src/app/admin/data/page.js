@@ -7,12 +7,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { ArrowUpIcon, DollarSign, Users, Youtube, AlertCircle, Clock, TrendingUp, Filter, Calendar, CreditCard, Video, User, Building } from "lucide-react";
+import { ArrowUpIcon, DollarSign, Check, Users, Youtube, AlertCircle, Clock, TrendingUp, Filter, Calendar, CreditCard, Video, User, Building } from "lucide-react";
 import { convertFromUtcToLocal } from "@/utils";
 import Header from "../../components/nav";
 import request from "@/request";
 import { toast } from "sonner";
 import NotFound from "@/app/components/NotFound";
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 export default function AdminDashboard() {
   const [selectedTransaction, setSelectedTransaction] = useState(null);
@@ -23,6 +25,8 @@ export default function AdminDashboard() {
   const [profitsMade, setProfitsMade] = useState(0);
   const [startingUp, setStartingUp] = useState(true);
   const [loading, setLoading] = useState(false);
+
+  const [newStatus, setNewStatus] = useState("");
 
   const [stats, setStats] = useState({
     totalUsers: 0,
@@ -107,6 +111,16 @@ export default function AdminDashboard() {
   },[]);
 
   if(startingUp) return <NotFound />
+
+  async function updateTransactionStatus(transactionId) {
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/admin/transaction-status`;
+    const response = await request(url, "PUT", { transactionId, newStatus });
+    if(response && response.success) {
+      toast.success("The status has been changed to " + newStatus);
+      fetchAdminData();
+      setSelectedTransaction(null);
+    } else toast.error("Failed to change status, tell steve");
+  }
 
   return (
     <>
@@ -348,7 +362,7 @@ export default function AdminDashboard() {
                   <TableHead className="text-gray-300">Type</TableHead>
                   <TableHead className="text-gray-300">Amount</TableHead>
                   <TableHead className="text-gray-300">Status</TableHead>
-                  <TableHead className="text-gray-300">Issue</TableHead>
+                  <TableHead className="text-gray-300">Issues</TableHead>
                   <TableHead className="text-gray-300">Creator</TableHead>
                   <TableHead className="text-gray-300">Sponsor</TableHead>
                   <TableHead className="text-gray-300">Created At</TableHead>
@@ -359,14 +373,24 @@ export default function AdminDashboard() {
                   <TableRow 
                     key={idx} 
                     className="cursor-pointer hover:bg-gray-700"
-                    onClick={() => setSelectedTransaction(transaction)}
+                    onClick={() => {
+                      setSelectedTransaction(transaction);
+                      setNewStatus(transaction.status);
+                    }}
                   >
                     <TableCell>{transaction.request.pricingModel}</TableCell>
                     <TableCell>${(transaction.price / 100).toLocaleString()}</TableCell>
                     <TableCell>{transaction.status}</TableCell>
+
                     <TableCell className="flex items-center">
+                      {transaction.request.issues.length > 0 ? <div className="flex">
                       <AlertCircle className="w-4 h-4 text-yellow-500 mr-2" />
-                      {transaction.status === "ADMIN_REVIEW" ? "Sponsor Refuted Video":"NONE"}
+                        {transaction.request.issues.length}
+                        </div>:<div className="flex">
+                        <Check className="w-4 h-4 text-green-500 mr-2" />
+                        0
+                        </div>}
+
                     </TableCell>
                     <TableCell>{transaction.request.creator.email.split("@")[0]}</TableCell>
                     <TableCell>{transaction.request.sponsor.email}</TableCell>
@@ -379,82 +403,158 @@ export default function AdminDashboard() {
         </CardContent>
       </Card>
 
-      <Dialog open={!!selectedTransaction} onOpenChange={() => setSelectedTransaction(null)}>
-        <DialogContent className="text-white">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold">Transaction Details</DialogTitle>
-          </DialogHeader>
-          {selectedTransaction && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+    <Dialog open={!!selectedTransaction} onOpenChange={() => setSelectedTransaction(null)}>
+      <DialogContent className="max-w-4xl max-h-[75vh] overflow-hidden">
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-bold">Transaction Details</DialogTitle>
+        </DialogHeader>
+        {selectedTransaction && (
+          <ScrollArea className="h-[calc(90vh-120px)] pr-4">
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-gray-400">Amount</p>
+                  <p className="text-sm text-muted-foreground">Agreed Price</p>
                   <p className="flex items-center">
                     <DollarSign className="w-4 h-4 mr-2 text-green-400" />
-                    ${(selectedTransaction.price/100).toLocaleString()}
+                    ${(selectedTransaction.price/100).toLocaleString()} {"USD".toUpperCase()}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-400">Status</p>
+                  <p className="text-sm text-muted-foreground">Status</p>
                   <p className="flex items-center">
                     <Clock className="w-4 h-4 mr-2 text-yellow-400" />
                     {selectedTransaction.status}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-400">Issue</p>
-                  <p className="flex items-center">
-                    <AlertCircle className="w-4 h-4 mr-2 text-red-400" />
-                    {selectedTransaction.status === "ADMIN_REVIEW" ? "Review Video Url" : "NONE"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-400">Creator</p>
+                  <p className="text-sm text-muted-foreground">Creator</p>
                   <p className="flex items-center">
                     <User className="w-4 h-4 mr-2 text-blue-400" />
                     {selectedTransaction.request.creator.email.split("@")[0]}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-400">Sponsor</p>
+                  <p className="text-sm text-muted-foreground">Sponsor</p>
                   <p className="flex items-center">
                     <Building className="w-4 h-4 mr-2 text-purple-400" />
                     {selectedTransaction.request.sponsor.email}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-400">Payment Type</p>
+                  <p className="text-sm text-muted-foreground">Payment Type</p>
                   <p className="flex items-center">
                     <CreditCard className="w-4 h-4 mr-2 text-green-400" />
                     {selectedTransaction.request.pricingModel}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-400">Amount Held</p>
+                  <p className="text-sm text-muted-foreground">Price After Fees (What we charged)</p>
                   <p className="flex items-center">
                     <DollarSign className="w-4 h-4 mr-2 text-yellow-400" />
-                    ${(selectedTransaction.amountHeld/100).toLocaleString()}
+                    ${(selectedTransaction.amountHeld/100).toLocaleString()} {"USD".toUpperCase()}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-400">Created At</p>
+                  <p className="text-sm text-muted-foreground">Partnership Start Date</p>
                   <p className="flex items-center">
                     <Calendar className="w-4 h-4 mr-2 text-blue-400" />
                     {convertFromUtcToLocal(selectedTransaction.createdAt)}
                   </p>
                 </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Final Video Url Deadline</p>
+                  <p className="flex items-center">
+                    <Calendar className="w-4 h-4 mr-2 text-red-400" />
+                    {convertFromUtcToLocal(selectedTransaction.deadline)}
+                  </p>
+                </div>
               </div>
+
               <div>
-                <p className="text-sm text-gray-400">Video URL</p>
-                <a href={selectedTransaction.videoUrl} target="_blank" rel="noopener noreferrer" className="text-green-400 hover:underline flex items-center">
-                  <Video className="w-4 h-4 mr-2" />
-                  {selectedTransaction.videoUrl}
-                </a>
+                <p className="text-sm text-muted-foreground">Description</p>
+                <p>{selectedTransaction.description}</p>
+              </div>
+
+
+              {selectedTransaction.draftVideoUrl && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Draft Video URL</p>
+                  <a href={selectedTransaction.draftVideoUrl} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline flex items-center">
+                    <Video className="w-4 h-4 mr-2" />
+                    {selectedTransaction.draftVideoUrl}
+                  </a>
+                </div>
+              )}
+
+              {selectedTransaction.refuteUrlInfo && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Refute URL Info</p>
+                  <p>{selectedTransaction.refuteUrlInfo}</p>
+                </div>
+              )}
+
+              <div>
+                <p className="text-sm text-muted-foreground">Video URL</p>
+                {selectedTransaction.videoUrl ? (
+                  <a href={selectedTransaction.videoUrl} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline flex items-center">
+                    <Video className="w-4 h-4 mr-2" />
+                    {selectedTransaction.videoUrl}
+                  </a>
+                ) : (
+                  <p>No video URL available</p>
+                )}
+              </div>
+
+
+              <Accordion type="single" collapsible className="w-full">
+                <AccordionItem value="issues">
+                  <AccordionTrigger>
+                    <div className="flex items-center">
+                      <AlertCircle className="w-4 h-4 mr-2 text-red-400" />
+                      Issues ({selectedTransaction.request.issues.length})
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    {selectedTransaction.request.issues.length > 0 ? (
+                      <ul className="space-y-2">
+                        {selectedTransaction.request.issues.map((issue, idx) => (
+                          <li key={idx} className="border-b pb-2">
+                            <p className="font-medium">Problem Type: {issue.problemType}</p>
+                            <p className="text-sm text-muted-foreground">Description: {issue.problemDescription}</p>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p>No issues reported</p>
+                    )}
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+
+              <div className="flex items-center space-x-4">
+                <Select value={newStatus} onValueChange={(value) => setNewStatus(value)}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Change status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="PENDING">Pending</SelectItem>
+                    <SelectItem value="COMPLETED">Completed</SelectItem>
+                    <SelectItem value="CANCELED">Cancelled</SelectItem>
+                    <SelectItem value="FAILED">Failed</SelectItem>
+                    <SelectItem value="DRAFT_REFUSED">Draft Refused</SelectItem>
+                    <SelectItem value="DRAFT_ACCPETED">Draft Accept</SelectItem>
+                    <SelectItem value="DRAFT_REVIEW">Draft Review</SelectItem>
+                    <SelectItem value="FINAL_REVIEW">Final Review</SelectItem>
+                    <SelectItem value="ADMIN_REVIEW">Admin Review</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button onClick={() => updateTransactionStatus(selectedTransaction.id)} disabled={newStatus === selectedTransaction.status}>Update Status</Button>
               </div>
             </div>
-          )}
-        </DialogContent>
-      </Dialog>
+          </ScrollArea>
+        )}
+      </DialogContent>
+    </Dialog>
 
       <Dialog open={!!selectedTransfer} onOpenChange={() => setSelectedTransfer(null)}>
         <DialogContent className="text-white">
