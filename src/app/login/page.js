@@ -20,7 +20,7 @@ export default function Component() {
   const [errMsg, setErrMsg] = useState("");
   const searchParams = useSearchParams();
 
-  const { setDescription, setEmail, setAccountType, setName, 
+  const { setDescription, setEmail, setAccountType, setName, setDeactivated,
     setRole, setOrganization, setAuth, setProfilePic } = useAppContext();
 
   const router = useRouter();
@@ -78,6 +78,7 @@ export default function Component() {
       setAccountType(response.body.accountType);
       setOrganization(response.body.company.id);
       setDescription(response.body.bio);
+      setDeactivated(response.body.deactivated);
       router.push("/listings");
     }
     setLoading(false);

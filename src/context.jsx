@@ -15,6 +15,7 @@ export function AppWrapper({children}) {
   const [organization, setOrganization] = useState("");
   const [description, setDescription] = useState("");
   const [company, setCompany] = useState(null);
+  const [deactivated, setDeactivated] = useState(null);
   
   async function fetchUser() {
     const url = `${process.env.NEXT_PUBLIC_API_URL}/users/account`;
@@ -34,6 +35,7 @@ export function AppWrapper({children}) {
     localStorage.setItem("accountType", response.body.accountType);
     setDescription(response.body.bio);
     localStorage.setItem("description", response.body.bio);
+    setDeactivated(response.body.deactivated);
 
     if(response.body.accountType === "GOOGLE") {
       setProfilePic(response.body.googleImage);
@@ -77,6 +79,7 @@ export function AppWrapper({children}) {
     email, setEmail,
     description, setDescription,
     company, setCompany,
+    deactivated, setDeactivated
   }
 
   return (

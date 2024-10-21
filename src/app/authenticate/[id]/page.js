@@ -1,13 +1,13 @@
 "use client";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect } from "react";
+import { useEffect } from "react";
 import { useAppContext } from "@/context";
 import request from "@/request";
 
 export default function Authenticating({params}) {
   const router = useRouter();
-  const { setCompany, setEmail, setAccountType, setName, setRole, setOrganization, setAuth, setProfilePic } = useAppContext();
+  const { setCompany, setEmail, setAccountType, setName, setRole, setOrganization, setAuth, setProfilePic, setDeactivated } = useAppContext();
 
   useEffect(() => {
     const { id } = params;
@@ -31,6 +31,7 @@ export default function Authenticating({params}) {
         setEmail(response.body.email);
         setAccountType(response.body.accountType);
         setCompany(response.body.company);
+        setDeactivated(response.body.deactivated);
 
         if (response.body.role === "SPONSOR") {
           setProfilePic(response.body.googleImage || "");
@@ -47,7 +48,7 @@ export default function Authenticating({params}) {
     if (id) {
       authenticateUser(id);
     }
-  }, [params, router, setAuth, setRole, setName, setEmail, setAccountType, setCompany, setProfilePic, setOrganization]);
+  }, [params, router, setAuth, setRole, setName, setEmail, setAccountType, setCompany, setProfilePic, setOrganization, setDeactivated]);
 
   return (
     <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-background">

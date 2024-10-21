@@ -15,6 +15,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { UploadIcon, AlertTriangle } from 'lucide-react'
 
 const contentTypes = [
   "Technology",
@@ -73,6 +75,48 @@ export default function Component() {
   const [oldPassword, setOldPassword] = useState("");
   const [load, setLoad] = useState(false);
   const [loadingRedirect, setLoadingRedirect] = useState(false);
+  const [deactivateConfirm, setDeactivateConfirm] = useState("");
+  const [deactivating, setDeactivating] = useState(false);
+  const isAccountActive = !state.deactivated;
+
+  async function handleAccountStatusChange(){
+    if(isAccountActive) {
+      deactivateAccount();
+    } else {
+      activateAccount();
+    }
+  };
+
+  async function deactivateAccount() {
+    if (deactivateConfirm !== "deactivate account") {
+      toast.error("Please type 'deactivate account' to confirm");
+      return;
+    }
+
+    setDeactivating(true);
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/users/deactivate-account`;
+    const response = await request(url, "POST", {});
+    
+    if (response && response.success) {
+      toast.success("Account deactivated successfully");
+      window.location.href = "/login";
+    } else {
+      toast.error(response?.message || "Failed to deactivate account, make sure that you do not have ongoing partnerships");
+    }
+    setDeactivating(false);
+  }
+
+  async function activateAccount() {
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/users/reactivate-account`;
+    const response = await request(url, "POST", {});
+    
+    if (response && response.success) {
+      toast.success("Account reactivated successfully");
+      window.location.href = "";
+    } else {
+      toast.error(response?.message || "Failed to reactivate account");
+    }
+  }
 
   const handleImageChange = (event) => {
     const validImageTypes = ["image/png", "image/jpg", "image/jpeg"]
@@ -175,10 +219,11 @@ export default function Component() {
         <Tabs defaultValue="account" className="w-full">
           <TabsList>
             <TabsTrigger value="account">Account</TabsTrigger>
-    {state.role==="SPONSOR"&&
-      <TabsTrigger value="profile">Profile</TabsTrigger>
-    }
+            {state.role === "SPONSOR" && (
+              <TabsTrigger value="profile">Profile</TabsTrigger>
+            )}
             <TabsTrigger value="payment">Payment</TabsTrigger>
+            <TabsTrigger value="deactivate">Deactivate</TabsTrigger>
           </TabsList>
           <TabsContent value="account" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -257,6 +302,77 @@ export default function Component() {
             addBankAccount={addBankAccount} loadingRedirect={loadingRedirect}/>
 
           </TabsContent>
+
+    <TabsContent value="deactivate" className="space-y-6">
+      <div className="space-y-4">
+        <h2 className="text-xl font-bold text-destructive">
+          {isAccountActive ? "Deactivate Account" : "Activate Account"}
+        </h2>
+        {isAccountActive ? (
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Warning</AlertTitle>
+            <AlertDescription>
+              Do not deactivate your account when you have a pending partnership. Please cancel the partnership or wait until its completion to deactivate your account.
+            </AlertDescription>
+          </Alert>
+        ) : (
+          <Alert>
+            <AlertTitle>Account Deactivated</AlertTitle>
+            <AlertDescription>
+              Your account is currently deactivated. Reactivating will restore your account and all associated data.
+            </AlertDescription>
+          </Alert>
+        )}
+        <div className="space-y-2">
+          <h3 className="font-semibold">What happens when you {isAccountActive ? "deactivate" : "activate"} your account?</h3>
+          {isAccountActive ? (
+            <div className="text-muted-foreground">
+              Deactivating your account will:
+              <ul className="list-disc list-inside mt-2">
+                <li>Hide your profile from other users</li>
+                <li>Remove you from ongoing partnerships</li>
+                <li>Preserve your data for future reactivation</li>
+              </ul>
+              You can reactivate your account at any time by logging in.
+            </div>
+          ) : (
+            <div className="text-muted-foreground">
+              Activating your account will:
+              <ul className="list-disc list-inside mt-2">
+                <li>Make your profile visible to other users again</li>
+                <li>Allow you to participate in partnerships</li>
+                <li>Restore access to all your previous data</li>
+              </ul>
+            </div>
+          )}
+        </div>
+        {isAccountActive && (
+          <div className="space-y-2">
+            <Label htmlFor="deactivateConfirm">Type &quot;deactivate account&quot; to confirm</Label>
+            <Input
+              id="deactivateConfirm"
+              value={deactivateConfirm}
+              onChange={(e) => setDeactivateConfirm(e.target.value)}
+              placeholder="deactivate account"
+            />
+          </div>
+        )}
+        <Button
+          variant={isAccountActive ? "destructive" : "default"}
+          onClick={handleAccountStatusChange}
+          disabled={isAccountActive ? (deactivateConfirm !== "deactivate account" || deactivating) : deactivating}
+        >
+          {deactivating
+            ? isAccountActive
+              ? "Deactivating..."
+              : "Activating..."
+            : isAccountActive
+            ? "Deactivate Account"
+            : "Activate Account"}
+        </Button>
+      </div>
+    </TabsContent>
         </Tabs>
 
       </div>
@@ -372,12 +488,12 @@ function PaymentSection({ role, addPaymentMethod, addBankAccount, loadingRedirec
                     ) : (
                       <AlertCircleIcon className="h-5 w-5 text-yellow-500 mr-2" />
                     )}
-                      {bankAccountInfo && bankAccountInfo.verified
-                        ? "Your bank account is set up and active."
-                        : "Please complete your bank setup."}
+                      {!bankAccountInfo ? "Please complete your bank setup." : !bankAccountInfo.verified ?
+                        "Your account is being verified..."
+                        : "Your bank account is setup"}
                     </span>
                   <Badge>
-                    {bankAccountInfo && bankAccountInfo.verified ? "Active" : "Incomplete"}
+                    {!bankAccountInfo ? "Incomplete" : !bankAccountInfo.verified ? "Verifying..." : "Active"}
                   </Badge>
                 </div>
                 <Button onClick={addBankAccount} variant="outline" className="w-full">
@@ -594,23 +710,3 @@ function AlertCircleIcon(props) {
   )
 }
 
-function UploadIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-      <polyline points="17 8 12 3 7 8" />
-      <line x1="12" x2="12" y1="3" y2="15" />
-    </svg>
-  )
-}
