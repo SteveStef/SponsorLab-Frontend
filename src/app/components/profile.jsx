@@ -59,8 +59,6 @@ export default function Component({id}) {
     if(id) fetchUser(id);
   },[id]);
 
-  console.log(user);
-
   function handleListingClick(listing) {
     router.push(`../../listings/${listing.id}`);
   }
@@ -69,7 +67,7 @@ export default function Component({id}) {
     return <NotFound />
   }
 
-  if(selectedListing) return <Editor listing={selectedListing} viewDeviations={user?.channel?.viewDeviations} setSelectedListing={setSelectedListing}/>
+  if(selectedListing) return <Editor listing={selectedListing} setSelectedListing={setSelectedListing}/>
 
   return (
 <div className={`w-full max-w-6xl mx-auto ${loading ? "animate-pulse rounded" : ""}`}>

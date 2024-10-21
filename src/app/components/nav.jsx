@@ -5,12 +5,21 @@ import Link from "next/link";
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useAppContext } from "@/context";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import Image from "next/image";
 import Beaker from "../../../public/Beaker.png";
 
 import { useState, useEffect, useCallback } from 'react';
-import { MessageSquare, UserPlus, AlertCircle, Search, BellIcon, LogOut, Settings, PlusCircle } from 'lucide-react';
+import { MessageSquare, UserPlus, AlertCircle, Search, BellIcon,
+  LogOut, Settings, PlusCircle, User, Building2, LayoutDashboard } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -306,51 +315,86 @@ function NotificationMenu({ isOpen, setIsOpen, hasNew, notifications, fetchAllNo
 }
 
 function ProfileMenu({ profilePic, name, role, organization, logout }) {
+  const [open, setOpen] = useState(false)
+
+  const menuItems = {
+    ADMIN: [
+      { href: '/admin/data', icon: LayoutDashboard, label: 'Dashboard' },
+    ],
+    SPONSOR: [
+      { href: `../../organizations/${organization}`, icon: Building2, label: 'My Organization' },
+    ],
+    CREATOR: [
+      { href: `../../profile/${organization}`, icon: User, label: 'My Profile' },
+      { href: '../../create', icon: PlusCircle, label: 'Create Listing' },
+    ],
+  }
+
+  const roleSpecificItems = menuItems[role] || []
+
   return (
-    <DropdownMenu>
+    <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <Avatar className="h-10 w-10 border">
-          <AvatarImage src={profilePic} alt="Profile" />
-          <AvatarFallback>{name[0]}</AvatarFallback>
-        </Avatar>
+        <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+          <Avatar className="h-10 w-10">
+            <AvatarImage src={profilePic} alt={name} />
+            <AvatarFallback>{name[0]}</AvatarFallback>
+          </Avatar>
+        </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-    {
-      role !== "ADMIN" ?
-        <DropdownMenuItem>
-          <Link href={role === "SPONSOR" ? `../../organizations/${organization}` : `../../profile/${organization}`} className="flex items-center gap-2" prefetch={false}>
-            {role === "SPONSOR" ? "My Organization" : "My Profile"}
-          </Link>
-        </DropdownMenuItem>
-      :
-        <DropdownMenuItem>
-          <Link href={`/admin/data`} className="flex items-center gap-2" prefetch={false}>
-            Dashboard
-          </Link>
-        </DropdownMenuItem>
-    }
-        {role === "CREATOR" && (
-          <DropdownMenuItem>
-            <Link href={`../../create`} className="flex items-center gap-2" prefetch={false}>
-              <PlusCircle className="h-4 w-4 mr-2" />
-              Create Listing
-            </Link>
-          </DropdownMenuItem>
-        )}
-        <DropdownMenuItem>
-          <Link href={`../../settings`} className="flex items-center gap-2" prefetch={false}>
-            <Settings className="h-4 w-4 mr-2" />
-            Settings
-          </Link>
-        </DropdownMenuItem>
+      <DropdownMenuContent className="w-56" align="end" forceMount>
+        <DropdownMenuLabel className="font-normal">
+          <div className="flex flex-col space-y-1">
+            <p className="text-sm font-medium leading-none">{name}</p>
+            <p className="text-xs leading-none text-muted-foreground">
+              {role.charAt(0).toUpperCase() + role.slice(1).toLowerCase()}
+            </p>
+          </div>
+        </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <Link onClick={logout} href="#" className="flex items-center gap-2" prefetch={false}>
-            <LogOut className="h-4 w-4 mr-2" />
-            Logout
+        <DropdownMenuGroup>
+          {roleSpecificItems.map((item, index) => (
+            <DropdownMenuItem key={index} asChild>
+              <Link 
+                href={item.href} 
+                className="flex items-center" 
+                prefetch={false}
+                onClick={() => setOpen(false)}
+              >
+                <item.icon className="mr-2 h-4 w-4" />
+                <span>{item.label}</span>
+              </Link>
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link 
+            href="../../settings" 
+            className="flex items-center" 
+            prefetch={false}
+            onClick={() => setOpen(false)}
+          >
+            <Settings className="mr-2 h-4 w-4" />
+            <span>Settings</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link 
+            href="#" 
+            className="flex items-center text-red-600 focus:text-red-600" 
+            prefetch={false}
+            onClick={() => {
+              setOpen(false)
+              logout()
+            }}
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            <span>Log out</span>
           </Link>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )
 }
+

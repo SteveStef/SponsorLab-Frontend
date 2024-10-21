@@ -1,24 +1,30 @@
-import Link from "next/link"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
+import Link from "next/link";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button"
 import { useState, useRef } from 'react';
 import { toast } from "sonner";
 import request from "@/request";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge";
-import { InfoIcon } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { InfoIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { convertFromUtcToLocal } from "@/utils";
 import { useAppContext } from "@/context";
+
+function getEstPrice(listing) {
+  const dollarAmount = listing.estimatedPrice / 100;
+  if(listing.priceingModel === "FLAT") return dollarAmount;
+  else return listing.estimatedViews / 1000 * dollarAmount;
+}
+
 
 export default function Component({listing, setShowSponsorForm}) {
 
   const titleRef = useRef("");
   const timeStampRef = useRef("");
-  const [estPrice, setEstPrice] = useState(listing.estimatedPrice / 100);
+  const [estPrice, setEstPrice] = useState(listing.estimatedPrice / 100); // 15 CPM or 55 Dollars
 
   const durationRef = useRef(0);
   const [sendingProduct, setSendingProduct] = useState("NO");
@@ -84,7 +90,6 @@ export default function Component({listing, setShowSponsorForm}) {
         return ;
       }
 
-      //console.log(response);
       if(response && response.success) {
         toast.success("Request Sent");
         router.push("../../requests");
@@ -173,9 +178,10 @@ export default function Component({listing, setShowSponsorForm}) {
     {
       wantPaymentCap === "YES" &&
         <div className="space-y-2">
-        <Label htmlFor="price2">Payment Cap (must be atleast ${estPrice*2})</Label>
+        <Label htmlFor="price2">Payment Cap (must be atleast ${getEstPrice(listing).toLocaleString()})</Label>
         <Input onChange={(e) => setMaxPayment(e.target.value)} id="price2" type="number" value={maxPayment} placeholder="$"
-        className={parseFloat(estPrice)* 2 > maxPayment && `border-red-600`}
+
+        className={getEstPrice(listing) > maxPayment && `border-red-600`}
       />
         </div>
     }
@@ -283,39 +289,6 @@ function ChevronLeftIcon(props) {
       <path d="m15 18-6-6 6-6" />
     </svg>
   )
-}
-
-function displayBadge(listing) {
-  const deviations = listing.user.channel.viewDeviations;
-  const views = listing.estimatedViews;
-  const details = [
-    {backgroundColor: "green", color: "white"},
-    {backgroundColor: "#FDDA0D", color: "black"},
-    {backgroundColor: "red", color: "white"}
-  ];
-  const text = [
-    "Low",
-    "Medium",
-    "High",
-  ];
-  for(let i = 0; i < deviations.length - 1; i++) {
-    if(views >= deviations[i] && views <= deviations[i + 1]) {
-      return <Badge
-        variant="solid"
-        className="px-3 py-1 rounded-md text-xs font-medium"
-        style={details[i]}
-      >
-        { text[i] }
-      </Badge>
-    }
-  }
-  return <Badge
-    variant="solid"
-    className="px-3 py-1 rounded-md text-xs font-medium"
-    style={{ backgroundColor: "red", color: "white" }}
-  >
-    High Risk
-  </Badge>
 }
 
 function EyeIcon(props) {

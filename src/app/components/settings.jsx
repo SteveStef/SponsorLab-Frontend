@@ -68,7 +68,6 @@ export default function Component() {
 
   const [image, setImage] = useState(null);
   const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
   const [selectedImage, setSelectedImage] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [oldPassword, setOldPassword] = useState("");
@@ -123,14 +122,14 @@ export default function Component() {
   const addBankAccount = async () => {
     setLoadingRedirect(true)
     const path = `${process.env.NEXT_PUBLIC_API_URL}/stripe/manage-account`
-    const response = await request(path, "POST", { email: state.email })
+    const response = await request(path, "POST", {});
     if (!response || !response.body || !response.body.url) {
       toast({ title: response.message || "Error creating account" })
       setLoadingRedirect(false)
       return
     }
-    //window.location.href = response.body.url
-    window.open(response.body.url, '_blank')
+    window.location.href = response.body.url
+    //window.open(response.body.url, '_blank')
   }
 
   const addPaymentMethod = async () => {
@@ -146,8 +145,8 @@ export default function Component() {
     }
 
     if (response.url) {
-      //window.location.href = response.url;
-      window.open(response.url, '_blank');
+      window.location.href = response.url;
+      //window.open(response.url, '_blank');
       return
     }
 

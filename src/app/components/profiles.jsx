@@ -50,7 +50,6 @@ export default function Component() {
     setLoad(true);
     const url = `${process.env.NEXT_PUBLIC_API_URL}/users/creators/page/${page}`;
     const response = await request(url, "POST", { needsSponsor: ns, sortBy: sb, sortOrder: so});
-    console.log(response);
     if(response && response.success) {
       setUsers(response.body);
       setTotalPages(Math.max(1, response.totalPages));
@@ -75,7 +74,6 @@ export default function Component() {
       } else {
         const url = `${process.env.NEXT_PUBLIC_API_URL}/users/creators/search`;
         const response = await request(url, "POST", { query: debouncedSearch });
-        console.log(response);
         if (response && response.success) {
           setUsers(response.body);
           setTotalPages(1);
