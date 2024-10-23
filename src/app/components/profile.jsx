@@ -314,6 +314,16 @@ const getStatusIcon = (status) => {
       return <XCircle className="w-4 h-4 text-red-500" />
     case 'CANCELED':
       return <XCircle className="w-4 h-4 text-red-500" />
+    case 'DRAFT_REVIEW':
+      return <Clock className="w-4 h-4 text-yellow-500" />
+    case 'DRAFT_ACCEPTED':
+      return <Clock className="w-4 h-4 text-yellow-500" />
+    case 'DRAFT_REFUSED':
+      return <XCircle  className="w-4 h-4 text-red-500" />
+    case 'FINAL_REVIEW':
+      return <Clock className="w-4 h-4 text-yellow-500" />
+    case 'ADMIN_REVIEW':
+      return <XCircle className="w-4 h-4 text-red-500" />
     default:
       return null
   }
@@ -329,6 +339,16 @@ const getStatusColor = (status) => {
       return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
     case 'CANCELED':
       return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+    case 'DRAFT_REVIEW ':
+      return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
+    case 'DRAFT_REFUSED':
+      return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+    case 'DRAFT_ACCEPTED':
+      return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+    case 'FINAL_REVIEW':
+      return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
+    case 'ADMIN_REVIEW':
+      return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300'
     default:
       return ''
   }

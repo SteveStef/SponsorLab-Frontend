@@ -15,7 +15,7 @@ import { useAppContext } from "@/context";
 
 function getEstPrice(listing) {
   const dollarAmount = listing.estimatedPrice / 100;
-  if(listing.priceingModel === "FLAT") return dollarAmount;
+  if(listing.pricingModel === "FLAT") return dollarAmount;
   else return listing.estimatedViews / 1000 * dollarAmount;
 }
 
@@ -46,8 +46,8 @@ export default function Component({listing, setShowSponsorForm}) {
     else if((parseFloat(body.price) <= 0)) error = "Price must be creater than $0.00";
     else if(!agreed) error = "Please accept the terms of service";
     else if(!body.proposal) error = "Please enter something for the proposal";
-    else if(wantPaymentCap && maxPayment < parseFloat(body.price) * 2) {
-      error = "The payment cap must be atleast 2 times the estimated price";
+    else if(wantPaymentCap === "YES" && getEstPrice(listing) > parseInt(body.paymentCap)) {
+      error = "The payment cap is less than the estimated price.";
     }
 
     if(error) {
@@ -73,7 +73,7 @@ export default function Component({listing, setShowSponsorForm}) {
       creatorName: listing.user.channel.name,
       proposal: proposalRef.current.value,
       sendingProduct: sendingProduct,
-      hasPaymentCap: wantPaymentCap === "YES",
+      hasPaymentCap: wantPaymentCap === "YES" && listing.pricingModel === "CPM",
       paymentCap: maxPayment,
       postId: listing.id,
       pricingModel: listing.pricingModel,
