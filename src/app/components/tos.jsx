@@ -1,5 +1,8 @@
+
+import Link from "next/link";
 export default function Component() {
   return (
+    <>
 <div className="container mx-auto max-w-3xl py-12 px-4 md:px-0">
       <h1 className="mb-8 text-3xl font-bold tracking-tight">SponsorLab Terms of Service</h1>
       <div className="space-y-8">
@@ -265,5 +268,14 @@ export default function Component() {
         </section>
       </div>
     </div>
+     <footer className="fixed bottom-0 w-full bg-black py-4">
+        <div className="container mx-auto px-6 text-center">
+          <div className="flex justify-center space-x-4">
+            <Link href="/terms-of-service" className="text-gray-400 hover:text-green-400">Terms of Service</Link>
+            <Link href="/privacy" className="text-gray-400 hover:text-green-400">Privacy Policy</Link>
+          </div>
+        </div>
+      </footer>
+    </>
   )
 }
