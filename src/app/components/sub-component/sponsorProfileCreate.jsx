@@ -1,40 +1,36 @@
-import { useState, useRef, useEffect } from 'react'
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Progress } from "@/components/ui/progress"
+'use client';
+
+import { useState, useRef, useEffect } from 'react';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Progress } from "@/components/ui/progress";
 import { Building2, Globe, PackageOpen, Youtube, Users, Banknote, 
   ArrowRight, ArrowLeft, LightbulbIcon, X } from 'lucide-react';
 import request from "@/request";
 import { toast } from "sonner";
-import { useAppContext } from '@/context'
+import { useAppContext } from '@/context';
 
 const contentTypes = [
-  "Technology",
-  "Gaming",
-  "Pets",
-  "Fashion",
-  "Education",
-  "Finance",
-  "Lifestyle",
-  "Food/Cooking",
-  "Family",
-  "Music",
-  "Vlogs",
-  "Business",
-  "DIY/Crafts",
-  "Travel",
-  "Religion",
-  "Nature",
-  "Garden",
-  "Wellness"
-];
+  "Technology", "Gaming", "Pets", "Fashion", "Education", "Finance", "Lifestyle",
+  "Food/Cooking", "Family", "Music", "Vlogs", "Business", "DIY/Crafts", "Travel",
+  "Religion", "Nature", "Garden", "Wellness"
+]
 
-export default function Component(props) {
+const allCategories = [
+  "Electronics", "Home & Kitchen", "Fashion & Apparel", "Beauty & Personal Care",
+  "Health & Wellness", "Toys & Games", "Sports & Outdoors", "Automotive",
+  "Office Supplies", "Baby Products", "Pet Supplies", "Grocery & Gourmet Food",
+  "Tools & Home Improvement", "Books & Media", "Garden & Outdoors",
+  "Jewelry & Accessories", "Crafts & DIY", "Travel & Luggage",
+  "Music Instruments & Gear", "Home Decor"
+]
+
+export default function Component({ refresh, setShowCreateFlow }) {
   const [step, setStep] = useState(1)
-  const { company, setCompany } = useAppContext();
+  const { company, setCompany } = useAppContext()
 
   const [formData, setFormData] = useState({
     website: '',
@@ -47,37 +43,60 @@ export default function Component(props) {
   })
   const [searchTerm, setSearchTerm] = useState('')
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-  const [load, setLoad] = useState(false);
-  const dropdownRef = useRef(null)
+  const [load, setLoad] = useState(false)
+  const dropdownRef = useRef(null);
 
   const updateFormData = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
+  const isStepValid = (stepNumber) => {
+    switch (stepNumber) {
+      case 1:
+        return formData.website.trim() !== '' && formData.description.trim() !== ''
+      case 2:
+        return formData.productCategories.length > 0
+      case 3:
+        return formData.contentTypes.length > 0 && formData.audienceAge !== ''
+      case 4:
+        return formData.budgetRange !== '' && formData.goals.trim() !== ''
+      default:
+        return false
+    }
+  }
+
   const handleNext = (e) => {
-    e.preventDefault();
-    setStep(prev => Math.min(prev + 1, 4))
+    e.preventDefault()
+    if (isStepValid(step)) {
+      setStep(prev => Math.min(prev + 1, 4))
+    } else {
+      toast.error("Please fill in all required fields before proceeding.")
+    }
   }
 
   const handlePrev = (e) => {
-    e.preventDefault();
+    e.preventDefault()
     setStep(prev => Math.max(prev - 1, 1))
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setLoad(true);
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/users/sponsor/create-profile`;
-    const response = await request(url, "POST", formData);
-    if(response && response.success) {
-      toast.success("Your profile has been created");
-      setCompany({...company, setup: true});
-      await props.refresh();
-      props.setShowCreateFlow(false);
+    if (isStepValid(4)) {
+      setLoad(true)
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/users/sponsor/create-profile`
+      const response = await request(url, "POST", formData)
+      if(response && response.success) {
+        toast.success("Your profile has been created")
+        setCompany({...company, setup: true})
+        await refresh()
+        setShowCreateFlow(false)
+      } else {
+        toast.error("There is a problem with creating your profile.")
+      }
+      setLoad(false)
     } else {
-      toast.error("There is a problem with creating your profile.");
+      toast.error("Please fill in all required fields before submitting.")
     }
-    setLoad(false);
   }
 
   const steps = [
@@ -106,29 +125,6 @@ export default function Component(props) {
     }
   ]
 
-const allCategories  = [
-  "Electronics",
-  "Home & Kitchen",
-  "Fashion & Apparel",
-  "Beauty & Personal Care",
-  "Health & Wellness",
-  "Toys & Games",
-  "Sports & Outdoors",
-  "Automotive",
-  "Office Supplies",
-  "Baby Products",
-  "Pet Supplies",
-  "Grocery & Gourmet Food",
-  "Tools & Home Improvement",
-  "Books & Media",
-  "Garden & Outdoors",
-  "Jewelry & Accessories",
-  "Crafts & DIY",
-  "Travel & Luggage",
-  "Music Instruments & Gear",
-  "Home Decor"
-];
-
   const filteredCategories = allCategories.filter(category => 
     category.toLowerCase().includes(searchTerm.toLowerCase()) &&
     !formData.productCategories.includes(category)
@@ -141,7 +137,7 @@ const allCategories  = [
   }
 
   const removeCategory = (category) => {
-    updateFormData('productCategories', formData.productCategories.filter(c => c !== category))
+    updateFormData('productCategories', formData.productCategories.filter((c) => c !== category))
   }
 
   useEffect(() => {
@@ -158,11 +154,10 @@ const allCategories  = [
   }, [])
 
   return (
-<div className="text-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="text-gray-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-8">Create Your Sponsor Profile</h1>
         
-        {/* Completion bar */}
         <div className="mb-8">
           <Progress value={step * 25} className="h-2 mb-2" />
           <div className="flex justify-between">
@@ -176,7 +171,6 @@ const allCategories  = [
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Left side panel */}
           <div className="w-full lg:w-1/3 p-6 rounded-lg mb-8 lg:mb-0">
             <div className="flex items-center mb-4">
               <LightbulbIcon className="w-6 h-6 mr-2 text-yellow-400" />
@@ -186,7 +180,6 @@ const allCategories  = [
             <p className="text-gray-300">{advicePanels[step - 1].content}</p>
           </div>
 
-          {/* Main form */}
           <form className="space-y-8 w-full lg:w-2/3">
             {step === 1 && (
               <div className="space-y-6">
@@ -197,25 +190,27 @@ const allCategories  = [
                 <div>
                   <Label htmlFor="website" className="flex items-center pb-2">
                     <Globe className="w-4 h-4 mr-2" />
-                    Website
+                    Website (required)
                   </Label>
                   <Input
                     id="website"
                     value={formData.website}
                     onChange={(e) => updateFormData('website', e.target.value)}
                     className="border-gray-700"
+                    required
                   />
                 </div>
                 <div>
                   <Label htmlFor="description" className="flex items-center pb-2">
                     <PackageOpen className="w-4 h-4 mr-2" />
-                    Company Description
+                    Company Description (required)
                   </Label>
                   <Textarea
                     id="description"
                     value={formData.description}
                     onChange={(e) => updateFormData('description', e.target.value)}
                     className="border-gray-700"
+                    required
                   />
                 </div>
               </div>
@@ -225,7 +220,7 @@ const allCategories  = [
               <div className="space-y-6">
                 <h2 className="text-2xl font-semibold mb-4 flex items-center pb-2">
                   <PackageOpen className="w-6 h-6 mr-2" />
-                  Product Categories
+                  Product Categories (at least one required)
                 </h2>
                 <div className="relative" ref={dropdownRef}>
                   <Input
@@ -275,7 +270,7 @@ const allCategories  = [
                 <div>
                   <Label className="flex items-center mb-2">
                     <Youtube className="w-4 h-4 mr-2" />
-                    Preferred Content Types
+                    Preferred Content Types (at least one required)
                   </Label>
                   <div className="space-y-2">
                     {contentTypes.map((type) => (
@@ -287,7 +282,7 @@ const allCategories  = [
                             if (checked) {
                               updateFormData('contentTypes', [...formData.contentTypes, type])
                             } else {
-                              updateFormData('contentTypes', formData.contentTypes.filter(t => t !== type))
+                              updateFormData('contentTypes', formData.contentTypes.filter((t) => t !== type))
                             }
                           }}
                         />
@@ -312,6 +307,7 @@ const allCategories  = [
                             checked={formData.audienceAge === age}
                             onChange={(e) => updateFormData('audienceAge', e.target.value)}
                             className="form-radio text-green-500 focus:ring-green-500 h-4 w-4 bg-gray-800 border-gray-600"
+                            required
                           />
                           <span>{age}</span>
                         </label>
@@ -342,7 +338,8 @@ const allCategories  = [
                           value={range}
                           checked={formData.budgetRange === range}
                           onChange={(e) => updateFormData('budgetRange', e.target.value)}
-                          className="form-radio text-green-500 focus:ring-green-500 h-4 w-4 bg-gray-800 border-gray-600"
+                          className="form-radio text-green-500 focus:ring-green-500  h-4 w-4 bg-gray-800 border-gray-600"
+                          required
                         />
                         <span>${range.replace('-', ' - ').replace('+', '+')}</span>
                       </label>
@@ -352,7 +349,7 @@ const allCategories  = [
                 <div>
                   <Label htmlFor="goals" className="flex items-center pb-2">
                     <PackageOpen className="w-4 h-4 mr-2" />
-                    Sponsorship Goals
+                    Sponsorship Goals (required)
                   </Label>
                   <Textarea
                     id="goals"
@@ -360,6 +357,7 @@ const allCategories  = [
                     onChange={(e) => updateFormData('goals', e.target.value)}
                     placeholder="What do you hope to achieve with your sponsorships?"
                     className="border-gray-700"
+                    required
                   />
                 </div>
               </div>
@@ -373,12 +371,21 @@ const allCategories  = [
                 </Button>
               )}
               {step < 4 ? (
-                <Button type="button" onClick={handleNext} className="ml-auto bg-green-600 hover:bg-green-700 flex items-center">
+                <Button 
+                  type="button" 
+                  onClick={handleNext} 
+                  className="ml-auto bg-green-600 hover:bg-green-700 flex items-center"
+                  disabled={!isStepValid(step)}
+                >
                   Next
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               ) : (
-                <Button disabled={load} onClick={handleSubmit} className="ml-auto bg-green-600 hover:bg-green-700 flex items-center">
+                <Button 
+                  disabled={load || !isStepValid(4)} 
+                  onClick={handleSubmit} 
+                  className="ml-auto bg-green-600 hover:bg-green-700 flex items-center"
+                >
                   Create Profile
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>

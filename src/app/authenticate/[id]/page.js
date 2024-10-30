@@ -36,13 +36,15 @@ export default function Authenticating({params}) {
         if (response.body.role === "SPONSOR") {
           setProfilePic(response.body.googleImage || "");
           setOrganization(response.body.company.id);
+          if(!response.body.company.setup) router.push(`/organizations/${response.body.company.id}`)
+          else router.push("/listings");
         } else {
           setOrganization(response.body.channel.name);
           setProfilePic(response.body.googleImage || response.body.channel.imageUrl || "");
+          router.push("/listings");
         }
       }
 
-      router.push("/listings");
     };
 
     if (id) {

@@ -39,7 +39,7 @@ export default function Component({ params }) {
   const [viewRanges, setViewRanges] = useState([]);
   const [dealBadge, setDealBadge] = useState(null);
 
-  const { role } = useAppContext();
+  const { role, company } = useAppContext();
 
   useEffect(() => {
 
@@ -76,8 +76,9 @@ export default function Component({ params }) {
     }
   }, [params]);
 
-  if(listing && showSponsorForm) return <SponsorForm listing={listing} setShowSponsorForm={setShowSponsorForm}/>
-
+  if(listing && showSponsorForm) {
+    return <SponsorForm listing={listing} setShowSponsorForm={setShowSponsorForm}/>
+  }
 
 return (
 <div className="grid lg:grid-cols-3 gap-6 lg:gap-12 items-start max-w-7xl px-4 mx-auto py-6">
@@ -155,11 +156,11 @@ return (
           {listing?.tag && <Badge variant="secondary">{listing.tag}</Badge>}
         </div>
         <Button
-          disabled={!listing || (role !== "SPONSOR" || listing.purchased || !listing.published)}
+          disabled={!listing || (role !== "SPONSOR" || listing.purchased || !listing.published || !company?.setup)}
           onClick={() => setShowSponsorForm(true)}
           className="mt-4"
         >
-          Sponsor this listing
+          {role === "SPONSOR" && !company?.setup ? "Please finish creating your profile to sponsor this listing" : "Sponsor this listing"}
         </Button>
       </div>
       <div className="grid gap-6">
