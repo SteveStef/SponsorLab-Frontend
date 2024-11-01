@@ -248,7 +248,7 @@ export default function Component({ room, participant, chatMessages }) {
               <div className="space-y-2">
                 <div className="flex items-center space-x-2">
                   <DollarSign className="w-5 h-5 text-green-500" />
-                  <span>Pricing Type: {room.pricingModel === "CPM" ? "CPM" : "Flat Rate"}</span>
+                  <span>Pricing Type: {room.request.pricingModel === "CPM" ? "CPM" : "Flat Rate"}</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <DollarSign className="w-5 h-5 text-green-500" />

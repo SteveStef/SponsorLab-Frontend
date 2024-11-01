@@ -453,7 +453,9 @@ export default function Component() {
                       <MessageSquare className="w-5 h-5 mr-2" />
                       Speech Requirements
                     </h3>
-                    <p>{selectedRequest.description}</p>
+            <ScrollArea className="h-[200px] pr-4">
+            <p>{selectedRequest.description}</p>
+            </ScrollArea>
                   </div>
                 </div>
                 <div className="space-y-4">

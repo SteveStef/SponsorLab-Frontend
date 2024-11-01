@@ -156,7 +156,7 @@ export default function Component({listing, setShowSponsorForm}) {
             </div>
 
 
-    {listing.pricingModel &&
+    {listing.pricingModel === "CPM" &&
       <>
       <div className="space-y-2">
       <Label htmlFor="sample2">Do you want to add a payment cap?</Label>
