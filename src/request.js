@@ -16,7 +16,7 @@ const request = async (url, req_method, body) => {
       if(response.status === 401 && data.error && data.error === "Not authorized") {
         const path = window.location.pathname;
         console.log(path);
-        const validPaths = ["/privacy","/login", "/", "/signup", "/terms-of-service", "/signup/youtuber", "/signup/sponsor", "/admin/login"];
+        const validPaths = ["/learn-more","/privacy","/login", "/", "/signup", "/terms-of-service", "/signup/youtuber", "/signup/sponsor", "/admin/login"];
         if(!validPaths.includes(path) && !path.includes("authenticate")) {
           window.location.href = "../../../signup";
         }
@@ -37,7 +37,7 @@ const request = async (url, req_method, body) => {
 
       if(response.status === 401 && data.error && data.error === "Not authorized") {
         const path = window.location.pathname;
-        const validPaths = ["/privacy","/login", "/", "/signup", "/terms-of-service", "/signup/youtuber", "/signup/sponsor", "/admin/login"];
+        const validPaths = ["/learn-more","/privacy","/login", "/", "/signup", "/terms-of-service", "/signup/youtuber", "/signup/sponsor", "/admin/login"];
         if(!validPaths.includes(path) && !path.includes("authenticate")) {
           window.location.href = "../../../signup";
         }

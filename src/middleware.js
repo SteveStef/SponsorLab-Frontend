@@ -21,5 +21,5 @@ export default function middleware(req) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|favicon.ico|login|signup|authenticate|terms-of-service|privacy|admin|$).*)'],
+  matcher: ['/((?!_next/static|favicon.ico|login|signup|authenticate|terms-of-service|privacy|admin|learn-more|$).*)'],
 }

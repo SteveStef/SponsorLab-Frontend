@@ -1,23 +1,23 @@
-'use client'
+'use client';
 
-import { Button } from "@/components/ui/button"
-import { ArrowRight, DollarSign, Search, Zap } from "lucide-react"
-import { motion } from "framer-motion"
-import Link from "next/link"
+import { Button } from "@/components/ui/button";
+import { ArrowRight, DollarSign, Search, Zap } from "lucide-react";
+import { motion } from "framer-motion";
+import Link from "next/link";
 import { useState, useEffect } from "react";
 
 function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false)
+  const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768)
     }
     handleResize()
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, [])
 
-  return isMobile
+  return isMobile;
 }
 
 function AnimatedBackground() {
@@ -147,7 +147,7 @@ function ConnectAnimation() {
 }
 
 export default function LandingPage() {
-  const isMobile = useIsMobile()
+  //const isMobile = useIsMobile();
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -206,9 +206,9 @@ export default function LandingPage() {
               SponsorLab is the innovative platform streamlining sponsorships for content creators and brands.
             </motion.p>
             <motion.div variants={itemVariants}>
-              <Link href="/signup">
+              <Link href="/learn-more">
                 <Button className="bg-green-500 hover:bg-green-600 text-white text-lg px-8 py-6">
-                  Get Started <ArrowRight className="ml-2" />
+                  Learn More<ArrowRight className="ml-2" />
                 </Button>
               </Link>
             </motion.div>
@@ -300,16 +300,16 @@ export default function LandingPage() {
               answer="SponsorLab is an open marketplace where content creators list their upcoming content, and brands can browse and select the videos or content that align with their marketing goals. Our platform uses automated matching algorithms to connect the right creators with the right brands."
             />
             <FAQItem
-              question="Is SponsorLab only for YouTube creators?"
-              answer="While we primarily focus on YouTube creators, SponsorLab is designed to support content creators across various platforms. If you create content on other platforms, you're welcome to join and explore sponsorship opportunities."
+              question="How does SponsorLab benefit content creators and brands?"
+              answer="Creators can showcase their upcoming projects, gain visibility to potential sponsors, and manage sponsorships seamlessly. The platform simplifies negotiations and ensures secure, timely payments."
             />
             <FAQItem
               question="How does SponsorLab ensure fair deals for both creators and brands?"
-              answer="SponsorLab provides a transparent marketplace where both creators and brands can see the terms of the deal upfront. We also offer guidelines and tools to help both parties negotiate fair terms, ensuring a win-win situation for everyone involved."
+              answer="SponsorLab provides creators with a platform to showcase upcoming projects, attract sponsors, and manage sponsorships seamlessly, with simplified negotiations and secure, timely payments. For brands, SponsorLab offers access to a diverse pool of creators, advanced matching algorithms to find ideal partnerships, and detailed analytics to track campaign performance—enabling more effective, targeted marketing."
             />
             <FAQItem
               question="What fees does SponsorLab charge?"
-              answer="SponsorLab charges a small percentage fee on successful sponsorship deals. Our fee structure is transparent and competitive, ensuring that both creators and brands get maximum value from our platform. For detailed pricing, please check our pricing page."
+              answer="SponsorLab charges a small percentage fee on successful sponsorship deals. Our fee structure is transparent and competitive, ensuring that both creators and brands get maximum value from our platform. For detailed pricing, please check our terms of service."
             />
           </div>
         </div>
