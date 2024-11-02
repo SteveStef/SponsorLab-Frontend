@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { ArrowUpIcon, DollarSign, Check, Users, Youtube, AlertCircle, Clock, TrendingUp, Filter, Calendar, CreditCard, Video, User, Building } from "lucide-react";
+import { ArrowUpIcon, DollarSign, Send, Check, Users, Youtube, AlertCircle, Clock, TrendingUp, Filter, Calendar, CreditCard, Video, User, Building } from "lucide-react";
 import { convertFromUtcToLocal } from "@/utils";
 import Header from "../../components/nav";
 import request from "@/request";
@@ -15,6 +15,9 @@ import { toast } from "sonner";
 import NotFound from "@/app/components/NotFound";
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 export default function AdminDashboard() {
   const [selectedTransaction, setSelectedTransaction] = useState(null);
@@ -25,6 +28,29 @@ export default function AdminDashboard() {
   const [profitsMade, setProfitsMade] = useState(0);
   const [startingUp, setStartingUp] = useState(true);
   const [loading, setLoading] = useState(false);
+
+  const [message, setMessage] = useState("");
+  const [sendToCreator, setSendToCreator] = useState(true);
+  const [sendToSponsor, setSendToSponsor] = useState(true);
+  const [sendViaEmail, setSendViaEmail] = useState(true);
+  const [sendViaSponsorLab, setSendViaSponsorLab] = useState(true);
+
+  const sendMessage = async (transaction) => {
+    if (!message.trim()) return
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/admin/send-message`;
+    const response = await request(url, "POST", { 
+      creatorEmail: sendToCreator ? transaction.request.creator.stripeAccount?.buisnessEmail || "" : "",
+      sponsorEmail: sendToSponsor ? transaction.request.sponsor.email : "",
+      sendViaEmail,
+      sendViaSponsorLab,
+      message, creatorSearchingEmail: transaction.request.creator.email
+    });
+    console.log(response);
+    if(response && response.success) {
+      setMessage("");
+      toast.success("The message has been sent");
+    } else toast.error("Message failed to send");
+  }
 
   const [newStatus, setNewStatus] = useState("");
 
@@ -41,6 +67,7 @@ export default function AdminDashboard() {
     profits: [],
     userGrowth: [],
   });
+  console.log(selectedTransaction)
 
   const size = useWindowSize();
 
@@ -130,9 +157,6 @@ export default function AdminDashboard() {
     <br></br>
     <div className="min-h-screen text-gray-100 p-8">
       <h1 className="text-4xl font-bold mb-8 text-center">SponsorLab Admin Dashboard</h1>
-
-
-
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <Card className="hover:bg-gray-750 transition-colors">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
@@ -404,7 +428,7 @@ export default function AdminDashboard() {
       </Card>
 
     <Dialog open={!!selectedTransaction} onOpenChange={() => setSelectedTransaction(null)}>
-      <DialogContent className="max-w-4xl max-h-[75vh] overflow-hidden">
+      <DialogContent className="max-w-4xl overflow-hidden">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">Transaction Details</DialogTitle>
         </DialogHeader>
@@ -431,6 +455,8 @@ export default function AdminDashboard() {
                   <p className="flex items-center">
                     <User className="w-4 h-4 mr-2 text-blue-400" />
                     {selectedTransaction.request.creator.email.split("@")[0]}
+                    {" "}
+                    {selectedTransaction.request.creator.stripeAccount?.buisnessEmail || "(No email)"}
                   </p>
                 </div>
                 <div>
@@ -472,9 +498,8 @@ export default function AdminDashboard() {
 
               <div>
                 <p className="text-sm text-muted-foreground">Description</p>
-                <p>{selectedTransaction.description}</p>
+                <p>{selectedTransaction.description || "No Description"}</p>
               </div>
-
 
               {selectedTransaction.draftVideoUrl && (
                 <div>
@@ -505,7 +530,6 @@ export default function AdminDashboard() {
                 )}
               </div>
 
-
               <Accordion type="single" collapsible className="w-full">
                 <AccordionItem value="issues">
                   <AccordionTrigger>
@@ -521,6 +545,8 @@ export default function AdminDashboard() {
                           <li key={idx} className="border-b pb-2">
                             <p className="font-medium">Problem Type: {issue.problemType}</p>
                             <p className="text-sm text-muted-foreground">Description: {issue.problemDescription}</p>
+                            <p className="text-sm text-muted-foreground">Sent by: {issue.user.email}</p>
+
                           </li>
                         ))}
                       </ul>
@@ -549,6 +575,42 @@ export default function AdminDashboard() {
                   </SelectContent>
                 </Select>
                 <Button onClick={() => updateTransactionStatus(selectedTransaction.id)} disabled={newStatus === selectedTransaction.status}>Update Status</Button>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Send Message</h3>
+                <Textarea
+                  placeholder="Type your message here..."
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  className="min-h-[100px]"
+                />
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox id="sendToCreator" checked={sendToCreator} onCheckedChange={setSendToCreator} />
+                    <Label htmlFor="sendToCreator">Send to Creator</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox id="sendToSponsor" checked={sendToSponsor} onCheckedChange={setSendToSponsor} />
+                    <Label htmlFor="sendToSponsor">Send to Sponsor</Label>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox id="sendViaEmail" checked={sendViaEmail} onCheckedChange={setSendViaEmail} />
+                    <Label htmlFor="sendViaEmail">Send via Email</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox id="sendViaSponsorLab" checked={sendViaSponsorLab} onCheckedChange={setSendViaSponsorLab} />
+                    <Label htmlFor="sendViaSponsorLab">Send via SponsorLab Notification</Label>
+                  </div>
+                </div>
+                <div className="flex justify-end">
+                  <Button onClick={() => sendMessage(selectedTransaction)} disabled={!message.trim() || (!sendToCreator && !sendToSponsor)}>
+                    <Send className="w-4 h-4 mr-2" />
+                    Send Message
+                  </Button>
+                </div>
               </div>
             </div>
           </ScrollArea>
@@ -590,6 +652,8 @@ export default function AdminDashboard() {
                   <p className="flex items-center">
                     <User className="w-4 h-4 mr-2 text-blue-400" />
                     {selectedTransfer.transaction.request.creator.email.split("@")[0]}
+                    {" "}
+                    {selectedTransfer.transaction.request.creator.stripeAccount?.buisnessEmail || "(No email)"}
                   </p>
                 </div>
                 <div>
