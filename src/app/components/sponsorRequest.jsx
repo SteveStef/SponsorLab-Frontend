@@ -6,11 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { User, Search,FileCheck, DollarSign, 
   Clock, InfoIcon, CheckCircle, Copy, XCircle, Eye, FileText, Check, X, Calendar, 
-  FileIcon, Link2, PlusIcon, Package, MessageSquare, Video, Timer, Gift, MessageCircle, Flag} from 'lucide-react';
+  FileIcon, Link2, PlusIcon, MessageCircle, Flag,
+} from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useAppContext } from '@/context';
 import Request from "@/request";
@@ -20,6 +21,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Progress } from "@/components/ui/progress";
 import { Label } from "@/components/ui/label";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import CardDetails from "./sub-component/cardDetails";
 
 const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('en-US', {
@@ -27,7 +29,8 @@ const formatDate = (dateString) => {
     month: 'long',
     day: 'numeric'
   })
-}
+
+}  
 
 export default function Component() {
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -453,75 +456,24 @@ export default function Component() {
         </div>
       </div>
 
-      {/* Proposal Modal */}
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="text-gray-300 max-w-4xl">
-          <DialogHeader>
-            <DialogTitle className="text-3xl font-bold text-green-400">Request Details</DialogTitle>
-          </DialogHeader>
-          {selectedRequest && (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-green-400 flex items-center">
-                      <User className="w-5 h-5 mr-2" />
-                      Sender Information
-                    </h3>
-                    <p><strong>Name:</strong> {name}</p>
-                    <p><strong>Company:</strong> {company.orginization.indexOf(".") > 0 ? company.orginization : "individual"}</p>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-green-400 flex items-center">
-                      <Package className="w-5 h-5 mr-2" />
-                      Product/Service Details
-                    </h3>
-                    <p><strong>Title:</strong> {selectedRequest.title}</p>
-                    <p><strong>Short Description:</strong> {selectedRequest.productDescription}</p>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-green-400 flex items-center">
-                      <MessageSquare className="w-5 h-5 mr-2" />
-                      Speech Requirements
-                    </h3>
-
-            <ScrollArea className="h-[200px] pr-4">
-            <p>{selectedRequest.description}</p>
-            </ScrollArea>
-
-                  </div>
-                </div>
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-green-400 flex items-center">
-                      <Video className="w-5 h-5 mr-2" />
-                      Advertisement Details
-                    </h3>
-                    <p><strong><Clock className="w-4 h-4 inline mr-1" /> Timestamp:</strong> {selectedRequest.timeStamp||"NONE"}</p>
-                    <p><strong><DollarSign className="w-4 h-4 inline mr-1" /> Proposed Payment:</strong> ${selectedRequest.requestedPrice/100} {selectedRequest.pricingModel}</p>
-                    <p><strong><Timer className="w-4 h-4 inline mr-1" /> Ad Duration:</strong> {selectedRequest.duration} seconds</p>
-                    <p><strong><Gift className="w-4 h-4 inline mr-1" /> Sample Product:</strong> {selectedRequest.sendingProduct ? 'Yes' : 'No'}</p>
-                    <p><strong><DollarSign className="w-4 h-4 inline mr-1" /> Payment Cap:</strong> {selectedRequest.hasPaymentCap ? "$"+(selectedRequest.paymentCap / 100).toLocaleString(): "none"}</p>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-green-400 flex items-center">
-                      <FileText className="w-5 h-5 mr-2" />
-                      Proposal Message
-                    </h3>
-                    <p className="max-h-40 overflow-y-auto">{selectedRequest.proposal}</p>
-                  </div>
-                </div>
-              </div>
-              <div className="flex justify-end gap-4 mt-6">
-                <Button onClick={() => setIsModalOpen(false)} variant="outline" className="bg-gray-800 text-green-400 hover:bg-gray-700 border-green-600 flex items-center">
-                  <X className="w-4 h-4 mr-2" />
-                  Close
-                </Button>
-              </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+    {
+      selectedRequest && 
+      <CardDetails isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen}
+      sender={{name: name, company: company?.orginization.indexOf(".") > 0 ? company.orginization : "individual"}}
+      product={{title: selectedRequest.title, description: selectedRequest.productDescription}}
+      speechRequirements={selectedRequest.description}
+      adDetails={{
+        timestamp: selectedRequest.timestamp || "NONE",
+          payment: `$${(selectedRequest.requestedPrice/100).toLocaleString()} ${selectedRequest.pricingModel}`,
+          duration: selectedRequest.duration,
+          sendingSample: selectedRequest.sendingProduct?"Yes":"No", 
+          paymentCap: selectedRequest.hasPaymentCap ? "$"+(selectedRequest.paymentCap / 100).toLocaleString(): "NONE",
+          pricingModel: selectedRequest.pricingModel
+      }}
+      proposedMessage={selectedRequest.proposal}
+      />
+    }
+      
       <Dialog open={flagDialog} onOpenChange={setFlagDialog}>
         <DialogContent className="sm:max-w-[425px] text-white">
           <DialogHeader>
@@ -639,7 +591,6 @@ const tabContent = {
           The sponsor has setup a payment cap of ${(request.paymentCap / 100).toLocaleString()}
         </p>
       }
-        <p className="text-sm text-gray-300">{request.proposal}</p>
       </div>
     )
   },
@@ -891,12 +842,10 @@ function ShowButtons(props) {
       }
     } else { // there is a transaciton
       if(request.transaction) {
-
         if(activeTab === "ongoing" && status === "FINAL_REVIEW") return <>{approve}{refute}</>
         if(activeTab === "ongoing" && (status === "DRAFT_REVIEW" || status === "DRAFT_REFUSED")) return <>{approveDraftBtn}{refuteDraftBtn}</>
         else if(activeTab === "request") return viewProposal
         else if(!request.transaction.videoUrl && activeTab === "ongoing" && request.transaction.status === "PENDING" && isLate()) return <>{refundBtn}</>
-
       }
     }
     return <></>

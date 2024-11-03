@@ -10,14 +10,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { User, Search,FileCheck, DollarSign, InfoIcon, Video, Link2,
-  Clock, CheckCircle, XCircle, Eye, FileText, Check, X, Calendar, FileIcon, Package, MessageSquare, 
-  Timer, Gift, MessageCircle, Flag} from 'lucide-react';
+  Clock, CheckCircle, XCircle, Eye, FileText, Check, X, Calendar, FileIcon, MessageCircle, Flag} from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import Request from "@/request";
 import { toast } from "sonner";
 import { convertFromUtcToLocal } from '@/utils';
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import CardDetails from "./sub-component/cardDetails";
 
 const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('en-US', {
@@ -423,72 +423,23 @@ export default function Component() {
         </div>
       </div>
 
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="text-gray-300 max-w-4xl">
-          <DialogHeader>
-            <DialogTitle className="text-3xl font-bold text-green-400">Request Details</DialogTitle>
-          </DialogHeader>
-          {selectedRequest && (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-green-400 flex items-center">
-                      <User className="w-5 h-5 mr-2" />
-                      Sender Information
-                    </h3>
-                    <p><strong>Name:</strong> {selectedRequest.sponsor.name}</p>
-                    <p className="break-words"><strong>Company:</strong> {selectedRequest.sponsor.company.orginization.indexOf(".") > 0 ? selectedRequest.sponsor.company.orginization : "individual"}</p>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-green-400 flex items-center">
-                      <Package className="w-5 h-5 mr-2" />
-                      Product/Service Details
-                    </h3>
-                    <p><strong>Title:</strong> {selectedRequest.title}</p>
-                    <p><strong>Short Description:</strong> {selectedRequest.productDescription}</p>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-green-400 flex items-center">
-                      <MessageSquare className="w-5 h-5 mr-2" />
-                      Speech Requirements
-                    </h3>
-            <ScrollArea className="h-[200px] pr-4">
-            <p>{selectedRequest.description}</p>
-            </ScrollArea>
-                  </div>
-                </div>
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-green-400 flex items-center">
-                      <Video className="w-5 h-5 mr-2" />
-                      Advertisement Details
-                    </h3>
-                    <p><strong><Clock className="w-4 h-4 inline mr-1" /> Timestamp:</strong> {selectedRequest.timeStamp || "NONE"}</p>
-                    <p><strong><DollarSign className="w-4 h-4 inline mr-1" /> Proposed Payment:</strong> ${selectedRequest.requestedPrice/100} {selectedRequest.pricingModel}</p>
-                    <p><strong><Timer className="w-4 h-4 inline mr-1" /> Ad Duration:</strong> {selectedRequest.duration} seconds</p>
-                    <p><strong><Gift className="w-4 h-4 inline mr-1" /> Sample Product:</strong> {selectedRequest.sendingProduct ? 'Yes' : 'No'}</p>
-                    <p><strong><DollarSign className="w-4 h-4 inline mr-1" /> Payment Cap:</strong> {selectedRequest.hasPaymentCap ? ("$" + (selectedRequest.paymentCap / 100).toLocaleString()) : "NONE"}</p>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-green-400 flex items-center">
-                      <FileText className="w-5 h-5 mr-2" />
-                      Proposal Message
-                    </h3>
-                    <p className="max-h-40 overflow-y-auto">{selectedRequest.proposal}</p>
-                  </div>
-                </div>
-              </div>
-              <div className="flex justify-end gap-4 mt-6">
-                <Button onClick={() => setIsModalOpen(false)} variant="outline" className="bg-gray-800 text-green-400 hover:bg-gray-700 border-green-600 flex items-center">
-                  <X className="w-4 h-4 mr-2" />
-                  Close
-                </Button>
-              </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+    {
+      selectedRequest && 
+    <CardDetails isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen}
+    sender={{name: selectedRequest?.sponsor.name, company: selectedRequest?.sponsor.company.orginization.indexOf(".") > 0 ? selectedRequest?.sponsor.company.orginization : "individual"}}
+    product={{title: selectedRequest?.title, description: selectedRequest?.productDescription}}
+    speechRequirements={selectedRequest?.description}
+    adDetails={{
+      timestamp: selectedRequest?.timestamp || "NONE",
+        payment: `$${(selectedRequest?.requestedPrice/100).toLocaleString()} ${selectedRequest.pricingModel}`,
+        duration: selectedRequest?.duration,
+        sendingSample: selectedRequest?.sendingProduct?"Yes":"No", 
+        paymentCap: selectedRequest?.hasPaymentCap ? "$"+(selectedRequest.paymentCap / 100).toLocaleString(): "NONE",
+        pricingModel: selectedRequest?.pricingModel
+    }}
+    proposedMessage={selectedRequest?.proposal}
+    />
+    }
 
       <Dialog open={flagDialog} onOpenChange={setFlagDialog}>
         <DialogContent className="sm:max-w-[425px] text-white">
@@ -607,7 +558,6 @@ const tabContent = {
           The sponsor has setup a payment cap of ${(request.paymentCap / 100).toLocaleString()}
         </p>
       }
-        <p className="text-sm text-gray-300">{request.proposal}</p>
       </div>
     )
   },
