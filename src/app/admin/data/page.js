@@ -66,7 +66,6 @@ export default function AdminDashboard() {
     profits: [],
     userGrowth: [],
   });
-  console.log(selectedTransaction)
 
   const size = useWindowSize();
 
@@ -94,6 +93,24 @@ export default function AdminDashboard() {
     } catch(err) {
       console.log(err);
     }
+  }
+
+  async function syncVideoProgress() {
+    try {
+      setLoading(true)
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/admin/sync-video-progress`;
+      const response = await request(url, "POST", {});
+      console.log(response);
+      if(response && response.success) {
+        toast.success("Channels are synced");
+      } else {
+        toast.error("There was a problem syncing the youtube data");
+      }
+    } catch(err) {
+      toast.error(err);
+      console.log(err);
+    }
+    setLoading(false);
   }
 
   async function syncYoutubeData() {
@@ -224,12 +241,21 @@ export default function AdminDashboard() {
     </Button>
 
     <Button 
+    onClick={syncVideoProgress}
+    className="bg-yellow-600 hover:bg-yellow-700 text-white transition-colors duration-300 flex items-center justify-center m-2"
+    disabled={loading}
+    >
+    <Video className="mr-2" size={18} />
+    Sync Video Progress
+    </Button>
+
+    <Button 
     onClick={transferMoney}
     className="bg-green-600 hover:bg-green-700 text-white transition-colors duration-300 flex items-center justify-center m-2"
     disabled={loading}
     >
     <DollarSign size={18} />
-    Send Payouts to Youtubers
+    Send Payouts 
     </Button>
     </div>
           </CardContent>

@@ -25,6 +25,7 @@ export default function Authenticating({params}) {
         toast.error(response.message);
       } else if (response && response.success) {
         document.cookie = `token=${response.token}; SameSite=None; Secure; Path=/`;
+        localStorage.clear();
         setAuth(true);
         setRole(response.body.role);
         setName(response.body.name);
@@ -33,7 +34,13 @@ export default function Authenticating({params}) {
         setCompany(response.body.company);
         setDeactivated(response.body.deactivated);
 
-        if (response.body.role === "SPONSOR") {
+        localStorage.setItem("role", response.body.role);
+        localStorage.setItem("name", response.body.name);
+        localStorage.setItem("accountType", "GOOGLE");
+
+        if(response.body.role === "SPONSOR") {
+          localStorage.setItem("profilePic", response.body.googleImage || "");
+          localStorage.setItem("organization", response.body.company.id);
           setProfilePic(response.body.googleImage || "");
           setOrganization(response.body.company.id);
           if(!response.body.company.setup) router.push(`/organizations/${response.body.company.id}`)
@@ -41,6 +48,8 @@ export default function Authenticating({params}) {
         } else {
           setOrganization(response.body.channel.name);
           setProfilePic(response.body.googleImage || response.body.channel.imageUrl || "");
+          localStorage.setItem("profilePic", response.body.googleImage || response.body.channel.imageUrl || "");
+          localStorage.setItem("organization", response.body.channel.name);
           router.push("/listings");
         }
       }

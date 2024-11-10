@@ -1,10 +1,11 @@
-"use client";
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
+'use client';
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { InfoIcon, DollarSignIcon, TrendingUpIcon, ImageIcon, CalendarIcon, EyeIcon, TypeIcon, ListIcon, MessageSquareIcon } from 'lucide-react';
 import { addLocalTimezone, inPast } from "@/utils";
 
@@ -16,133 +17,138 @@ import { redirect, useRouter } from 'next/navigation';
 import Image from "next/image";
 
 const contentTypes = [
-"Technology",
-"Gaming",
-"Fashion",
-"Education",
-"Finance",
-"Lifestyle",
-"Food/Cooking",
-"Family",
-"Music",
-"Vlogs",
-"Business",
-"DIY/Crafts",
-"Travel",
-"Religion",
-"Nature",
-"Garden",
-"Wellness"
-];
+  "Technology",
+  "Gaming",
+  "Fashion",
+  "Education",
+  "Finance",
+  "Lifestyle",
+  "Food/Cooking",
+  "Family",
+  "Music",
+  "Vlogs",
+  "Business",
+  "DIY/Crafts",
+  "Travel",
+  "Religion",
+  "Nature",
+  "Garden",
+  "Wellness"
+]
 
 export default function Component() {
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(1)
   const [pricingModel, setPricingModel] = useState('CPM')
 
-  const { role, organization } = useAppContext();
-  const [load, setLoad] = useState(false);
-  const router = useRouter();
+  const { role, organization } = useAppContext()
+  const [load, setLoad] = useState(false)
+  const router = useRouter()
 
   useLayoutEffect(() => {
     if(role && role !== "CREATOR"){
-      redirect("/");
+      redirect("/")
     }
-  }, [role]);
+  }, [role])
 
   const [selectedCategory, setSelectedCategory] = useState("")
-  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedDate, setSelectedDate] = useState("")
 
-  const [image, setImage] = useState(null);
-  const [selectedImage, setSelectedImage] = useState(null);
+  const [image, setImage] = useState(null)
+  const [selectedImage, setSelectedImage] = useState(null)
 
-  const [title, setTitle] = useState("");
-  const [caption, setCaption] = useState("");
+  const [title, setTitle] = useState("")
+  const [caption, setCaption] = useState("")
 
-  const [estimatedViews, setEstimatedViews] = useState(0);
-  const [price, setPrice] = useState(0);
+  const [estimatedViews, setEstimatedViews] = useState("")
+  const [price, setPrice] = useState("")
 
   const handleImageChange = (event) => {
-    const validImageTypes = ["image/png", "image/jpg", "image/jpeg"];
-    if(!event.target.files || !event.target.files[0]) return;
+    const validImageTypes = ["image/png", "image/jpg", "image/jpeg"]
+    if(!event.target.files || !event.target.files[0]) return
 
     if(!validImageTypes.includes(event.target.files[0].type)) {
-      toast.error("Invalid image type, we only accept PNG/JPG/JPEG");
-      return;
+      toast.error("Invalid image type, we only accept PNG/JPG/JPEG")
+      return
     }
 
-    const file = event.target.files[0];
-    const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
+    const file = event.target.files[0]
+    const sizeInMB = (file.size / (1024 * 1024)).toFixed(2)
     if(sizeInMB > 5) {
-      toast.error("The image is over 5MB in size, please select an image under 5MB");
-      return;
+      toast.error("The image is over 5MB in size, please select an image under 5MB")
+      return
     }
 
-    setImage(event.target.files[0]);
-    setSelectedImage(URL.createObjectURL(event.target.files[0]));
-
-  };
-
-  function validate() {
-    let message = "";
-
-    if (!title) {
-      message = "Listing must have a title";
-    } else if (!caption) {
-      message = "Listing must have a caption";
-
-    } else if(price <= 0) {
-      message = "Price must be greater than $0.00";
-
-    } else if(estimatedViews < 0) {
-      message = "Estimated views can not be negative";
-
-    } else if(inPast(selectedDate)) {
-      message = "Upload date must be in the future";
-    }
-
-    if(message) {
-      toast.error(message);
-      setLoad(false);
-      return false;
-    }
-
-    return true;
+    setImage(file)
+    setSelectedImage(URL.createObjectURL(file))
   }
 
-  async function uploadListing(e) {
-    setLoad(true);
-    e.preventDefault();
-    if(!validate()) return;
-
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/posts`;
-    const formData = new FormData();
-
-    formData.append("tag", selectedCategory);
-    formData.append("estimatedPrice", price);
-    formData.append("uploadDate", addLocalTimezone(selectedDate));
-    formData.append("estimatedViews", estimatedViews);
-    formData.append("caption", caption);
-    formData.append("title", title);
-    formData.append("pricingModel", pricingModel);
-    formData.append("file", image);
-
-    const response = await axiosRequest(url, "POST", formData);
-    if(response.status === 200) {
-      toast.success("The listing was created and is privated by default. You can edit this on your profile");
-      router.push(`../profile/${organization}`);
-    } else {
-      toast.error("Something went wrong, try again later");
+  const validateStep = (currentStep) => {
+    switch(currentStep) {
+      case 1:
+        return title.trim() !== "" && selectedCategory !== "" && caption.trim() !== ""
+      case 2:
+        return estimatedViews !== "" && selectedDate !== ""
+      case 3:
+        return price !== ""
+      default:
+        return false
     }
-    setLoad(false);
   }
 
   const nextStep = (e) => {
-    e.preventDefault();
-    setStep(step + 1)
+    e.preventDefault()
+    if (validateStep(step)) {
+      setStep(step + 1)
+    } else {
+      toast.error("Please fill in all fields before proceeding.")
+    }
   }
+
   const prevStep = (e) => {
-    e.preventDefault();
+    e.preventDefault()
     setStep(step - 1)
+  }
+
+  const uploadListing = async (e) => {
+    e.preventDefault()
+    if (!validateStep(3)) {
+      toast.error("Please fill in all fields before submitting.")
+      return
+    }
+
+    setLoad(true)
+
+    if(inPast(selectedDate)) {
+      toast.error("Upload date must be in the future")
+      setLoad(false)
+      return
+    }
+
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/posts`
+    const formData = new FormData()
+
+    formData.append("tag", selectedCategory)
+    formData.append("estimatedPrice", price)
+    formData.append("uploadDate", addLocalTimezone(selectedDate))
+    formData.append("estimatedViews", estimatedViews)
+    formData.append("caption", caption)
+    formData.append("title", title)
+    formData.append("pricingModel", pricingModel)
+    formData.append("file", image)
+
+    try {
+      const response = await axiosRequest(url, "POST", formData)
+      if(response.status === 200) {
+        toast.success("The listing was created and is privated by default. You can edit this on your profile")
+        router.push(`../profile/${organization}`)
+      } else {
+        throw new Error("Server responded with an error")
+      }
+    } catch (error) {
+      toast.error("Something went wrong, try again later")
+    } finally {
+      setLoad(false)
+    }
   }
 
   const stepInfo = [
@@ -210,17 +216,14 @@ export default function Component() {
                       <ListIcon className="mr-2 text-green-400" />
                       Category
                     </Label>
-
-                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                    <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                       <SelectTrigger className="border-gray-600 text-gray-100">
                         <SelectValue placeholder="Select a category" />
                       </SelectTrigger>
                       <SelectContent>
-                        {
-                          contentTypes.map((item, idx) => (
-                            <SelectItem key={idx} value={item}>{item}</SelectItem>
-                          ))
-                        }
+                        {contentTypes.map((item, idx) => (
+                          <SelectItem key={idx} value={item}>{item}</SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -241,23 +244,22 @@ export default function Component() {
                       <ImageIcon className="mr-2 text-green-400" />
                       Thumbnail
                     </Label>
-
                     <div className="flex items-center space-x-4">
-                      <label for="thumbnail" class="bg-gray-600 text-white py-2 px-4 rounded cursor-pointer hover:bg-gray-700">
-                {image ? image.name : "Upload Image Here"}
+                      <label htmlFor="thumbnail" className="bg-gray-600 text-white py-2 px-4 rounded cursor-pointer hover:bg-gray-700">
+                        {image ? image.name : "Upload Image Here"}
                       </label>
-                <input onChange={handleImageChange} id="thumbnail" type="file" accept="image/*" className="hidden" />
+                      <input onChange={handleImageChange} id="thumbnail" type="file" accept="image/*" className="hidden" />
                       <div className="w-20 h-10 bg-gray-600 rounded flex items-center justify-center">
-                        {
-                          selectedImage ?
-                        <Image
-                          src={selectedImage}
-                          width="400"
-                          height="400"
-                          alt="selected image"
-                        /> :
-                        <ImageIcon className="text-gray-400" size={24} />
-                        }
+                        {selectedImage ? (
+                          <Image
+                            src={selectedImage}
+                            width={400}
+                            height={400}
+                            alt="selected image"
+                          />
+                        ) : (
+                          <ImageIcon className="text-gray-400" size={24} />
+                        )}
                       </div>
                     </div>
                   </div>
@@ -298,13 +300,13 @@ export default function Component() {
                   </div>
                   {pricingModel === 'CPM' ? (
                     <div className="space-y-2">
-                      <Label htmlFor="cpmRate">CPM Rate ($)</Label>
-                      <Input onChange={(e) => setPrice(e.target.value)} id="cpmRate" type="number" placeholder="Enter CPM rate" className="border-gray-600 text-gray-100" />
+                      <Label htmlFor="cpmRate">CPM Rate $ (How many dollars per 1,000 views)</Label>
+                      <Input onChange={(e) => setPrice(e.target.value)} value={price} id="cpmRate" type="number" placeholder="Enter CPM rate" className="border-gray-600 text-gray-100" />
                     </div>
                   ) : (
                     <div className="space-y-2">
                       <Label htmlFor="flatRate">Flat Rate ($)</Label>
-                      <Input onChange={(e) => setPrice(e.target.value)} id="flatRate" type="number" placeholder="Enter flat rate" className="border-gray-600 text-gray-100" />
+                      <Input onChange={(e) => setPrice(e.target.value)} value={price} id="flatRate" type="number" placeholder="Enter flat rate" className="border-gray-600 text-gray-100" />
                     </div>
                   )}
                 </>
@@ -317,11 +319,20 @@ export default function Component() {
                   </Button>
                 )}
                 {step < 3 ? (
-                  <Button type="button" onClick={nextStep} className="bg-green-500 hover:bg-green-400 ml-auto">
+                  <Button 
+                    type="button" 
+                    onClick={nextStep} 
+                    className="bg-green-500 hover:bg-green-400 ml-auto"
+                    disabled={!validateStep(step)}
+                  >
                     Next
                   </Button>
                 ) : (
-                  <Button disabled={load} onClick={uploadListing} className="bg-green-500 hover:bg-green-400 ml-auto">
+                  <Button 
+                    disabled={load || !validateStep(step)} 
+                    onClick={uploadListing} 
+                    className="bg-green-500 hover:bg-green-400 ml-auto"
+                  >
                     Create Listing
                   </Button>
                 )}

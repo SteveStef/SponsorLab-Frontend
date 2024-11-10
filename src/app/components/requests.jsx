@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { User, Search,FileCheck, DollarSign, InfoIcon, Video, Link2,
-  Clock, CheckCircle, XCircle, Eye, FileText, Check, X, Calendar, FileIcon, MessageCircle, Flag} from 'lucide-react';
+  Clock, CheckCircle, XCircle, Eye, FileText, Check, X, Calendar, FileIcon, MessageCircle, Flag } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import Request from "@/request";
 import { toast } from "sonner";
@@ -18,6 +18,7 @@ import { convertFromUtcToLocal } from '@/utils';
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import CardDetails from "./sub-component/cardDetails";
+import LineChart from "./sub-component/charts";
 
 const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('en-US', {
@@ -39,7 +40,6 @@ export default function Component() {
   const [flagFormData, setFlagFormData] = useState({ problemType: '', problemDescription: '', requestId: ''});
   const [load, setLoad] = useState(true);
   const [debouncedSearch, setDebouncedSearch] = useState(search);
-
 
   const [videoUrls, setVideoUrls] = useState({});
 
@@ -111,7 +111,6 @@ export default function Component() {
     };
   }, [search]);
 
-  console.log(requests);
 
   const getRequests = useCallback(async () => {
     setRefreshing(true);
@@ -139,7 +138,6 @@ export default function Component() {
   useEffect(() => {
     getRequests();
   }, [getRequests]);
-
 
   async function acceptRequest(requestId) {
     setLoad(true);
@@ -379,9 +377,15 @@ export default function Component() {
                         </div>
                       </CardHeader>
                       <CardContent>
+                        {
+                          key === "receipt" ? 
+                        <ScrollArea className="h-[300px] pr-4">
+                          {content(request)}
+                        </ScrollArea> :
                         <ScrollArea className="h-[200px] pr-4">
                           {key === "ongoing" ? content(request, videoUrls, setVideoUrls) : content(request)}
                         </ScrollArea>
+                        }
                       </CardContent>
                       <CardFooter className="flex flex-wrap justify-center sm:justify-between gap-2">
                         <ShowButtons
@@ -530,115 +534,159 @@ const tabContent = {
     request: {
     title: "Request Details",
     content: (request)=> (
-      <div className="space-y-2">
-        <p className="text-sm text-green-400 flex items-center">
-          <Link href={`../../listings/${request.post.id}`} className="text-green-500 hover:text-green-300 flex items-center">
-            <Eye className="w-4 h-4 mr-2 flex-shrink-0 text-green-500" />
-            Listing: { request.post.title }
-          </Link>
-        </p>
-        <p className="text-sm text-gray-400 flex items-center">
-          <User className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
-          <span className="font-semibold mr-2">{request.sponsor.name}</span>
-          <span className="text-gray-500">({request.sponsor.company.orginization.indexOf(".") > 0 ? request.sponsor.company.orginization : "individual"})</span>
-        </p>
-        <p className="text-sm text-gray-400 flex items-center">
-          <FileText className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
-          Product: {request.title}
-        </p>
-        <p className="text-sm text-yellow-400 flex items-center">
-          <Calendar className="w-4 h-4 mr-2 flex-shrink-0 text-yellow-500" />
-          Upload Deadline: {convertFromUtcToLocal(request.post.uploadDate)}
-        </p>
-
-      {
-        request.hasPaymentCap && 
-        <p className="text-sm text-red-400 flex items-center">
-          <DollarSign className="w-4 h-4 mr-2 flex-shrink-0 " />
-          The sponsor has setup a payment cap of ${(request.paymentCap / 100).toLocaleString()}
-        </p>
-      }
-      </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <p className="text-sm text-green-400 flex items-center">
+              <Link href={`../../listings/${request.post.id}`} className="text-green-500 hover:text-green-300 flex items-center">
+                <Eye className="w-4 h-4 mr-2 flex-shrink-0 text-green-500" />
+                Listing: {request.post.title}
+              </Link>
+            </p>
+            <p className="text-sm text-gray-400 flex items-center">
+              <User className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
+              <span className="font-semibold mr-2">{request.sponsor.name}</span>
+              <span className="text-gray-500">({request.sponsor.company.orginization.indexOf(".") > 0 ? request.sponsor.company.orginization : "individual"})</span>
+            </p>
+          </div>
+          <div className="space-y-2">
+            <p className="text-sm text-gray-400 flex items-center">
+              <FileText className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
+              Product: {request.title}
+            </p>
+            <p className="text-sm text-yellow-400 flex items-center">
+              <Calendar className="w-4 h-4 mr-2 flex-shrink-0 text-yellow-500" />
+              Upload Deadline: {convertFromUtcToLocal(request.post.uploadDate)}
+            </p>
+          </div>
+          {request.hasPaymentCap && (
+            <div className="col-span-full">
+              <p className="text-sm text-red-400 flex items-center">
+                <DollarSign className="w-4 h-4 mr-2 flex-shrink-0 " />
+                The sponsor has setup a payment cap of ${(request.paymentCap / 100).toLocaleString()}
+              </p>
+            </div>
+          )}
+        </div>
     )
   },
   ongoing: {
     title: "You have partnered with a sponsor!",
     content: (request,videoUrls,setVideoUrls)=> (
-      <div className="space-y-2">
-
-      <p className="text-sm text-gray-400 flex items-center">
-        <Clock className="w-4 h-4 mr-2 flex-shrink-0 text-blue-500" />
-        Started on: {request.transaction && new Date(request.transaction.createdAt).toDateString()}
-      </p>
-
-        <p className="text-sm text-gray-400 flex items-center">
-          <User className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
-          Sponsor: {request.sponsor.name} ({request.sponsor.email})
-        </p>
-
-        <p className="text-sm text-gray-400 flex items-center">
-          <Calendar className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
-          Upload Deadline: {request.transaction && convertFromUtcToLocal(request.transaction.deadline)}
-        </p>
-        <div className="text-sm flex text-yellow-400">
-        <InfoIcon className="w-4 h-4 mr-1 mt-1"/>
-      {
-        {
-          FINAL_REVIEW: "The final video URL is being reviewed by the sponsor",
-            DRAFT_REVIEW: "The draft URL is being reviewed by the sponsor",
-            PENDING: "Please send a draft of the video that contains your ad for the sponsor to review",
-            DRAFT_ACCEPTED: "The draft was accepted, please send the published YouTube video URL",
-            DRAFT_REFUSED: "The sponsor refused your draft, please make these changes and send another draft: " 
-        }[request.transaction?.status] || "No further action is required for this step"
-      }
-      </div>
-      {
-        request.transaction?.status === "DRAFT_REFUSED" && <div className="mt-2">{request.transaction?.refuteUrlInfo}</div>
-      }
-      <div className="space-y-2 px-1">
-        <Input 
-          id="name"
-          disabled={!["PENDING", "DRAFT_REVIEW", "FINAL_REVIEW", "DRAFT_ACCEPTED", "DRAFT_REFUSED"].includes(request.transaction?.status)}
-          placeholder={request.transaction?.status === "DRAFT_ACCEPTED" ? "https://www.youtube.com/watch?v=..." : "Enter video link"}
-          onChange={(e) => setVideoUrls((prev) => ({ ...prev, [request.transaction.id]: e.target.value }))}
-        />
-      </div>
-      
-      <p className="text-sm text-gray-400 hover:text-gray-200 flex items-center">
-        <Link2 className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
-        <Link href={request.transaction?.videoUrl || request.transaction?.draftVideoUrl || "#"}>
-          {request.transaction?.videoUrl || request.transaction?.draftVideoUrl || "No link uploaded"}
-        </Link>
-      </p>
-    </div>
+     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <p className="text-sm text-gray-400 flex items-center">
+              <Clock className="w-4 h-4 mr-2 flex-shrink-0 text-blue-500" />
+              Started on: {request.transaction && new Date(request.transaction.createdAt).toDateString()}
+            </p>
+            <p className="text-sm text-gray-400 flex items-center">
+              <User className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
+              Sponsor: {request.sponsor.name} ({request.sponsor.email})
+            </p>
+          </div>
+          <div className="space-y-2">
+            <p className="text-sm text-gray-400 flex items-center">
+              <Calendar className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
+              Upload Deadline: {request.transaction && convertFromUtcToLocal(request.transaction.deadline)}
+            </p>
+            <div className="text-sm flex text-yellow-400">
+              <InfoIcon className="w-4 h-4 mr-1 mt-1"/>
+              {
+                {
+                  FINAL_REVIEW: "The final video URL is being reviewed by the sponsor",
+                  DRAFT_REVIEW: "The draft URL is being reviewed by the sponsor",
+                  PENDING: "Please send a draft of the video that contains your ad for the sponsor to review",
+                  DRAFT_ACCEPTED: "The draft was accepted, please send the published YouTube video URL",
+                  DRAFT_REFUSED: "The sponsor refused your draft, please make these changes and send another draft: "
+                }[request.transaction?.status] || "No further action is required for this step"
+              }
+            </div>
+          </div>
+          {request.transaction?.status === "DRAFT_REFUSED" && (
+            <div className="col-span-full mt-2 text-red-400">{request.transaction?.refuteUrlInfo}</div>
+          )}
+          <div className="col-span-full space-y-2 px-1">
+            <Input 
+              id="videoUrl"
+              disabled={!["PENDING", "DRAFT_REVIEW", "FINAL_REVIEW", "DRAFT_ACCEPTED", "DRAFT_REFUSED"].includes(request.transaction?.status)}
+              placeholder={request.transaction?.status === "DRAFT_ACCEPTED" ? "https://www.youtube.com/watch?v=..." : "Enter video link"}
+              onChange={(e) => setVideoUrls((prev) => ({ ...prev, [request.transaction.id]: e.target.value }))}
+            />
+            <p className="text-sm text-gray-400 hover:text-gray-200 flex items-center">
+              <Link2 className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
+              <Link href={request.transaction?.videoUrl || request.transaction?.draftVideoUrl || "#"}>
+                {request.transaction?.videoUrl || request.transaction?.draftVideoUrl || "No link uploaded"}
+              </Link>
+            </p>
+          </div>
+        </div>
     )
   },
   receipt: {
     title: "Transaction Receipt",
     content: (request)=> (
-      <div className="space-y-2">
-        <p className="text-sm text-gray-400 flex items-center ">
-          <FileCheck className="w-4 h-4 mr-2 flex-shrink-0 text-green-500" />
-          Completed on: {formatDate(new Date())}
-        </p>
-          <p className="text-sm text-gray-400 flex items-center">
-            <User className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
-            Buyer: {request.sponsor.name}
-          </p>
-          <p className="text-sm text-gray-400 flex items-center">
-            <FileText className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
-            Product: {request.title}
-          </p>
-          <p className="text-sm text-gray-300">Thank you for using SponsorLab. This serves as your official receipt.</p>
-        <div className="flex text-green-400">
-        <InfoIcon className="w-5 h-5 mr-1"/>
-          <p className="text-sm text-green-300">The money will hit your bank account within the next 2 weeks, if there are questions or concerns, please contact support@sponsorlab.co</p>
-      </div>
-
+  <div className="w-full max-w-4xl">
+      <br></br>
+      <CardContent>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground flex items-center">
+                <FileCheck className="w-4 h-4 mr-2 flex-shrink-0 text-green-500" />
+                Completed on: {formatDate(request.transaction.transfer.createdAt)}
+              </p>
+              <p className="text-sm text-muted-foreground flex items-center">
+                <User className="w-4 h-4 mr-2 flex-shrink-0 text-primary" />
+                Buyer: {request.sponsor.name}
+              </p>
+              <p className="text-sm text-muted-foreground flex items-center">
+                <DollarSign className="w-4 h-4 mr-2 flex-shrink-0 text-green-500" />
+                Earngings: {
+<span className="font-bold ml-1">${(request.transaction.transfer.earnings).toLocaleString()}</span>
+                  }
+              </p>
+              <p className="text-sm text-muted-foreground flex items-center">
+                <Clock className="w-4 h-4 mr-2 flex-shrink-0 text-green-500" />
+                  Payday: {convertFromUtcToLocal(request.transaction.transfer.payday)}
+              </p>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Thank you for using SponsorLab. This serves as your official receipt.
+            </p>
+            <div className="flex text-green-500">
+              <InfoIcon className="w-5 h-5 mr-2 flex-shrink-0" />
+              <p className="text-sm">
+      {request.pricingModel === "FLAT" ? "The money will hit your bank account within the next 2 weeks. If there are questions or concerns, please contact support@sponsorlab.co"
+        : "SponsorLab evaluates the video's performance one month after it's posted. The final payment is calculated based on the number of views achieved during this period."
+      }
+              </p>
+            </div>
+          </div>
+          {request.pricingModel === "CPM" && (
+            <div className="space-y-2">
+              <div className="flex justify-between items-center bg-primary/10 p-2 rounded-lg text-sm w-65">
+                <span className="font-semibold text-muted-foreground">Total Views: {(request.transaction.transfer.currViews).toLocaleString()}</span>
+                <span className="font-semibold text-primary">
+                  Earnings: ${(request.transaction.transfer.earnings).toLocaleString()}
+                </span>
+              </div>
+              <div className="h-[200px]">
+                <LineChart data={request.transaction.transfer.videoProgress} />
+              </div>
+            <p className="text-sm text-gray-400 hover:text-gray-200 flex items-center ml-4">
+              <Link2 className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
+              <Link href={request.transaction?.videoUrl || request.transaction?.draftVideoUrl || "#"}>
+                {request.transaction?.videoUrl || request.transaction?.draftVideoUrl || "No link uploaded"}
+              </Link>
+            </p>
+            </div>
+          )}
         </div>
+      </CardContent>
+    </div>
       )
     }
   }
+
 
 function ShowButtons(props) {
   const [showConfirm, setShowConfirm] = useState(false);
@@ -810,9 +858,8 @@ function ShowButtons(props) {
   </>
 }
 
-
 function NoRequests() {
-return <main className="flex items-center justify-center bg-background p-4 md:p-8">
+  return <main className="flex items-center justify-center bg-background p-4 md:p-8">
       <div className="text-center">
         <div className="mb-4 flex justify-center">
           <FileIcon className="h-16 w-16 text-muted-foreground" />
@@ -822,8 +869,3 @@ return <main className="flex items-center justify-center bg-background p-4 md:p-
       </div>
     </main>
 }
-
-
-
-
-

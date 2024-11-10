@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { User, Search,FileCheck, DollarSign, 
   Clock, InfoIcon, CheckCircle, Copy, XCircle, Eye, FileText, Check, X, Calendar, 
@@ -22,14 +22,14 @@ import { Progress } from "@/components/ui/progress";
 import { Label } from "@/components/ui/label";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import CardDetails from "./sub-component/cardDetails";
+import LineChart from "./sub-component/charts";
 
 const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric'
-  })
-
+  });
 }  
 
 export default function Component() {
@@ -120,7 +120,6 @@ export default function Component() {
     setRefreshing(true);
     setLoad(true);
     const url = `${process.env.NEXT_PUBLIC_API_URL}/requests/sponsor`;
-    console.log(filter);
     const response = await Request(url, "POST", {filter, query: debouncedSearch});
     if(response && response.success) {
       response.body.sort((a,b) =>  new Date(b.createdAt) - new Date(a.createdAt));
@@ -182,7 +181,6 @@ export default function Component() {
     await Request(url, "POST", body);
     setLoad(false);
   }
-
 
   function changeTab(requestId, value) {
     let tmp = {...activeTab};
@@ -418,9 +416,16 @@ export default function Component() {
                         </div>
                       </CardHeader>
                       <CardContent>
+                        {
+                          key === "receipt" ? 
+                        <ScrollArea className="h-[300px] pr-4">
+                          {content(request)}
+                        </ScrollArea> :
                         <ScrollArea className="h-[200px] pr-4">
                           {key === "ongoing" ? content(request, videoUrls, copied, handleCopy) : content(request)}
                         </ScrollArea>
+
+                        }
                       </CardContent>
                       <CardFooter className="flex flex-wrap justify-center sm:justify-between gap-2">
                         <ShowButtons request={request} load={load} 
@@ -564,58 +569,66 @@ const tabContent = {
     request: {
     title: "Request Details",
     content: (request) => (
-      <div className="space-y-2">
-        <p className="text-sm text-green-400 flex items-center">
-          <Link href={`../../listings/${request.post.id}`} className="text-green-500 hover:text-green-300 flex items-center">
-            <Eye className="w-4 h-4 mr-2 flex-shrink-0 text-green-500" />
-            Listing: { request.post.title }
-          </Link>
-        </p>
-        <p className="text-sm text-gray-400 flex items-center">
+
+
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <p className="text-sm text-green-400 flex items-center">
+              <Link href={`../../listings/${request.post.id}`} className="text-green-500 hover:text-green-300 flex items-center">
+                <Eye className="w-4 h-4 mr-2 flex-shrink-0 text-green-500" />
+                Listing: {request.post.title}
+              </Link>
+            </p>
+            <p className="text-sm text-gray-400 flex items-center">
           <User className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
           <span className="font-semibold mr-2">{request.creator.name}</span>
           <span className="text-gray-500">(Youtuber)</span>
-        </p>
-        <p className="text-sm text-gray-400 flex items-center">
-          <FileText className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
-          Product: {request.title}
-        </p>
-        <p className="text-sm text-yellow-400 flex items-center">
-          <Calendar className="w-4 h-4 mr-2 flex-shrink-0 text-yellow-500" />
-          Upload Deadline: {convertFromUtcToLocal(request.post.uploadDate)}
-        </p>
-      {
-        request.hasPaymentCap && 
-        <p className="text-sm text-red-400 flex items-center">
-          <DollarSign className="w-4 h-4 mr-2 flex-shrink-0 " />
-          The sponsor has setup a payment cap of ${(request.paymentCap / 100).toLocaleString()}
-        </p>
-      }
-      </div>
+            </p>
+          </div>
+          <div className="space-y-2">
+            <p className="text-sm text-gray-400 flex items-center">
+              <FileText className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
+              Product: {request.title}
+            </p>
+            <p className="text-sm text-yellow-400 flex items-center">
+              <Calendar className="w-4 h-4 mr-2 flex-shrink-0 text-yellow-500" />
+              Upload Deadline: {convertFromUtcToLocal(request.post.uploadDate)}
+            </p>
+          </div>
+          {request.hasPaymentCap && (
+            <div className="col-span-full">
+              <p className="text-sm text-red-400 flex items-center">
+                <DollarSign className="w-4 h-4 mr-2 flex-shrink-0 " />
+                You have setup a payment cap of ${(request.paymentCap / 100).toLocaleString()}
+              </p>
+            </div>
+          )}
+        </div>
     )
   },
   ongoing: {
     title: "You have partnered with a youtuber!",
     content: (request, videoUrls, copied, handleCopy) => (
-      <div className="space-y-1">
-
-      <p className="text-sm text-gray-400 flex items-center mb-2">
-      <Clock className="w-4 h-4 mr-2 flex-shrink-0 text-blue-500" />
-      Started on: {request.transaction && new Date(request.transaction.createdAt).toDateString()}
-      </p>
-        <p className="text-sm text-gray-400 flex items-center">
-          <User className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
-          Youtuber: {request.creator.name}
-        </p>
-
-        <p className="text-sm text-gray-400 flex items-center">
-          <Calendar className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
-          Upload Deadline: {request.transaction && convertFromUtcToLocal(request.transaction.deadline)}
-        </p>
-      <div className="flex text-sm">
-        <InfoIcon className="w-4 h-4 mr-1 flex-shrink-0 text-yellow-500" />
-        <p className="text-md text-yellow-400">
-
+      <div>
+     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <p className="text-sm text-gray-400 flex items-center">
+              <Clock className="w-4 h-4 mr-2 flex-shrink-0 text-blue-500" />
+              Started on: {request.transaction && new Date(request.transaction.createdAt).toDateString()}
+            </p>
+            <p className="text-sm text-gray-400 flex items-center">
+              <User className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
+              Youtuber: {request.creator.name}
+            </p>
+          </div>
+          <div className="space-y-2">
+            <p className="text-sm text-gray-400 flex items-center">
+              <Calendar className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
+              Upload Deadline: {request.transaction && convertFromUtcToLocal(request.transaction.deadline)}
+            </p>
+            <div className="text-sm flex text-yellow-400">
+              <InfoIcon className="w-4 h-4 mr-1 mt-1"/>
         {
             request.transaction && request.transaction.status === "FINAL_REVIEW" ? "Please review the final video url"
           : request.transaction && request.transaction.status === "DRAFT_REVIEW" ? "Please review the following video draft"
@@ -624,10 +637,10 @@ const tabContent = {
           : request.transaction && request.transaction.status === "DRAFT_REFUSED" ? "Waiting for the youtuber to make the changes and send a new draft"
           : "No further action is reqired for this step"
         }
-
-      </p>
-      </div>
-
+            </div>
+          </div>
+        </div>
+      <div className="pt-4">
       {
         request.transaction && !["PENDING","DRAFT_ACCEPTED", "CANCELED"].includes(request.transaction.status) &&
             <div className="space-y-2 px-1">
@@ -655,27 +668,72 @@ const tabContent = {
       </div>
       }
       </div>
+      </div>
+
     )
   },
   receipt: {
     title: "Transaction Receipt",
     content: (request)=> (
-      <div className="space-y-2">
-        <p className="text-sm text-gray-400 flex items-center ">
-          <FileCheck className="w-4 h-4 mr-2 flex-shrink-0 text-green-500" />
-          Completed on: {formatDate(new Date())}
-        </p>
-          <p className="text-sm text-gray-400 flex items-center">
-            <User className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
-            Buyer: {request.creator.name}
-          </p>
-          <p className="text-sm text-gray-400 flex items-center">
-            <FileText className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
-            Product: {request.title}
-          </p>
-
-          <p className="text-sm text-gray-300">Thank you for your purchase. This serves as your official receipt.</p>
+  <div className="w-full max-w-4xl">
+      <br></br>
+      <CardContent>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground flex items-center">
+                <FileCheck className="w-4 h-4 mr-2 flex-shrink-0 text-green-500" />
+                Completed on: {formatDate(request.transaction.transfer.createdAt)}
+              </p>
+              <p className="text-sm text-muted-foreground flex items-center">
+                <User className="w-4 h-4 mr-2 flex-shrink-0 text-primary" />
+                Youtuber: {request.creator.name}
+              </p>
+              <p className="text-sm text-muted-foreground flex items-center">
+                <DollarSign className="w-4 h-4 mr-2 flex-shrink-0 text-green-500" />
+              Current Cost: {
+<span className="font-bold ml-1">${(request.transaction.transfer.earnings).toLocaleString()}</span>
+                }
+              </p>
+              <p className="text-sm text-muted-foreground flex items-center">
+                <Clock className="w-4 h-4 mr-2 flex-shrink-0 text-green-500" />
+                  Payment Due: {convertFromUtcToLocal(request.transaction.transfer.payday)}
+              </p>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Thank you for using SponsorLab. This serves as your official receipt.
+            </p>
+            <div className="flex text-green-500">
+              <InfoIcon className="w-5 h-5 mr-2 flex-shrink-0" />
+              <p className="text-sm">
+      {request.pricingModel === "FLAT" ? "The money will hit your bank account within the next 2 weeks. If there are questions or concerns, please contact support@sponsorlab.co"
+        : "SponsorLab evaluates the video's performance one month after it's posted. The final payment is calculated based on the number of views achieved during this period."
+      }
+              </p>
+            </div>
+          </div>
+          {request.pricingModel === "CPM" && (
+            <div className="space-y-2">
+              <div className="flex justify-between items-center bg-primary/10 p-2 rounded-lg text-sm w-65">
+                <span className="font-semibold text-muted-foreground">Total Views: {(request.transaction.transfer.currViews).toLocaleString()}</span>
+                <span className="font-semibold text-primary">
+                  Cost: ${(request.transaction.transfer.earnings).toLocaleString()}
+                </span>
+              </div>
+              <div className="h-[200px]">
+                <LineChart data={request.transaction.transfer.videoProgress} />
+              </div>
+            <p className="text-sm text-gray-400 hover:text-gray-200 flex items-center ml-4">
+              <Link2 className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
+              <Link href={request.transaction?.videoUrl || request.transaction?.draftVideoUrl || "#"}>
+                {request.transaction?.videoUrl || request.transaction?.draftVideoUrl || "No link uploaded"}
+              </Link>
+            </p>
+            </div>
+          )}
         </div>
+      </CardContent>
+    </div>
       )
     }
   }
@@ -684,8 +742,7 @@ const tabContent = {
 function ShowButtons(props) {
   const { request, load, activeTab, confirmRequest, 
     cancelRequest, handleViewProposal, approveVideo, refuteVideo, refund,
-    approveDraft, refuteDraft
-  } = props;
+    approveDraft, refuteDraft } = props;
 
   const [showConfirm, setShowConfirm] = useState(false);
   const [selectedParams, setSelectedParams] = useState("");
