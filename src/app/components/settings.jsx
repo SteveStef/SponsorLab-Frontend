@@ -179,7 +179,7 @@ export default function Component() {
   const addPaymentMethod = async () => {
     setLoadingRedirect(true)
     const url = `${process.env.NEXT_PUBLIC_API_URL}/stripe/manage-customer`
-    const body = { email: state.email, name: state.name }
+    const body = { email: state.email, name: state.name, prevUrl: "settings"}
     const response = await request(url, "POST", body)
 
     if (!response) {

@@ -12,6 +12,9 @@ import { PlayIcon, FileWarning, CalendarIcon, VideoIcon, EyeIcon } from "lucide-
 import { convertFromUtcToLocal } from "@/utils";
 import { useAppContext } from "@/context";
 
+import { loadStripe } from "@stripe/stripe-js";
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY);
+
 function calculateDealScore(estimatedViews, estimatedPrice, pricingModel) {
   const viewsScore = Math.log10(estimatedViews) / 10 // Logarithmic scale for views
   const pricePerView = pricingModel === "FLAT" 
@@ -38,16 +41,16 @@ export default function Component({ params }) {
   const [showSponsorForm, setShowSponsorForm] = useState(false);
   const [viewRanges, setViewRanges] = useState([]);
   const [dealBadge, setDealBadge] = useState(null);
+  const [isStripeCustomer, setIsStripeCustomer] = useState(false);
+  const [loadingRedirect, setLoadingRedirect] = useState(false);
 
-  const { role, company } = useAppContext();
+  const { role, company, name, email } = useAppContext();
 
   useEffect(() => {
-
     async function fetchListing() {
       const url = `${process.env.NEXT_PUBLIC_API_URL}/posts/${params.id}`;
       const response = await request(url, "GET", null);
       if(response && response.success) {
-        console.log(response.body);
         setListing(response.body);
         let tmp = [];
         let dev = response.body.user.channel.viewDeviations;
@@ -70,18 +73,61 @@ export default function Component({ params }) {
       }
     }
 
+    async function fullyAuth() {
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/fullAuth`;
+      const response = await request(url, "GET", null);
+      if(response && response.success) {
+        setIsStripeCustomer(true);
+      }
+    }
+
     if(params.id) {
       fetchListing();
       fetchRelated();
+      if(role === "SPONSOR") {
+        fullyAuth();
+      }
     }
+
   }, [params]);
+
+
+  const addPaymentMethod = async () => {
+    setLoadingRedirect(true)
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/stripe/manage-customer`
+    const body = { email: email, name: name, prevUrl: "listings/"+listing.id}
+    const response = await request(url, "POST", body)
+
+    if (!response) {
+      toast({ title: "Error creating customer" })
+      setLoadingRedirect(false)
+      return
+    }
+
+    if (response.url) {
+      //window.location.href = response.url;
+      window.open(response.url, '_blank');
+      return
+    }
+
+    if (!response.sessionId) {
+      setLoadingRedirect(false)
+      return
+    }
+
+    const stripe = await stripePromise
+    const data = await stripe.redirectToCheckout({ sessionId: response.sessionId })
+    if (data.error) {
+      setLoadingRedirect(false)
+      return
+    }
+  }
 
   if(listing && showSponsorForm) {
     return <SponsorForm listing={listing} setShowSponsorForm={setShowSponsorForm}/>
   }
-
-return (
-<div className="grid lg:grid-cols-3 gap-6 lg:gap-12 items-start max-w-7xl px-4 mx-auto py-6">
+  return (
+    <div className="grid lg:grid-cols-3 gap-6 lg:gap-12 items-start max-w-7xl px-4 mx-auto py-6">
       <div className="lg:col-span-2 grid gap-4">
         <div className="rounded-xl overflow-hidden">
           <Image
@@ -156,8 +202,14 @@ return (
           {listing?.tag && <Badge variant="secondary">{listing.tag}</Badge>}
         </div>
         <Button
-          disabled={!listing || (role !== "SPONSOR" || listing.purchased || !listing.published || !company?.setup)}
-          onClick={() => setShowSponsorForm(true)}
+          disabled={loadingRedirect || !listing || (role !== "SPONSOR" || listing.purchased || !listing.published || !company?.setup)}
+          onClick={() => {
+            if(isStripeCustomer) {
+              setShowSponsorForm(true);
+            } else {
+              addPaymentMethod();
+            }
+          }}
           className="mt-4"
         >
           {role === "SPONSOR" && !company?.setup ? "Please finish creating your profile to sponsor this listing" : "Sponsor this listing"}
