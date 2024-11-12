@@ -715,13 +715,13 @@ const tabContent = {
           {request.pricingModel === "CPM" && (
             <div className="space-y-2">
               <div className="flex justify-between items-center bg-primary/10 p-2 rounded-lg text-sm w-65">
-                <span className="font-semibold text-muted-foreground">Total Views: {(request.transaction.transfer.currViews).toLocaleString()}</span>
+                <span className="font-semibold text-muted-foreground">Total Views: {(request.transaction?.transfer?.currViews||"").toLocaleString()}</span>
                 <span className="font-semibold text-primary">
-                  Cost: ${(request.transaction.transfer.earnings).toLocaleString()}
+                  Cost: ${(request.transaction?.transfer?.earnings||"").toLocaleString()}
                 </span>
               </div>
               <div className="h-[200px]">
-                <LineChart data={request.transaction.transfer.videoProgress} />
+                <LineChart data={request.transaction?.transfer?.videoProgress} />
               </div>
             <p className="text-sm text-gray-400 hover:text-gray-200 flex items-center ml-4">
               <Link2 className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
