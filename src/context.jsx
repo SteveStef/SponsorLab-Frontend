@@ -22,7 +22,7 @@ export function AppWrapper({children}) {
     const response = await request(url, "GET", null);
     console.log(response);
     if(!response || !response.success) {
-      setAuth(false);
+      //setAuth(false);
       return;
     }
 

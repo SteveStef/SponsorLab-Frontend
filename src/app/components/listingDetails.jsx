@@ -89,7 +89,7 @@ export default function Component({ params }) {
       }
     }
 
-  }, [params]);
+  }, [params, role]);
 
 
   const addPaymentMethod = async () => {
@@ -105,8 +105,8 @@ export default function Component({ params }) {
     }
 
     if (response.url) {
-      //window.location.href = response.url;
-      window.open(response.url, '_blank');
+      window.location.href = response.url;
+      //window.open(response.url, '_blank');
       return
     }
 

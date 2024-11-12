@@ -34,17 +34,29 @@ export default function AdminDashboard() {
   const [sendViaEmail, setSendViaEmail] = useState(true);
   const [sendViaSponsorLab, setSendViaSponsorLab] = useState(true);
 
-  const sendMessage = async (transaction) => {
+  const sendMessage = async (data, isTransfer) => {
     if (!message.trim()) return
     const url = `${process.env.NEXT_PUBLIC_API_URL}/admin/send-message`;
-    const response = await request(url, "POST", { 
-      creatorEmail: sendToCreator ? transaction.request.creator.stripeAccount?.buisnessEmail || "" : "",
-      sponsorEmail: sendToSponsor ? transaction.request.sponsor.email : "",
-      sendViaEmail,
-      sendViaSponsorLab,
-      message, creatorSearchingEmail: transaction.request.creator.email
-    });
-    console.log(response);
+    let response = null;
+
+    if(isTransfer) {
+      response = await request(url, "POST", { 
+        creatorEmail: sendToCreator ? data.request.creator.stripeAccount?.buisnessEmail || "" : "",
+        sponsorEmail: sendToSponsor ? data.request.sponsor.email : "",
+        sendViaEmail,
+        sendViaSponsorLab,
+        message, creatorSearchingEmail: data.request.creator.email
+      });
+    } else {
+      response = await request(url, "POST", { 
+        creatorEmail: sendToCreator ? data.transaction.request.creator.stripeAccount?.buisnessEmail || "" : "",
+        sponsorEmail: sendToSponsor ? data.transaction.request.sponsor.email : "",
+        sendViaEmail,
+        sendViaSponsorLab,
+        message, creatorSearchingEmail: data.transaction.request.creator.email
+      });
+    }
+
     if(response && response.success) {
       setMessage("");
       toast.success("The message has been sent");
@@ -73,7 +85,6 @@ export default function AdminDashboard() {
     try {
       const url = `${process.env.NEXT_PUBLIC_API_URL}/admin`;
       const response = await request(url, "GET", null);
-      console.log(response);
       if(response && response.success) {
         setStartingUp(false);
         setStats((prev) => ({ 
@@ -100,7 +111,6 @@ export default function AdminDashboard() {
       setLoading(true)
       const url = `${process.env.NEXT_PUBLIC_API_URL}/admin/sync-video-progress`;
       const response = await request(url, "POST", {});
-      console.log(response);
       if(response && response.success) {
         toast.success("Channels are synced");
       } else {
@@ -118,7 +128,6 @@ export default function AdminDashboard() {
       setLoading(true)
       const url = `${process.env.NEXT_PUBLIC_API_URL}/admin/sync-channels`;
       const response = await request(url, "POST", {});
-      console.log(response);
       if(response && response.success) {
         toast.success("Channels are synced");
       } else {
@@ -136,7 +145,6 @@ export default function AdminDashboard() {
       setLoading(true);
       const url = `${process.env.NEXT_PUBLIC_API_URL}/admin/transfer`;
       const response = await request(url, "POST", {});
-      console.log(response);
       if(response && response.success) {
         toast.success(response.message);
       } else {
@@ -162,6 +170,16 @@ export default function AdminDashboard() {
       toast.success("The status has been changed to " + newStatus);
       fetchAdminData();
       setSelectedTransaction(null);
+    } else toast.error("Failed to change status, tell steve");
+  }
+
+  async function updateTransferStatus(transferId) {
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/admin/transfer-status`;
+    const response = await request(url, "PUT", { transferId, newStatus });
+    if(response && response.success) {
+      toast.success("The status has been changed to " + newStatus);
+      fetchAdminData();
+      setSelectedTransfer(null);
     } else toast.error("Failed to change status, tell steve");
   }
 
@@ -324,7 +342,7 @@ export default function AdminDashboard() {
                   <TableHead className="text-gray-300">Type</TableHead>
                   <TableHead className="text-gray-300">Amount</TableHead>
                   <TableHead className="text-gray-300">Status</TableHead>
-                  <TableHead className="text-gray-300">Issue</TableHead>
+                  <TableHead className="text-gray-300">Next Steps</TableHead>
                   <TableHead className="text-gray-300">Creator</TableHead>
                   <TableHead className="text-gray-300">Sponsor</TableHead>
                   <TableHead className="text-gray-300">Payday</TableHead>
@@ -341,8 +359,7 @@ export default function AdminDashboard() {
                     <TableCell>${(t.price / 100).toLocaleString()}</TableCell>
                     <TableCell>{t.status}</TableCell>
                     <TableCell className="flex items-center">
-                      <AlertCircle className="w-4 h-4 text-yellow-500 mr-2" />
-                      {t.status === "PENDING" ? "Payout Needed":""}
+                      {t.status === "PENDING" ? "Payout Needed": t.status === "COMPLETED" ? "All Done here" : "Seems like something is wrong?"}
                     </TableCell>
                     <TableCell>{t.transaction.request.creator.email.split("@")[0]}</TableCell>
                     <TableCell>{t.transaction.request.sponsor.email}</TableCell>
@@ -354,12 +371,6 @@ export default function AdminDashboard() {
           </div>
         </CardContent>
       </Card>
-
-
-
-
-
-
 
       <Card className="hover:bg-gray-750 transition-colors mt-8">
         <CardHeader>
@@ -520,6 +531,16 @@ export default function AdminDashboard() {
                   </p>
                 </div>
               </div>
+                {
+                  selectedTransaction.request.pricingModel === "CPM" && 
+                <div>
+                  <p className="text-sm text-muted-foreground">Payment Cap</p>
+                  <p className="flex items-center">
+                    <DollarSign className="w-4 h-4 mr-2 text-black-400" />
+                    {selectedTransaction.request.paymentCap}
+                  </p>
+                </div>
+                }
 
               <div>
                 <p className="text-sm text-muted-foreground">Description</p>
@@ -644,36 +665,23 @@ export default function AdminDashboard() {
     </Dialog>
 
       <Dialog open={!!selectedTransfer} onOpenChange={() => setSelectedTransfer(null)}>
-        <DialogContent className="text-white">
+      <DialogContent className="max-w-4xl overflow-hidden">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold">Payout Details</DialogTitle>
           </DialogHeader>
           {selectedTransfer && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+          <ScrollArea className="h-[calc(90vh-120px)] pr-4">
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-gray-400">Amount</p>
-                  <p className="flex items-center">
-                    <DollarSign className="w-4 h-4 mr-2 text-green-400" />
-                    ${(selectedTransfer.price/100).toLocaleString()}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-400">Status</p>
+                  <p className="text-sm text-muted-foreground">Status</p>
                   <p className="flex items-center">
                     <Clock className="w-4 h-4 mr-2 text-yellow-400" />
                     {selectedTransfer.status}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-400">Issue</p>
-                  <p className="flex items-center">
-                    <AlertCircle className="w-4 h-4 mr-2 text-red-400" />
-                    {selectedTransfer.status === "PENDING" ? "Needs Payout": ""}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-400">Creator</p>
+                  <p className="text-sm text-muted-foreground">Creator</p>
                   <p className="flex items-center">
                     <User className="w-4 h-4 mr-2 text-blue-400" />
                     {selectedTransfer.transaction.request.creator.email.split("@")[0]}
@@ -682,42 +690,135 @@ export default function AdminDashboard() {
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-400">Sponsor</p>
+                  <p className="text-sm text-muted-foreground">Sponsor</p>
                   <p className="flex items-center">
                     <Building className="w-4 h-4 mr-2 text-purple-400" />
                     {selectedTransfer.transaction.request.sponsor.email}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-400">Payment Type</p>
+                  <p className="text-sm text-muted-foreground">Payment Type</p>
                   <p className="flex items-center">
                     <CreditCard className="w-4 h-4 mr-2 text-green-400" />
                     {selectedTransfer.pricingModel}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-400">Amount Held</p>
+                  <p className="text-sm text-muted-foreground">Price After Fees (What we charged)</p>
                   <p className="flex items-center">
                     <DollarSign className="w-4 h-4 mr-2 text-yellow-400" />
-                    ${(selectedTransfer.amountHeld/100).toLocaleString()}
+                    ${(selectedTransfer.amountHeld/100).toLocaleString()} {"USD".toUpperCase()}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-400">Payday</p>
+                  <p className="text-sm text-muted-foreground">Partnership Start Date</p>
                   <p className="flex items-center">
                     <Calendar className="w-4 h-4 mr-2 text-blue-400" />
+                    {convertFromUtcToLocal(selectedTransfer.createdAt)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Payday due</p>
+                  <p className="flex items-center">
+                    <Calendar className="w-4 h-4 mr-2 text-red-400" />
                     {convertFromUtcToLocal(selectedTransfer.payday)}
                   </p>
                 </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Profit </p>
+                  <p className="flex items-center">
+                    <DollarSign className="w-4 h-4 mr-2 text-green-400" />
+                    ${(selectedTransfer.amountHeld/100 * 0.1)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Amount to send to Youtuber</p>
+                  <p className="flex items-center">
+                    <DollarSign className="w-4 h-4 mr-2 text-pink-400" />
+                    ${(selectedTransfer.amountHeld/100) - (selectedTransfer.amountHeld/100 * 0.1)}
+                  </p>
+                </div>
+                {
+                  selectedTransfer.pricingModel === "CPM" && 
+                <div>
+                  <p className="text-sm text-muted-foreground">Payment Cap</p>
+                  <p className="flex items-center">
+                    <DollarSign className="w-4 h-4 mr-2 text-black-400" />
+                    {selectedTransfer.transaction.request.paymentCap}
+                  </p>
+                </div>
+                }
               </div>
+
               <div>
-                <p className="text-sm text-gray-400">Video URL</p>
-                <a href={selectedTransfer.videoUrl} target="_blank" rel="noopener noreferrer" className="text-green-400 hover:underline flex items-center">
-                  <Video className="w-4 h-4 mr-2" />
-                  {selectedTransfer.videoUrl}
-                </a>
+                <p className="text-sm text-muted-foreground">Video URL</p>
+                {selectedTransfer.videoUrl ? (
+                  <a href={selectedTransfer.videoUrl} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline flex items-center">
+                    <Video className="w-4 h-4 mr-2" />
+                    {selectedTransfer.videoUrl}
+                  </a>
+                ) : (
+                  <p>No video URL available</p>
+                )}
+              </div>
+
+              <div className="flex items-center space-x-4">
+                <Select value={newStatus} onValueChange={(value) => setNewStatus(value)}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Change status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="PENDING">Pending</SelectItem>
+                    <SelectItem value="COMPLETED">Completed</SelectItem>
+                    <SelectItem value="PENDING_PRIORITY">Pending Priority</SelectItem>
+                    <SelectItem value="INVALID_HOST">Invalid Host</SelectItem>
+                    <SelectItem value="INVALID_VIDEO_URL">Invalid Video Url</SelectItem>
+                    <SelectItem value="REFUND_FAILED">Refund Failed</SelectItem>
+                    <SelectItem value="TRANSFER_FAILED">Transfer Failed</SelectItem>
+                    <SelectItem value="CHARGE_FAILED">Charge Failed</SelectItem>
+                    <SelectItem value="COMPLETION_FAILED">Completion Failed</SelectItem>
+            </SelectContent>
+                </Select>
+                <Button onClick={() => updateTransferStatus(selectedTransfer.id)} disabled={newStatus === selectedTransfer.status}>Update Status</Button>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Send Message</h3>
+                <Textarea
+                  placeholder="Type your message here..."
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  className="min-h-[100px]"
+                />
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox id="sendToCreator" checked={sendToCreator} onCheckedChange={setSendToCreator} />
+                    <Label htmlFor="sendToCreator">Send to Creator</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox id="sendToSponsor" checked={sendToSponsor} onCheckedChange={setSendToSponsor} />
+                    <Label htmlFor="sendToSponsor">Send to Sponsor</Label>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox id="sendViaEmail" checked={sendViaEmail} onCheckedChange={setSendViaEmail} />
+                    <Label htmlFor="sendViaEmail">Send via Email</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox id="sendViaSponsorLab" checked={sendViaSponsorLab} onCheckedChange={setSendViaSponsorLab} />
+                    <Label htmlFor="sendViaSponsorLab">Send via SponsorLab Notification</Label>
+                  </div>
+                </div>
+                <div className="flex justify-end">
+                  <Button onClick={() => sendMessage(selectedTransfer)} disabled={!message.trim() || (!sendToCreator && !sendToSponsor)}>
+                    <Send className="w-4 h-4 mr-2" />
+                    Send Message
+                  </Button>
+                </div>
               </div>
             </div>
+          </ScrollArea>
           )}
         </DialogContent>
       </Dialog>
@@ -745,30 +846,6 @@ function useWindowSize() {
   return windowSize;
 }
 
-const PieChart = ({ sponsors, youtubers }) => {
-  const total = sponsors + youtubers
-  const sponsorsPercentage = (sponsors / total) * 100
-  const youtubersPercentage = (youtubers / total) * 100
-
-  return (
-    <svg width="200" height="200" viewBox="0 0 100 100">
-      <circle cx="50" cy="50" r="45" fill="#059669" />
-      <circle
-        cx="50"
-        cy="50"
-        r="45"
-        fill="transparent"
-        stroke="#22c55e"
-        strokeWidth="90"
-        strokeDasharray={`${sponsorsPercentage} ${youtubersPercentage}`}
-        transform="rotate(-90 50 50)"
-      />
-      <text x="50" y="50" textAnchor="middle" dy=".3em" fontSize="8" fill="white">
-        {`${Math.round(sponsorsPercentage)}% Sponsors`}
-      </text>
-    </svg>
-  )
-}
 
 const LineGraph = ({ data, width }) => {
   const maxAmount = Math.max(...data.map(item => item.amount))

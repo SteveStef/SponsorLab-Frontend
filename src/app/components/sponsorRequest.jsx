@@ -683,7 +683,7 @@ const tabContent = {
             <div className="space-y-2">
               <p className="text-sm text-muted-foreground flex items-center">
                 <FileCheck className="w-4 h-4 mr-2 flex-shrink-0 text-green-500" />
-                Completed on: {formatDate(request.transaction.transfer.createdAt)}
+                Completed on: {formatDate(request.transaction?.transfer?.createdAt)}
               </p>
               <p className="text-sm text-muted-foreground flex items-center">
                 <User className="w-4 h-4 mr-2 flex-shrink-0 text-primary" />
@@ -691,13 +691,13 @@ const tabContent = {
               </p>
               <p className="text-sm text-muted-foreground flex items-center">
                 <DollarSign className="w-4 h-4 mr-2 flex-shrink-0 text-green-500" />
-              Current Cost: {
-<span className="font-bold ml-1">${(request.transaction.transfer.earnings).toLocaleString()}</span>
+              Cost: {
+                <span className="font-bold ml-1">${(request.transaction?.transfer?.earnings||(request.requestedPrice/100)).toLocaleString()}</span>
                 }
               </p>
               <p className="text-sm text-muted-foreground flex items-center">
                 <Clock className="w-4 h-4 mr-2 flex-shrink-0 text-green-500" />
-                  Payment Due: {convertFromUtcToLocal(request.transaction.transfer.payday)}
+                  Payment Due: {convertFromUtcToLocal(request.transaction?.transfer?.payday)}
               </p>
             </div>
             <p className="text-sm text-muted-foreground">
