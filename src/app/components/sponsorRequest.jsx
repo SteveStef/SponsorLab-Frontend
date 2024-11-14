@@ -16,13 +16,16 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useAppContext } from '@/context';
 import Request from "@/request";
 import { toast } from "sonner";
-import { convertFromUtcToLocal, inPast } from '@/utils';
+import { convertFromUtcToLocal, inPast, SalesTaxByState } from '@/utils';
 import { Textarea } from '@/components/ui/textarea';
 import { Progress } from "@/components/ui/progress";
 import { Label } from "@/components/ui/label";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import CardDetails from "./sub-component/cardDetails";
 import LineChart from "./sub-component/charts";
+
+const SPONSOR_FEE = parseFloat(process.env.NEXT_PUBLIC_SPONSOR_FEE);
+const STRIPE_FEE = parseFloat(process.env.NEXT_PUBLIC_STRIPE_FEE);
 
 const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('en-US', {
@@ -163,7 +166,7 @@ export default function Component() {
 
     setLoad(true);
     const url = `${process.env.NEXT_PUBLIC_API_URL}/requests/sponsor/confirm-payment`;
-    const response = await Request(url, "POST",  { requestId });
+    const response = await Request(url, "POST",  { requestId, country: company.country, state: company.state});
     if(response && response.success) {
       toast.success("Request was accepted");
       await openChat(creatorEmail, requestId);
@@ -990,22 +993,22 @@ function ShowButtons(props) {
               <span className="font-semibold">Subtotal</span>
               <span>${PRICE.toLocaleString()}</span>
             </div>
-            <div className="flex justify-between">
-              <span>Stripe Fee (2.9%)</span>
-              <span>${(0.029 * (PRICE)).toLocaleString()}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Sales Tax (6%)</span>
-              <span>${(0.06 * (PRICE)).toLocaleString()}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>PartnerShip Fee (2%)</span>
-              <span>${(0.02 * (PRICE)).toLocaleString()}</span>
-            </div>
-            <div className="flex justify-between font-bold text-lg pt-2 border-t">
-              <span>Total</span>
-          <span>${(PRICE + (0.109 * PRICE)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-            </div>
+<div className="flex justify-between">
+  <span>Partnership Fee (${SPONSOR_FEE * 100}%)</span>
+  <span>${((PRICE * SPONSOR_FEE).toFixed(2))}</span>
+</div>
+<div className="flex justify-between">
+  <span>Stripe Fee (${STRIPE_FEE * 100}%)</span>
+  <span>${(((PRICE * (1 + SPONSOR_FEE)) * STRIPE_FEE).toFixed(2))}</span>
+</div>
+<div className="flex justify-between">
+  <span>Sales Tax (${SalesTaxByState[company.state || "PA"]}%)</span>
+          <span>${((((PRICE * (1+SPONSOR_FEE)) * (1 + STRIPE_FEE)) * SalesTaxByState[company.state||"PA"]).toFixed(2).toLocaleString())}</span>
+</div>
+<div className="flex justify-between font-bold text-lg pt-2 border-t">
+  <span>Total</span>
+  <span>${calculateFinalAmount(PRICE, company.state)}</span>
+</div>
           </div>
         </div>
         <p className="text-sm text-gray-500 mb-4">
@@ -1050,3 +1053,13 @@ return <main className="flex items-center justify-center bg-background p-4 md:p-
       </div>
     </main>
 }
+
+
+function calculateFinalAmount(dollars, state="PA") {
+  const withPartnershipFee = dollars * (1 + SPONSOR_FEE);
+  const withStripeFee = withPartnershipFee * (1 + STRIPE_FEE);
+  const withSalesTax = withStripeFee * (1 + SalesTaxByState[state]);
+  const result = Math.round(withSalesTax * 100) / 100;
+  return result.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+

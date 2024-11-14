@@ -1,13 +1,13 @@
 'use client';
 import { useState, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { ArrowUpIcon, DollarSign, Send, Check, Users, Youtube, AlertCircle, Clock, TrendingUp, Filter, Calendar, CreditCard, Video, User, Building } from "lucide-react";
-import { convertFromUtcToLocal } from "@/utils";
+import { ArrowUpIcon, DollarSign, Send, Check, Users, Percent, Youtube, AlertCircle, Clock, TrendingUp, Filter, Calendar, CreditCard, Video, User, Building } from "lucide-react";
+import { convertFromUtcToLocal, SalesTaxByState } from "@/utils";
 import Header from "../../components/nav";
 import request from "@/request";
 import { toast } from "sonner";
@@ -17,6 +17,10 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+
+const SPONSOR_FEE = parseFloat(process.env.NEXT_PUBLIC_SPONSOR_FEE);
+const CREATOR_FEE = parseFloat(process.env.NEXT_PUBLIC_CREATOR_FEE);
+const STRIPE_FEE = parseFloat(process.env.NEXT_PUBLIC_STRIPE_FEE);
 
 export default function AdminDashboard() {
   const [selectedTransaction, setSelectedTransaction] = useState(null);
@@ -33,6 +37,31 @@ export default function AdminDashboard() {
   const [sendToSponsor, setSendToSponsor] = useState(true);
   const [sendViaEmail, setSendViaEmail] = useState(true);
   const [sendViaSponsorLab, setSendViaSponsorLab] = useState(true);
+  const [taxesMade, setTaxesMade] = useState(0);
+
+  const [confirmationText, setConfirmationText] = useState('')
+  const isConfirmed = confirmationText.toLowerCase() === 'confirm';
+
+  const handleSendPayout = () => {
+    if (isConfirmed) {
+      sendPayout(selectedTransfer.id)
+      setConfirmationText('')
+    }
+  }
+
+  async function sendPayout(transferId) {
+    setLoading(true);
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/admin/send-payout`;
+    const response = await request(url, "POST", { transferId });
+    if(!response || !response.success) {
+      toast.error(response?.message || "Something went wrong, 500 error, ask steve");
+      setLoading(false);
+      return;
+    }
+    toast.success(response.message);
+    fetchAdminData();
+    setLoading(false);
+  }
 
   const sendMessage = async (data, isTransfer) => {
     if (!message.trim()) return
@@ -95,8 +124,11 @@ export default function AdminDashboard() {
         }));
 
         let sum = 0;
+        let taxSum = 0;
         for(let i = 0; i < response.body.profits.length; i++) sum += response.body.profits[i].amount;
+        for(let i = 0; i < response.body.taxes.length; i++) taxSum += response.body.taxes[i].amount;
         setProfitsMade(sum);
+        setTaxesMade(taxSum);
 
         setTransfers(response.body.transfers);
         setTransactionHistory(response.body.transactions);
@@ -112,7 +144,7 @@ export default function AdminDashboard() {
       const url = `${process.env.NEXT_PUBLIC_API_URL}/admin/sync-video-progress`;
       const response = await request(url, "POST", {});
       if(response && response.success) {
-        toast.success("Channels are synced");
+        toast.success("All video progress are synced");
       } else {
         toast.error("There was a problem syncing the youtube data");
       }
@@ -191,8 +223,8 @@ export default function AdminDashboard() {
     <br></br>
     <div className="min-h-screen text-gray-100 p-8">
       <h1 className="text-4xl font-bold mb-8 text-center">SponsorLab Admin Dashboard</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <Card className="hover:bg-gray-750 transition-colors">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6 mb-8">
+    <Card className="hover:bg-gray-750 transition-colors">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-sm font-medium">Total Users</CardTitle>
             <Users className="w-4 h-4 text-green-400" />
@@ -228,6 +260,15 @@ export default function AdminDashboard() {
             <div className="text-2xl font-bold">${(stats.stripeBalance / 100).toLocaleString()}</div>
           </CardContent>
         </Card>
+        <Card className="hover:bg-gray-750 transition-colors">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-sm font-medium">Taxes Paid</CardTitle>
+            <Percent className="w-4 h-4 text-green-400" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">${(taxesMade / 100).toLocaleString()}</div>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -236,46 +277,44 @@ export default function AdminDashboard() {
             <CardTitle>Profit Tracking</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold mb-2">${profitsMade.toLocaleString()}</div>
+            <div className="text-2xl font-bold mb-2">${(profitsMade / 100).toLocaleString()}</div>
             <p className="text-green-400 flex items-center">
               <ArrowUpIcon className="h-4 w-4 mr-1" />
               0% from last month
             </p>
           </CardContent>
         </Card>
-        <Card>
+<Card>
           <CardHeader>
             <CardTitle>Actions</CardTitle>
           </CardHeader>
-          <CardContent className="flex space-x-4">
-    <div className="flex"> 
-    <Button 
-    onClick={syncYoutubeData}
-    className="bg-red-600 hover:bg-red-700 text-white transition-colors duration-300 flex items-center justify-center m-2"
-    disabled={loading}
-    >
-    <Youtube className="mr-2" size={18} />
-    Sync Youtube Data
-    </Button>
-
-    <Button 
-    onClick={syncVideoProgress}
-    className="bg-yellow-600 hover:bg-yellow-700 text-white transition-colors duration-300 flex items-center justify-center m-2"
-    disabled={loading}
-    >
-    <Video className="mr-2" size={18} />
-    Sync Video Progress
-    </Button>
-
-    <Button 
-    onClick={transferMoney}
-    className="bg-green-600 hover:bg-green-700 text-white transition-colors duration-300 flex items-center justify-center m-2"
-    disabled={loading}
-    >
-    <DollarSign size={18} />
-    Send Payouts 
-    </Button>
-    </div>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                onClick={syncYoutubeData}
+                className="bg-red-600 hover:bg-red-700 text-white transition-colors duration-300 flex items-center justify-center"
+                disabled={loading}
+              >
+                <Youtube className="mr-2" size={18} />
+                Sync Youtube Data
+              </Button>
+              <Button
+                onClick={syncVideoProgress}
+                className="bg-yellow-600 hover:bg-yellow-700 text-white transition-colors duration-300 flex items-center justify-center"
+                disabled={loading}
+              >
+                <Video className="mr-2" size={18} />
+                Sync Video Progress
+              </Button>
+              <Button
+                onClick={transferMoney}
+                className="bg-green-600 hover:bg-green-700 text-white transition-colors duration-300 flex items-center justify-center"
+                disabled={loading}
+              >
+                <DollarSign size={18} className="mr-2" />
+                Send Payouts
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -513,7 +552,7 @@ export default function AdminDashboard() {
                   <p className="text-sm text-muted-foreground">Price After Fees (What we charged)</p>
                   <p className="flex items-center">
                     <DollarSign className="w-4 h-4 mr-2 text-yellow-400" />
-                    ${(selectedTransaction.amountHeld/100).toLocaleString()} {"USD".toUpperCase()}
+                    ${(selectedTransaction.amountHeld / 100).toLocaleString()} {"USD".toUpperCase()}
                   </p>
                 </div>
                 <div>
@@ -537,7 +576,7 @@ export default function AdminDashboard() {
                   <p className="text-sm text-muted-foreground">Payment Cap</p>
                   <p className="flex items-center">
                     <DollarSign className="w-4 h-4 mr-2 text-black-400" />
-                    {selectedTransaction.request.paymentCap}
+                    {selectedTransaction.request.paymentCap / 100}
                   </p>
                 </div>
                 }
@@ -693,7 +732,7 @@ export default function AdminDashboard() {
                   <p className="text-sm text-muted-foreground">Sponsor</p>
                   <p className="flex items-center">
                     <Building className="w-4 h-4 mr-2 text-purple-400" />
-                    {selectedTransfer.transaction.request.sponsor.email}
+                    {selectedTransfer.transaction.request.sponsor.email} ({selectedTransfer.state})
                   </p>
                 </div>
                 <div>
@@ -704,14 +743,7 @@ export default function AdminDashboard() {
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Price After Fees (What we charged)</p>
-                  <p className="flex items-center">
-                    <DollarSign className="w-4 h-4 mr-2 text-yellow-400" />
-                    ${(selectedTransfer.amountHeld/100).toLocaleString()} {"USD".toUpperCase()}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Partnership Start Date</p>
+                  <p className="text-sm text-muted-foreground">Recipt Created</p>
                   <p className="flex items-center">
                     <Calendar className="w-4 h-4 mr-2 text-blue-400" />
                     {convertFromUtcToLocal(selectedTransfer.createdAt)}
@@ -725,17 +757,45 @@ export default function AdminDashboard() {
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Profit </p>
+                  <p className="text-sm text-muted-foreground">Price After Fees (What we charged)</p>
+                  <p className="flex items-center">
+                    <DollarSign className="w-4 h-4 mr-2 text-yellow-400" />
+                    ${(selectedTransfer.amountHeld/100).toLocaleString()} {"USD".toUpperCase()}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Price of listing</p>
+                  <p className="flex items-center">
+                    <DollarSign className="w-4 h-4 mr-2 text-red-400" />
+                    ${(selectedTransfer.price / 100).toFixed(2)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Profit from Sponsor</p>
                   <p className="flex items-center">
                     <DollarSign className="w-4 h-4 mr-2 text-green-400" />
-                    ${(selectedTransfer.amountHeld/100 * 0.1)}
+            ${(selectedTransfer.price / 100 * SPONSOR_FEE).toFixed(2)}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Amount to send to Youtuber</p>
                   <p className="flex items-center">
                     <DollarSign className="w-4 h-4 mr-2 text-pink-400" />
-                    ${(selectedTransfer.amountHeld/100) - (selectedTransfer.amountHeld/100 * 0.1)}
+                    ${((selectedTransfer.price / 100) -(selectedTransfer.price / 100 * CREATOR_FEE)).toFixed(2)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Profit from Youtuber</p>
+                  <p className="flex items-center">
+                    <DollarSign className="w-4 h-4 mr-2 text-green-400" />
+                    ${(selectedTransfer.price / 100 * CREATOR_FEE).toFixed(2)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Sales Tax Due</p>
+                  <p className="flex items-center">
+                    <DollarSign className="w-4 h-4 mr-2 text-red-400" />
+                    ${((((selectedTransfer.price / 100 * (1 + SPONSOR_FEE)) * (1 + STRIPE_FEE)) * SalesTaxByState[selectedTransfer.state || "PA"])).toFixed(2)}
                   </p>
                 </div>
                 {
@@ -744,7 +804,7 @@ export default function AdminDashboard() {
                   <p className="text-sm text-muted-foreground">Payment Cap</p>
                   <p className="flex items-center">
                     <DollarSign className="w-4 h-4 mr-2 text-black-400" />
-                    {selectedTransfer.transaction.request.paymentCap}
+                    {selectedTransfer.transaction.request.paymentCap / 100}
                   </p>
                 </div>
                 }
@@ -782,6 +842,40 @@ export default function AdminDashboard() {
                 <Button onClick={() => updateTransferStatus(selectedTransfer.id)} disabled={newStatus === selectedTransfer.status}>Update Status</Button>
               </div>
 
+    <Card className="max-w-md">
+      <CardHeader>
+        <CardTitle>Confirm Payout</CardTitle>
+        <CardDescription>
+          You are about to send a payout of ${((selectedTransfer.price / 100) -(selectedTransfer.price / 100 * 0.08)).toFixed(2)} to Youtuber
+          and assign the sales tax / profit to our stripe account.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="grid w-full items-center gap-4">
+          <div className="flex flex-col space-y-1.5">
+            <Label htmlFor="confirmationInput">Type confirm to proceed</Label>
+            <Input
+              id="confirmationInput"
+              placeholder="confirm"
+              value={confirmationText}
+              onChange={(e) => setConfirmationText(e.target.value)}
+            />
+          </div>
+        </div>
+      </CardContent>
+      <CardFooter>
+        <Button
+          className="w-full bg-green-600 hover:bg-green-700 text-white"
+          onClick={handleSendPayout}
+          disabled={loading || !isConfirmed}
+        >
+          <Send className="w-4 h-4 mr-2" />
+          Send Payout
+        </Button>
+      </CardFooter>
+    </Card>
+
+
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold">Send Message</h3>
                 <Textarea
@@ -815,6 +909,7 @@ export default function AdminDashboard() {
                     <Send className="w-4 h-4 mr-2" />
                     Send Message
                   </Button>
+                  
                 </div>
               </div>
             </div>
