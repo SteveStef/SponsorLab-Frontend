@@ -55,9 +55,6 @@ export default function Component({ refresh, setShowCreateFlow }) {
 
   const countries = [
     { code: 'US', name: 'United States' },
-    { code: 'CA', name: 'Canada' },
-    { code: 'UK', name: 'United Kingdom' },
-    // Add more countries as needed
   ]
 
 const usStates = [

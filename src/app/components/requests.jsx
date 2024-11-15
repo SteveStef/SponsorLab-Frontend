@@ -143,11 +143,14 @@ export default function Component() {
     setLoad(true);
     const url = `${process.env.NEXT_PUBLIC_API_URL}/requests/creator/accept`;
     const response = await Request(url, "PUT", {requestId});
+    console.log(response);
     if(response && response.success) {
       toast.success("Request was accepted");
       getRequests();
+    } else if(response?.status === 403) {
+      toast.error(response.error);
     } else {
-      toast.error("There was a problem when declining request");
+      toast.error("Something went wrong, try again later");
     }
     setLoad(false);
   }

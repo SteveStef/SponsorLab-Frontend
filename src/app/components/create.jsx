@@ -139,7 +139,7 @@ export default function Component() {
     try {
       const response = await axiosRequest(url, "POST", formData)
       if(response.status === 200) {
-        toast.success("The listing was created and is privated by default. You can edit this on your profile")
+        toast.success("The listing was created and is public for sponsors to see!")
         router.push(`../profile/${organization}`)
       } else {
         throw new Error("Server responded with an error")

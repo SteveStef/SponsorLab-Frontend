@@ -21,7 +21,20 @@ export default function RootLayout({ children }) {
             {children}
           </AppWrapper>
             </Suspense>
-        <Toaster richColors />
+        <Toaster
+          richColors
+          theme="dark"
+          toastOptions={{
+            style: {
+              color: "#ffffff", // Custom text color
+              borderRadius: "8px", // Custom border radius
+              padding: "16px", // Custom padding
+              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)", // Custom shadow
+              fontSize: "16px",
+              duration: 9000,
+            },
+          }}
+        />
     </body>
     </html>
   );
