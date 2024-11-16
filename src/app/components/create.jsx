@@ -34,7 +34,8 @@ const contentTypes = [
   "Nature",
   "Garden",
   "Wellness"
-]
+];
+
 
 export default function Component() {
   const [step, setStep] = useState(1)

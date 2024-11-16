@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { User, Search,FileCheck, DollarSign, 
-  Clock, InfoIcon, CheckCircle, Copy, XCircle, Eye, FileText, Check, X, Calendar, 
+  Clock, InfoIcon, CheckCircle, Copy, XCircle, Eye, Building, AlertCircle, Check, X, Calendar, Package, Info,
   FileIcon, Link2, PlusIcon, MessageCircle, Flag,
 } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -23,6 +23,17 @@ import { Label } from "@/components/ui/label";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import CardDetails from "./sub-component/cardDetails";
 import LineChart from "./sub-component/charts";
+
+const getStatusMessage = (status) => {
+    const messages = {
+      FINAL_REVIEW: "Please review the final video URL",
+      DRAFT_REVIEW: "Please review the following video draft",
+      PENDING: "Waiting for YouTuber to send a draft of the advertisement",
+      DRAFT_ACCEPTED: "Waiting for the YouTuber to send the posted YouTube video URL",
+      DRAFT_REFUSED: "Waiting for the YouTuber to make the changes and send a new draft"
+    }
+    return messages[status] || "No further action is required for this step"
+  }
 
 const SPONSOR_FEE = parseFloat(process.env.NEXT_PUBLIC_SPONSOR_FEE);
 const STRIPE_FEE = parseFloat(process.env.NEXT_PUBLIC_STRIPE_FEE);
@@ -424,8 +435,12 @@ export default function Component() {
                         <ScrollArea className="h-[300px] pr-4">
                           {content(request)}
                         </ScrollArea> :
-                        <ScrollArea className="h-[200px] pr-4">
-                          {key === "ongoing" ? content(request, videoUrls, copied, handleCopy) : content(request)}
+                        key === "ongoing" ? 
+                        <ScrollArea className="h-[248px] pr-4">
+                          {content(request, videoUrls, copied, handleCopy) }
+                        </ScrollArea> : 
+                        <ScrollArea className="h-[150px] pr-4">
+                          {content(request)}
                         </ScrollArea>
 
                         }
@@ -434,7 +449,7 @@ export default function Component() {
                         <ShowButtons request={request} load={load} 
                           activeTab={key} confirmRequest={confirmRequest} cancelRequest={cancelRequest} 
                           handleViewProposal={handleViewProposal} approveVideo={approveVideo} refuteVideo={refuteVideo} refund={refund}
-                          approveDraft={approveDraft} refuteDraft={refuteDraft}
+                          approveDraft={approveDraft} refuteDraft={refuteDraft} company={company}
                         />
                       </CardFooter>
                     </TabsContent>
@@ -572,171 +587,224 @@ const tabContent = {
     request: {
     title: "Request Details",
     content: (request) => (
-
-
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <p className="text-sm text-green-400 flex items-center">
-              <Link href={`../../listings/${request.post.id}`} className="text-green-500 hover:text-green-300 flex items-center">
-                <Eye className="w-4 h-4 mr-2 flex-shrink-0 text-green-500" />
-                Listing: {request.post.title}
-              </Link>
-            </p>
-            <p className="text-sm text-gray-400 flex items-center">
-          <User className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
-          <span className="font-semibold mr-2">{request.creator.name}</span>
-          <span className="text-gray-500">(Youtuber)</span>
-            </p>
-          </div>
-          <div className="space-y-2">
-            <p className="text-sm text-gray-400 flex items-center">
-              <FileText className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
-              Product: {request.title}
-            </p>
-            <p className="text-sm text-yellow-400 flex items-center">
-              <Calendar className="w-4 h-4 mr-2 flex-shrink-0 text-yellow-500" />
-              Upload Deadline: {convertFromUtcToLocal(request.post.uploadDate)}
-            </p>
-          </div>
-          {request.hasPaymentCap && (
-            <div className="col-span-full">
-              <p className="text-sm text-red-400 flex items-center">
-                <DollarSign className="w-4 h-4 mr-2 flex-shrink-0 " />
-                You have setup a payment cap of ${(request.paymentCap / 100).toLocaleString()}
-              </p>
+      <Card>
+      <CardContent className="p-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-4">
+          <div className="flex items-center space-x-3">
+            <User className="w-5 h-5 text-pink-500" />
+            <div>
+              <p className="font-medium">{request.creator.name} (Youtuber)</p>
+              <p className="text-sm text-gray-400">{request.creator.email}</p>
             </div>
-          )}
+          </div>
+        <div className="col-span-full">
+          <div className="flex items-center space-x-3 mb-2">
+            <Link2 className="w-5 h-5 text-blue-500" />
+            <p className="font-medium">Purchased Listing</p>
+          </div>
+      <Link 
+      href={`/listings/${request.post.id}`} 
+      className="text-sm text-blue-400 hover:underline flex items-center space-x-2"
+      >
+      <Link2 className="w-4 h-4" />
+      <span>{request.post.title}</span>
+      </Link>
+
         </div>
+        </div>
+        <div className="space-y-4">
+          <div className="flex items-center space-x-3">
+            <DollarSign className="w-5 h-5 text-green-500" />
+            <p className="text-sm">Payment Cap: ${(request.paymentCap / 100).toFixed(2)}</p>
+<TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Info className="w-4 h-4 text-gray-400 cursor-help" />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="max-w-xs text-sm">
+                The payment cap is the maximum amount you can earn for this sponsorship. 
+                Your actual earnings may be lower depending on your performance metrics.
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+          </div>
+          <div className="flex items-center space-x-3">
+            <Clock className="w-5 h-5 text-red-500" />
+            <p className="text-sm">Scheduled Post: {convertFromUtcToLocal(request.post.uploadDate)}</p>
+          </div>
+          <div className="flex items-start space-x-3">
+            <Package className="w-5 h-5 text-purple-500 mt-1" />
+            <p className="text-sm mt-1">{request.title} - {request.productDescription}</p>
+          </div>
+        </div>
+      </div>
+      </CardContent>
+      </Card>
     )
   },
   ongoing: {
     title: "You have partnered with a youtuber!",
     content: (request, videoUrls, copied, handleCopy) => (
-      <div>
-     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <p className="text-sm text-gray-400 flex items-center">
-              <Clock className="w-4 h-4 mr-2 flex-shrink-0 text-blue-500" />
-              Started on: {request.transaction && new Date(request.transaction.createdAt).toDateString()}
-            </p>
-            <p className="text-sm text-gray-400 flex items-center">
-              <User className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
-              Youtuber: {request.creator.name}
-            </p>
+      <Card>
+      <CardContent className="p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            <div className="flex items-center space-x-3">
+              <Clock className="w-5 h-5 text-blue-500" />
+              <div>
+                <p className="text-sm font-medium">Started on</p>
+                <p className="text-sm text-gray-400">
+                  {request.transaction && new Date(request.transaction.createdAt).toDateString()}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-3">
+              <User className="w-5 h-5 text-green-500" />
+              <div>
+                <p className="text-sm font-medium">YouTuber</p>
+                <p className="text-sm text-gray-400">{request.creator.name}</p>
+              </div>
+            </div>
           </div>
-          <div className="space-y-2">
-            <p className="text-sm text-gray-400 flex items-center">
-              <Calendar className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
-              Upload Deadline: {request.transaction && convertFromUtcToLocal(request.transaction.deadline)}
-            </p>
-            <div className="text-sm flex text-yellow-400">
-              <InfoIcon className="w-4 h-4 mr-1 mt-1"/>
-        {
-            request.transaction && request.transaction.status === "FINAL_REVIEW" ? "Please review the final video url"
-          : request.transaction && request.transaction.status === "DRAFT_REVIEW" ? "Please review the following video draft"
-          : request.transaction && request.transaction.status === "PENDING" ? "Waiting for youtuber to send a draft of the advertisement"
-          : request.transaction && request.transaction.status === "DRAFT_ACCEPTED" ? "Waiting for the youtuber to send the posted youtube video url."
-          : request.transaction && request.transaction.status === "DRAFT_REFUSED" ? "Waiting for the youtuber to make the changes and send a new draft"
-          : "No further action is reqired for this step"
-        }
+          <div className="space-y-4">
+            <div className="flex items-center space-x-3">
+              <Calendar className="w-5 h-5 text-yellow-500" />
+              <div>
+                <p className="text-sm font-medium">Upload Deadline</p>
+                <p className="text-sm text-gray-400">
+                  {request.transaction && convertFromUtcToLocal(request.transaction.deadline)}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start space-x-3">
+              <AlertCircle className="w-5 h-5 text-orange-500 mt-0.5" />
+              <p className="text-sm text-yellow-400">
+                {request.transaction && getStatusMessage(request.transaction.status)}
+              </p>
             </div>
           </div>
         </div>
-      <div className="pt-4">
-      {
-        request.transaction && !["PENDING","DRAFT_ACCEPTED", "CANCELED"].includes(request.transaction.status) &&
-            <div className="space-y-2 px-1">
-      <div className="flex items-center space-x-2">
-            <Input 
-      style={{cursor: "pointer"}}
-      onClick={() => handleCopy(videoUrls[request.transaction.id])}
-      id="bananan"
-      readOnly
-      value={`${videoUrls[request.transaction.id]}`} 
-        />
-      <Button 
-      size="icon"
-      onClick={() => handleCopy(videoUrls[request.transaction.id])}
-      aria-label="Copy to clipboard">
-      {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-      </Button>
-
-      </div>
-        <p className="text-sm text-gray-400 hover:text-gray-200 flex items-center">
-          <Link2 className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
-          <Link href={request.transaction && (request.transaction.videoUrl|| request.transaction.draftVideoUrl) || "#"} style={{cursor: "pointer"}}>
-      {(request.transaction.videoUrl|| request.transaction.draftVideoUrl) || "No link uploaded"}</Link>
-        </p>
-      </div>
-      }
-      </div>
-      </div>
+      </CardContent>
+      
+      {request.transaction && !["PENDING", "DRAFT_ACCEPTED", "CANCELED"].includes(request.transaction.status) && (
+        <CardFooter className="flex flex-col space-y-4">
+          <div className="flex items-center space-x-2 w-full">
+            <Input
+              readOnly
+              value={videoUrls[request.transaction.id] || ''}
+              className="cursor-pointer flex-grow"
+              onClick={() => handleCopy(videoUrls[request.transaction.id])}
+            />
+            <Button
+              size="icon"
+              onClick={() => handleCopy(videoUrls[request.transaction.id])}
+              aria-label="Copy to clipboard"
+            >
+              {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+            </Button>
+          </div>
+          <div className="flex items-center space-x-2 w-full">
+            <Link2 className="w-5 h-5 text-blue-500 flex-shrink-0" />
+            <Link
+              href={request.transaction.videoUrl || request.transaction.draftVideoUrl || "#"}
+              className="text-sm text-blue-400 hover:underline cursor-pointer truncate"
+            >
+              {request.transaction.videoUrl || request.transaction.draftVideoUrl || "No link uploaded"}
+            </Link>
+          </div>
+        </CardFooter>
+      )}
+    </Card>
 
     )
   },
   receipt: {
     title: "Transaction Receipt",
     content: (request)=> (
-  <div className="w-full max-w-4xl">
-      <br></br>
-      <CardContent>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="space-y-6">
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground flex items-center">
-                <FileCheck className="w-4 h-4 mr-2 flex-shrink-0 text-green-500" />
+    <Card className="w-full max-w-4xl">
+      <CardContent className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-4">
+        <div className="space-y-6">
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <FileCheck className="w-5 h-5 text-green-500" />
+              <p className="text-sm text-muted-foreground">
                 Completed on: {formatDate(request.transaction?.transfer?.createdAt)}
               </p>
-              <p className="text-sm text-muted-foreground flex items-center">
-                <User className="w-4 h-4 mr-2 flex-shrink-0 text-primary" />
+            </div>
+            <div className="flex items-center space-x-2">
+              <User className="w-5 h-5 text-primary" />
+              <p className="text-sm text-muted-foreground">
                 Youtuber: {request.creator.name}
               </p>
-              <p className="text-sm text-muted-foreground flex items-center">
-                <DollarSign className="w-4 h-4 mr-2 flex-shrink-0 text-green-500" />
-              Cost: {
-                <span className="font-bold ml-1">${(request.transaction?.transfer?.earnings||(request.requestedPrice/100)).toLocaleString()}</span>
-                }
-              </p>
-              <p className="text-sm text-muted-foreground flex items-center">
-                <Clock className="w-4 h-4 mr-2 flex-shrink-0 text-green-500" />
-                  Payment Due: {convertFromUtcToLocal(request.transaction?.transfer?.payday)}
+            </div>
+            <div className="flex items-center space-x-2">
+              <DollarSign className="w-5 h-5 text-green-500" />
+              <p className="text-sm text-muted-foreground">
+                Cost: <span className="font-bold">${(request.transaction?.transfer?.earnings || (request.requestedPrice / 100)).toLocaleString()}</span>
               </p>
             </div>
-            <p className="text-sm text-muted-foreground">
-              Thank you for using SponsorLab. This serves as your official receipt.
-            </p>
-            <div className="flex text-green-500">
-              <InfoIcon className="w-5 h-5 mr-2 flex-shrink-0" />
-              <p className="text-sm">
-      {request.pricingModel === "FLAT" ? "The money will hit your bank account within the next 2 weeks. If there are questions or concerns, please contact support@sponsorlab.co"
-        : "SponsorLab evaluates the video's performance one month after it's posted. The final payment is calculated based on the number of views achieved during this period."
-      }
+            <div className="flex items-center space-x-2">
+              <Clock className="w-5 h-5 text-green-500" />
+              <p className="text-sm text-muted-foreground">
+                Payday: {convertFromUtcToLocal(request.transaction?.transfer?.payday)}
               </p>
             </div>
           </div>
-          {request.pricingModel === "CPM" && (
-            <div className="space-y-2">
-              <div className="flex justify-between items-center bg-primary/10 p-2 rounded-lg text-sm w-65">
-                <span className="font-semibold text-muted-foreground">Total Views: {(request.transaction?.transfer?.currViews||"").toLocaleString()}</span>
-                <span className="font-semibold text-primary">
-                  Cost: ${(request.transaction?.transfer?.earnings||"").toLocaleString()}
-                </span>
-              </div>
-              <div className="h-[200px]">
-                <LineChart data={request.transaction?.transfer?.videoProgress} />
-              </div>
-            <p className="text-sm text-gray-400 hover:text-gray-200 flex items-center ml-4">
-              <Link2 className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
-              <Link href={request.transaction?.videoUrl || request.transaction?.draftVideoUrl || "#"}>
+          <p className="text-sm text-muted-foreground">
+            Thank you for using SponsorLab. This serves as your official receipt.
+          </p>
+        {
+          request.pricingModel === "CPM" && 
+          <div className="flex items-start space-x-2 bg-green-500/10 p-4 rounded-md">
+            <Info className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+            <p className="text-sm text-green-700 dark:text-green-300">
+              {request.pricingModel === "FLAT"
+                ? "The money will hit your bank account within the next 2 weeks. If there are questions or concerns, please contact support@sponsorlab.co"
+                : "SponsorLab evaluates the video's performance one month after it's posted. The final payment is calculated based on the number of views achieved during this period."}
+            </p>
+          </div>
+        }
+        </div>
+        {
+          request.pricingModel === "FLAT" && 
+          <div className="flex items-start space-x-2  p-4 rounded-md">
+            <Info className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+            <p className="text-sm text-green-700 dark:text-green-300">
+              {request.pricingModel === "FLAT"
+                ? "The money will hit your bank account within the next 2 weeks. If there are questions or concerns, please contact support@sponsorlab.co"
+                : "SponsorLab evaluates the video's performance one month after it's posted. The final payment is calculated based on the number of views achieved during this period."}
+            </p>
+          </div>
+        }
+        
+        {request.pricingModel === "CPM" && (
+          <div className="space-y-4">
+            <div className="flex justify-between items-center bg-primary/10 p-4 rounded-lg">
+              <Badge variant="secondary">Total Views: {(request.transaction?.transfer?.currViews || "").toLocaleString()}</Badge>
+              <Badge variant="default">Cost: ${(request.transaction?.transfer?.earnings || "").toLocaleString()}</Badge>
+            </div>
+            <div className="h-[200px]">
+              <LineChart data={request.transaction?.transfer?.videoProgress} />
+            </div>
+            <div className="flex items-center space-x-2">
+              <Link2 className="w-5 h-5 text-primary" />
+              <Link
+                href={request.transaction?.videoUrl || request.transaction?.draftVideoUrl || "#"}
+                className="text-sm text-primary hover:underline"
+              >
                 {request.transaction?.videoUrl || request.transaction?.draftVideoUrl || "No link uploaded"}
               </Link>
-            </p>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </CardContent>
-    </div>
+      <CardFooter className="text-sm text-muted-foreground">
+        For any inquiries, please contact our support team.
+      </CardFooter>
+    </Card>
       )
     }
   }
@@ -745,7 +813,7 @@ const tabContent = {
 function ShowButtons(props) {
   const { request, load, activeTab, confirmRequest, 
     cancelRequest, handleViewProposal, approveVideo, refuteVideo, refund,
-    approveDraft, refuteDraft } = props;
+    approveDraft, refuteDraft, company } = props;
 
   const [showConfirm, setShowConfirm] = useState(false);
   const [selectedParams, setSelectedParams] = useState("");
@@ -994,15 +1062,15 @@ function ShowButtons(props) {
               <span>${PRICE.toLocaleString()}</span>
             </div>
 <div className="flex justify-between">
-  <span>Partnership Fee (${SPONSOR_FEE * 100}%)</span>
+  <span>Partnership Fee ({SPONSOR_FEE * 100}%)</span>
   <span>${((PRICE * SPONSOR_FEE).toFixed(2))}</span>
 </div>
 <div className="flex justify-between">
-  <span>Stripe Fee (${STRIPE_FEE * 100}%)</span>
+  <span>Stripe Fee ({(STRIPE_FEE * 100).toFixed(1)}%)</span>
   <span>${(((PRICE * (1 + SPONSOR_FEE)) * STRIPE_FEE).toFixed(2))}</span>
 </div>
 <div className="flex justify-between">
-  <span>Sales Tax (${SalesTaxByState[company.state || "PA"]}%)</span>
+  <span>{company.state} Sales Tax ({SalesTaxByState[company.state || "PA"] * 100}%)</span>
           <span>${((((PRICE * (1+SPONSOR_FEE)) * (1 + STRIPE_FEE)) * SalesTaxByState[company.state||"PA"]).toFixed(2).toLocaleString())}</span>
 </div>
 <div className="flex justify-between font-bold text-lg pt-2 border-t">

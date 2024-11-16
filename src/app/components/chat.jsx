@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { convertFromUtcToLocal, chatTime } from "@/utils";
 import io from "socket.io-client";
 
+
 export default function Component({ room, participant, chatMessages }) {
   const [leftPanelOpen, setLeftPanelOpen] = useState(false)
   const [rightPanelOpen, setRightPanelOpen] = useState(false)
@@ -91,7 +92,7 @@ export default function Component({ room, participant, chatMessages }) {
         }`}
       >
         <div className="p-4 border-b border-gray-800 flex justify-between items-center">
-          <h2 className="text-xl font-bold text-green-500">Messages</h2>
+          <h2 className="text-xl font-bold text-green-500">Keep In Mind</h2>
           <Button
             variant="ghost"
             size="icon"
@@ -101,24 +102,9 @@ export default function Component({ room, participant, chatMessages }) {
             <X className="h-6 w-6" />
           </Button>
         </div>
-        <ScrollArea className="h-[calc(91vh-60px)]">
-          {false && chatRooms.map((room, index) => {
-            const participant = room.participants[0]
-            const name = participant.user.channel ? participant.user.channel.name : participant.user.company.orginization;
-
-            return (
-              <div key={index} onClick={() => switchRooms(room.id)} className={`flex items-center space-x-2 p-2 rounded ${selectedRoomId === room.id ? 'bg-green-900' : 'hover:bg-gray-800'} cursor-pointer mb-2`}>
-                <Avatar>
-                  <AvatarImage src={`${(participant.user.s3ImageName || participant.user.googleImage)||""}`} alt={room.participants[0].user.name} />
-                  <AvatarFallback><UserIcon className="h-6 w-6" /></AvatarFallback>
-                </Avatar>
-                <div>
-              <h3 className="font-semibold">{participant.user.name}</h3>
-                  <p className="text-sm text-gray-400">{name}</p>
-                </div>
-              </div>
-            )})}
-        </ScrollArea>
+<span className="mt-2">
+  <strong className="text-yellow-400">Warning:</strong> Please avoid using inappropriate language or sharing sensitive information in this direct messaging. Protect your privacy and ensure a respectful communication environment.
+</span>
       </div>
 
       {/* Main Chat Area */}

@@ -15,23 +15,58 @@ import { useAppContext } from "@/context";
 import { loadStripe } from "@stripe/stripe-js";
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY);
 
-function calculateDealScore(estimatedViews, estimatedPrice, pricingModel) {
-  const viewsScore = Math.log10(estimatedViews) / 10 // Logarithmic scale for views
-  const pricePerView = pricingModel === "FLAT" 
-    ? estimatedPrice / 100 / estimatedViews 
-    : estimatedPrice /100 / 1000 // CPM
-  const priceScore = 1 - (pricePerView / 0.1) // Assuming $0.10 per view is the baseline
+const contentTypesMap = [
+  { category: "Technology", cpm: 20 },
+  { category: "Gaming", cpm: 15 },
+  { category: "Fashion", cpm: 25 },
+  { category: "Education", cpm: 18 },
+  { category: "Finance", cpm: 30 },
+  { category: "Lifestyle", cpm: 12 },
+  { category: "Food/Cooking", cpm: 10 },
+  { category: "Family", cpm: 8 },
+  { category: "Music", cpm: 10 },
+  { category: "Vlogs", cpm: 8 },
+  { category: "Business", cpm: 25 },
+  { category: "DIY/Crafts", cpm: 12 },
+  { category: "Travel", cpm: 15 },
+  { category: "Religion", cpm: 8 },
+  { category: "Nature", cpm: 10 },
+  { category: "Garden", cpm: 8 },
+  { category: "Wellness", cpm: 15 }
+];
 
-  const score = (viewsScore + priceScore) / 2 * 100
-  return Math.min(Math.max(score, 0), 100)
-}
+function evaluateDeal(category, pricingModel, offeredPrice, impressions = null) {
+  const standard = contentTypesMap.find(item => item.category === category)?.cpm;
 
-function getDealBadge(score) {
-  if (score >= 80) return { text: "Great Deal", color: "bg-green-500" }
-  if (score >= 60) return { text: "Good Deal", color: "bg-lime-500" }
-  if (score >= 40) return { text: "Decent Deal", color: "bg-yellow-500" }
-  if (score >= 20) return { text: "Bad Deal", color: "bg-orange-500" }
-  return { text: "Terrible Deal", color: "bg-red-500" }
+  if (standard === undefined) {
+    return { text: "Category not found", color: "bg-gray-500" };
+  }
+
+  if (pricingModel === "CPM") {
+    if (offeredPrice < standard * 0.7) {
+      return { text: "Great Deal", color: "bg-green-500" };
+    } else if (offeredPrice >= standard * 0.3 && offeredPrice <= standard * 1.3) {
+      return { text: "Good Deal", color: "bg-blue-500" };
+    } else {
+      return { text: "Bad Deal", color: "bg-red-500" };
+    }
+  } else if (pricingModel === "FLAT") {
+    if (!impressions) {
+      return { text: "Impressions required for Flat Rate", color: "bg-gray-500" };
+    }
+
+    const effectiveCPM = (offeredPrice / impressions) * 1000;
+
+    if (effectiveCPM < standard * 0.7) {
+      return { text: "Great Deal", color: "bg-green-500" };
+    } else if (effectiveCPM >= standard * 0.7 && effectiveCPM <= standard * 1.3) {
+      return { text: "Good Deal", color: "bg-blue-500" };
+    } else {
+      return { text: "Bad Deal", color: "bg-red-500" };
+    }
+  } else {
+    return { text: "Invalid pricing model", color: "bg-gray-500" };
+  }
 }
 
 export default function Component({ params }) {
@@ -60,8 +95,7 @@ export default function Component({ params }) {
           tmp.push({ range, probability: (normalDist[i]).toFixed(1)});
         }
         setViewRanges(tmp);
-        const score = calculateDealScore(response.body.estimatedViews, response.body.estimatedPrice, response.body.pricingModel);
-        setDealBadge(getDealBadge(score));
+        setDealBadge(evaluateDeal(response.body.tag, response.body.pricingModel, response.body.estimatedPrice/100, response.body.estimatedViews));
       }
     }
 

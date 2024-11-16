@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { ArrowUpIcon, DollarSign, Send, Check, Users, Percent, Youtube, AlertCircle, Clock, TrendingUp, Filter, Calendar, CreditCard, Video, User, Building } from "lucide-react";
+import { ArrowUpIcon, DollarSign, Eye, Send, Check, Users, Percent, Youtube, AlertCircle, Clock, TrendingUp, Filter, Calendar, CreditCard, Video, User, Building } from "lucide-react";
 import { convertFromUtcToLocal, SalesTaxByState } from "@/utils";
 import Header from "../../components/nav";
 import request from "@/request";
@@ -767,14 +767,14 @@ export default function AdminDashboard() {
                   <p className="text-sm text-muted-foreground">Price of listing</p>
                   <p className="flex items-center">
                     <DollarSign className="w-4 h-4 mr-2 text-red-400" />
-                    ${(selectedTransfer.price / 100).toFixed(2)}
+                    ${(selectedTransfer.price / 100).toFixed(2)} {" "} {selectedTransfer.pricingModel}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Profit from Sponsor</p>
                   <p className="flex items-center">
                     <DollarSign className="w-4 h-4 mr-2 text-green-400" />
-            ${(selectedTransfer.price / 100 * SPONSOR_FEE).toFixed(2)}
+                    ${(selectedTransfer.price / 100 * SPONSOR_FEE).toFixed(2)}
                   </p>
                 </div>
                 <div>
@@ -799,13 +799,21 @@ export default function AdminDashboard() {
                   </p>
                 </div>
                 {
-                  selectedTransfer.pricingModel === "CPM" && 
+                  selectedTransfer.pricingModel === "CPM" && <div>
                 <div>
                   <p className="text-sm text-muted-foreground">Payment Cap</p>
                   <p className="flex items-center">
                     <DollarSign className="w-4 h-4 mr-2 text-black-400" />
                     {selectedTransfer.transaction.request.paymentCap / 100}
                   </p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Current Views</p>
+                  <p className="flex items-center">
+                    <Eye className="w-4 h-4 mr-2 text-black-400" />
+                    {selectedTransfer.currentViews}
+                  </p>
+                </div>
                 </div>
                 }
               </div>
