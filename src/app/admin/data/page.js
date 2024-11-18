@@ -56,9 +56,12 @@ export default function AdminDashboard() {
     if(!response || !response.success) {
       toast.error(response?.message || "Something went wrong, 500 error, ask steve");
       setLoading(false);
+      setSelectedTransfer(null);
+      fetchAdminData();
       return;
     }
-    toast.success(response.message);
+    toast.success("It worked, all should be good");
+    setSelectedTransfer(null)
     fetchAdminData();
     setLoading(false);
   }
@@ -164,23 +167,6 @@ export default function AdminDashboard() {
         toast.success("Channels are synced");
       } else {
         toast.error("There was a problem syncing the youtube data");
-      }
-    } catch(err) {
-      toast.error(err);
-      console.log(err);
-    }
-    setLoading(false);
-  }
-
-  async function transferMoney() {
-    try {
-      setLoading(true);
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/admin/transfer`;
-      const response = await request(url, "POST", {});
-      if(response && response.success) {
-        toast.success(response.message);
-      } else {
-        toast.error(response.message);
       }
     } catch(err) {
       toast.error(err);
@@ -306,14 +292,6 @@ export default function AdminDashboard() {
                 <Video className="mr-2" size={18} />
                 Sync Video Progress
               </Button>
-              <Button
-                onClick={transferMoney}
-                className="bg-green-600 hover:bg-green-700 text-white transition-colors duration-300 flex items-center justify-center"
-                disabled={loading}
-              >
-                <DollarSign size={18} className="mr-2" />
-                Send Payouts
-              </Button>
             </div>
           </CardContent>
         </Card>
@@ -398,7 +376,7 @@ export default function AdminDashboard() {
                     <TableCell>${(t.price / 100).toLocaleString()}</TableCell>
                     <TableCell>{t.status}</TableCell>
                     <TableCell className="flex items-center">
-                      {t.status === "PENDING" ? "Payout Needed": t.status === "COMPLETED" ? "All Done here" : "Seems like something is wrong?"}
+                      {t.status === "PENDING" ? "Payout Needed": t.status === "COMPLETED" ? "All Done here" : t.status==="PAYOUT_READY"?"Send money to youtuber": "Something go wrong?"}
                     </TableCell>
                     <TableCell>{t.transaction.request.creator.email.split("@")[0]}</TableCell>
                     <TableCell>{t.transaction.request.sponsor.email}</TableCell>
@@ -878,8 +856,10 @@ export default function AdminDashboard() {
       <CardHeader>
         <CardTitle>Confirm Payout</CardTitle>
         <CardDescription>
-          You are about to send a payout of ${((selectedTransfer.price / 100) -(selectedTransfer.price / 100 * 0.08)).toFixed(2)} to Youtuber
-          and assign the sales tax / profit to our stripe account.
+            {selectedTransfer.pricingModel === "CPM" && selectedTransfer.status === "PAYOUT_READY" ? "You are about to send $" + (calculateCurrentCPMPrice(selectedTransfer) - (calculateCurrentCPMPrice(selectedTransfer) * CREATOR_FEE)).toFixed(2) + " to the youtuber" : selectedTransfer.pricingModel==="CPM" && selectedTransfer.status==="PENDING" ? "About to charge the sponsor the difference between what we held and the actual price is. This should only be submitted if the 1 month mark has hit" : selectedTransfer.pricingModel==="FLAT" && <span>
+          You are about to send a payout of ${((selectedTransfer.price / 100) -(selectedTransfer.price / 100 * 0.08)).toFixed(2)} 
+            to Youtuber and assign the sales tax / profit to our stripe account.
+                </span> }
         </CardDescription>
       </CardHeader>
       <CardContent>
