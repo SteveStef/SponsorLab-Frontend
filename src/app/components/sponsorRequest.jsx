@@ -1037,7 +1037,7 @@ function ShowButtons(props) {
           <Dialog open={showConfirm} onOpenChange={setShowConfirm}>
       <DialogContent className="sm:max-w-[500px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">Checkout - Partnership Step</DialogTitle>
+          <DialogTitle className="text-2xl font-bold">{request.pricingModel === "FLAT" ? "Checkout" : "Security Deposit"}- Partnership Step</DialogTitle>
         </DialogHeader>
         <div className="py-4">
             <div className="flex items-start space-x-2 mb-4 p-3 bg-secondary rounded-md">
@@ -1061,22 +1061,30 @@ function ShowButtons(props) {
               <span className="font-semibold">Subtotal</span>
               <span>${PRICE.toLocaleString()}</span>
             </div>
-<div className="flex justify-between">
-  <span>Partnership Fee ({SPONSOR_FEE * 100}%)</span>
-  <span>${((PRICE * SPONSOR_FEE).toFixed(2))}</span>
-</div>
-<div className="flex justify-between">
-  <span>Stripe Fee ({(STRIPE_FEE * 100).toFixed(1)}%)</span>
-  <span>${(((PRICE * (1 + SPONSOR_FEE)) * STRIPE_FEE).toFixed(2))}</span>
-</div>
-<div className="flex justify-between">
-  <span>{company.state} Sales Tax ({SalesTaxByState[company.state || "PA"] * 100}%)</span>
-          <span>${((((PRICE * (1+SPONSOR_FEE)) * (1 + STRIPE_FEE)) * SalesTaxByState[company.state||"PA"]).toFixed(2).toLocaleString())}</span>
-</div>
-<div className="flex justify-between font-bold text-lg pt-2 border-t">
-  <span>Total</span>
-  <span>${calculateFinalAmount(PRICE, company.state)}</span>
-</div>
+          {
+            request.pricingModel === "FLAT" && 
+            <div className="flex justify-between">
+            <span>Partnership Fee ({SPONSOR_FEE * 100}%)</span>
+            <span>${((PRICE * SPONSOR_FEE).toFixed(2))}</span>
+            </div>
+          }
+          <div className="flex justify-between">
+          <span>Stripe Fee ({(STRIPE_FEE * 100).toFixed(1)}%)</span>
+          {request.pricingModel === "FLAT"?<span>${(((PRICE * (1 + SPONSOR_FEE)) * STRIPE_FEE).toFixed(2))}</span>
+            :<span>${((PRICE * STRIPE_FEE).toFixed(2))}</span>} 
+          </div>
+          {
+            request.pricingModel === "FLAT" &&
+            <div className="flex justify-between">
+            <span>{company.state} Sales Tax ({SalesTaxByState[company.state || "PA"] * 100}%)</span>
+            <span>${((((PRICE * (1+SPONSOR_FEE)) * (1 + STRIPE_FEE)) * SalesTaxByState[company.state||"PA"]).toFixed(2).toLocaleString())}</span>
+            </div>
+          }
+          <div className="flex justify-between font-bold text-lg pt-2 border-t">
+          <span>Total</span>
+          <span>${request.pricingModel==="FLAT"?calculateFinalAmount(PRICE, company.state):(PRICE + (PRICE * STRIPE_FEE))}</span>
+          </div>
+
           </div>
         </div>
         <p className="text-sm text-gray-500 mb-4">

@@ -757,7 +757,11 @@ export default function AdminDashboard() {
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Price After Fees (What we charged)</p>
+            <p className="text-sm text-muted-foreground">
+            {
+              selectedTransfer.pricingModel === "CPM" ? "Insurance money charged" : "Price After Fees (What we charged)"
+            }
+            </p>
                   <p className="flex items-center">
                     <DollarSign className="w-4 h-4 mr-2 text-yellow-400" />
                     ${(selectedTransfer.amountHeld/100).toLocaleString()} {"USD".toUpperCase()}
@@ -771,31 +775,58 @@ export default function AdminDashboard() {
                   </p>
                 </div>
                 <div>
+                  <p className="text-sm text-muted-foreground">What to charge the sponsor so far (after all fees)</p>
+                  <p className="flex items-center">
+                    <DollarSign className="w-4 h-4 mr-2 text-red-400" />
+                    {addFeesToCPMPrice(selectedTransfer).toFixed(2)}
+                  </p>
+                </div>
+                <div>
                   <p className="text-sm text-muted-foreground">Profit from Sponsor</p>
                   <p className="flex items-center">
                     <DollarSign className="w-4 h-4 mr-2 text-green-400" />
-                    ${(selectedTransfer.price / 100 * SPONSOR_FEE).toFixed(2)}
+                    {
+                      selectedTransfer.pricingModel === "CPM" ? (calculateCurrentCPMPrice(selectedTransfer) * SPONSOR_FEE).toFixed(2): 
+                      (selectedTransfer.price / 100 * SPONSOR_FEE).toFixed(2)
+                    }
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Amount to send to Youtuber</p>
                   <p className="flex items-center">
                     <DollarSign className="w-4 h-4 mr-2 text-pink-400" />
-                    ${((selectedTransfer.price / 100) -(selectedTransfer.price / 100 * CREATOR_FEE)).toFixed(2)}
+                    {
+                      selectedTransfer.pricingModel === "CPM" ? (calculateCurrentCPMPrice(selectedTransfer) - (calculateCurrentCPMPrice(selectedTransfer) * CREATOR_FEE)).toFixed(2):
+                      (selectedTransfer.price / 100) - (selectedTransfer.price / 100 * CREATOR_FEE).toFixed(2)
+                    }
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Profit from Youtuber</p>
                   <p className="flex items-center">
                     <DollarSign className="w-4 h-4 mr-2 text-green-400" />
-                    ${(selectedTransfer.price / 100 * CREATOR_FEE).toFixed(2)}
+            {
+              selectedTransfer.pricingModel === "CPM" ? (calculateCurrentCPMPrice(selectedTransfer) * CREATOR_FEE).toFixed(2): 
+              (selectedTransfer.price / 100 * CREATOR_FEE).toFixed(2)
+            }
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Sales Tax Due</p>
                   <p className="flex items-center">
                     <DollarSign className="w-4 h-4 mr-2 text-red-400" />
-                    ${((((selectedTransfer.price / 100 * (1 + SPONSOR_FEE)) * (1 + STRIPE_FEE)) * SalesTaxByState[selectedTransfer.state || "PA"])).toFixed(2)}
+                      {
+                      selectedTransfer.pricingModel === "CPM" ? 
+                        (calculateCurrentCPMPrice(selectedTransfer) * (1+SPONSOR_FEE) * (1+STRIPE_FEE) * SalesTaxByState[selectedTransfer.state||"PA"]).toFixed(2)
+                        :((((selectedTransfer.price / 100 * (1 + SPONSOR_FEE)) * (1 + STRIPE_FEE)) * SalesTaxByState[selectedTransfer.state || "PA"])).toFixed(2)
+                      }
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Current Views</p>
+                  <p className="flex items-center">
+                    <Eye className="w-4 h-4 mr-2 text-black-400" />
+                    {selectedTransfer.currentViews}
                   </p>
                 </div>
                 {
@@ -805,13 +836,6 @@ export default function AdminDashboard() {
                   <p className="flex items-center">
                     <DollarSign className="w-4 h-4 mr-2 text-black-400" />
                     {selectedTransfer.transaction.request.paymentCap / 100}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Current Views</p>
-                  <p className="flex items-center">
-                    <Eye className="w-4 h-4 mr-2 text-black-400" />
-                    {selectedTransfer.currentViews}
                   </p>
                 </div>
                 </div>
@@ -1001,3 +1025,17 @@ const LineGraph = ({ data, width }) => {
     </svg>
   )
 }
+function calculateCurrentCPMPrice(transfer) {
+  return Math.min(transfer.transaction.request.paymentCap / 100, parseFloat((transfer.currentViews / 1000 * transfer.price / 100).toFixed(2)));
+}
+
+function addFeesToCPMPrice(transfer) {
+  let currentAmount = calculateCurrentCPMPrice(transfer);
+  currentAmount += (SPONSOR_FEE * currentAmount);
+  currentAmount += (STRIPE_FEE * currentAmount);
+  currentAmount += (SalesTaxByState[transfer.state] * currentAmount);
+  return currentAmount;
+}
+
+
+
