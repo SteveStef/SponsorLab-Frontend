@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { User, Search,FileCheck, DollarSign, 
-  Clock, InfoIcon, CheckCircle, Copy, XCircle, Eye, Building, AlertCircle, Check, X, Calendar, Package, Info,
+  Clock, InfoIcon, CheckCircle, Copy, XCircle, Eye, AlertCircle, Check, X, Calendar, Package, Info,
   FileIcon, Link2, PlusIcon, MessageCircle, Flag,
 } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -165,6 +165,7 @@ export default function Component() {
     } else {
       toast.error("Request failed to cancel");
     }
+    setLoad(false);
   }
 
   useEffect(() => {
@@ -183,8 +184,9 @@ export default function Component() {
       await openChat(creatorEmail, requestId);
       await getRequests();
     } else {
-      toast.error("There was a problem when declining request");
+      toast.error("The payment failed. Make sure the registered card is active.");
     }
+    setLoad(false);
 
   }
 
@@ -1082,7 +1084,7 @@ function ShowButtons(props) {
           }
           <div className="flex justify-between font-bold text-lg pt-2 border-t">
           <span>Total</span>
-          <span>${request.pricingModel==="FLAT"?calculateFinalAmount(PRICE, company.state):(PRICE + (PRICE * STRIPE_FEE))}</span>
+          <span>${request.pricingModel==="FLAT"?calculateFinalAmount(PRICE, company.state):(PRICE + (PRICE * STRIPE_FEE)).toFixed(2)}</span>
           </div>
 
           </div>
