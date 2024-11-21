@@ -618,7 +618,7 @@ const tabContent = {
         <div className="space-y-4">
           <div className="flex items-center space-x-3">
             <DollarSign className="w-5 h-5 text-green-500" />
-            <p className="text-sm">Payment Cap: ${(request.paymentCap / 100).toFixed(2)}</p>
+            <p className="text-sm">Payment Cap: {request.paymentCap ? `$${(request.paymentCap / 100).toFixed(2)}` : `$${request.requestedPrice / 100}`}</p>
 <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
