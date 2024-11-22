@@ -28,6 +28,8 @@ const formatDate = (dateString) => {
   })
 }
 
+const CREATOR_FEE = parseFloat(process.env.NEXT_PUBLIC_CREATOR_FEE);
+
 export default function Component() {
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -566,7 +568,7 @@ const tabContent = {
         <div className="space-y-4">
           <div className="flex items-center space-x-3">
             <DollarSign className="w-5 h-5 text-green-500" />
-            <p className="text-sm">Payment Cap: {request.paymentCap ? `$${(request.paymentCap / 100).toFixed(2)}` : "none"}</p>
+            <p className="text-sm">Payment Cap: {request.paymentCap ? `$${(request.paymentCap / 100).toFixed(2)}` : (request.requestedPrice / 100).toFixed(2)}</p>
 <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -574,8 +576,11 @@ const tabContent = {
             </TooltipTrigger>
             <TooltipContent>
               <p className="max-w-xs text-sm">
-                The payment cap is the maximum amount you can earn for this sponsorship. 
-                Your actual earnings may be lower depending on your performance metrics.
+                {
+                  request.pricingModel === "CPM" ? 
+                  "The payment cap is the maximum amount you can earn for this sponsorship. Your actual earnings may be lower depending on your performance metrics."
+                  : "The payment cap is the maximum amount you can earn for this sponsorship."
+                }
               </p>
             </TooltipContent>
           </Tooltip>
@@ -698,7 +703,8 @@ const tabContent = {
             <div className="flex items-center space-x-2">
               <DollarSign className="w-5 h-5 text-green-500" />
               <p className="text-sm text-muted-foreground">
-                Earnings: <span className="font-bold">${(request.transaction?.transfer?.earnings || (request.requestedPrice / 100)).toLocaleString()}</span>
+                Earnings after fees: <span className="font-bold">
+      ${request.transaction?.transfer?.earnings && (request.transaction?.transfer?.earnings - request.transaction?.transfer?.earnings * CREATOR_FEE).toLocaleString() || (request.requestedPrice / 100 - request.requestedPrice / 100 * CREATOR_FEE).toLocaleString()}</span>
               </p>
             </div>
             <div className="flex items-center space-x-2">

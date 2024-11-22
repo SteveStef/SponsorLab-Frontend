@@ -435,7 +435,7 @@ export default function Component() {
                         {
                           key === "receipt" ? 
                         <ScrollArea className="h-[300px] pr-4">
-                          {content(request)}
+                          {content(request, company)}
                         </ScrollArea> :
                         key === "ongoing" ? 
                         <ScrollArea className="h-[248px] pr-4">
@@ -626,8 +626,11 @@ const tabContent = {
             </TooltipTrigger>
             <TooltipContent>
               <p className="max-w-xs text-sm">
-                The payment cap is the maximum amount you can earn for this sponsorship. 
-                Your actual earnings may be lower depending on your performance metrics.
+                {
+                  request.pricingModel === "CPM" ? 
+                  "The payment cap is the maximum amount you can earn for this sponsorship. Your actual earnings may be lower depending on your performance metrics."
+                  : "The payment cap is the maximum amount you can earn for this sponsorship."
+                }
               </p>
             </TooltipContent>
           </Tooltip>
@@ -725,7 +728,8 @@ const tabContent = {
   },
   receipt: {
     title: "Transaction Receipt",
-    content: (request)=> (
+    content: (request, company)=> (
+
     <Card className="w-full max-w-4xl">
       <CardContent className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-4">
         <div className="space-y-6">
@@ -745,7 +749,9 @@ const tabContent = {
             <div className="flex items-center space-x-2">
               <DollarSign className="w-5 h-5 text-green-500" />
               <p className="text-sm text-muted-foreground">
-                Cost: <span className="font-bold">${(request.transaction?.transfer?.earnings || (request.requestedPrice / 100)).toLocaleString()}</span>
+                Cost after fees: <span className="font-bold">
+      ${(request.transaction?.transfer?.earnings && calculateFinalAmount(request.transaction?.transfer?.earnings, company.state) 
+        || calculateFinalAmount(request.requestedPrice / 100, company.state)).toLocaleString()}</span>
               </p>
             </div>
             <div className="flex items-center space-x-2">

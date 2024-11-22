@@ -27,7 +27,7 @@ export function getTodaysDate() {
 
 export function inPast(date) {
   const dateObj = dayjs(date).tz(Intl.DateTimeFormat().resolvedOptions().timeZone);
-  return dateObj.diff(dayjs(getTodaysDate()), 'day') < 0;
+  return dateObj.diff(dayjs(getTodaysDate()), 'day') <= 0;
 }
 
 export const SalesTaxByState = {
