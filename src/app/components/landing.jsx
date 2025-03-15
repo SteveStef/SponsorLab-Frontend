@@ -341,14 +341,26 @@ export default function LandingPage() {
       </motion.section>
 
       {/* Footer */}
-      <footer className="bg-black bg-opacity-50 py-8">
-        <div className="container mx-auto px-6 text-center">
-          <div className="flex justify-center space-x-4">
-            <Link href="/terms-of-service" className="text-gray-400 hover:text-green-400">Terms of Service</Link>
-            <Link href="/privacy" className="text-gray-400 hover:text-green-400">Privacy Policy</Link>
+        <footer className="bg-black bg-opacity-50 py-12 mt-16">
+          <div className="container mx-auto px-6">
+            <div className="flex flex-col md:flex-row justify-between items-center">
+              <div className="mb-6 md:mb-0">
+                <h3 className="text-xl font-bold text-green-400 mb-2">SponsorLab</h3>
+                <p className="text-gray-400">Connecting creators and brands seamlessly</p>
+              </div>
+              <div className="flex flex-col md:flex-row gap-4 md:gap-8">
+                <Link href="/terms-of-service" className="text-gray-400 hover:text-green-400">
+                  Terms of Service
+                </Link>
+                <Link href="/privacy" className="text-gray-400 hover:text-green-400">
+                  Privacy Policy
+                </Link>
+              </div>
+            </div>
+            <div className="mt-8 pt-8 border-t border-gray-800 text-center text-gray-500">
+            </div>
           </div>
-        </div>
-      </footer>
+        </footer>
     </div>
   )
 }
