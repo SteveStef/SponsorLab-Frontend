@@ -4,21 +4,8 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, DollarSign, Search, Zap } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useState, useEffect } from "react";
-
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768)
-    }
-    handleResize()
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [])
-
-  return isMobile;
-}
+import Header from "../components/nav";
+import { useAppContext } from "@/context";
 
 function AnimatedBackground() {
   const lines = Array.from({ length: 10 }, (_, i) => (
@@ -147,8 +134,7 @@ function ConnectAnimation() {
 }
 
 export default function LandingPage() {
-  //const isMobile = useIsMobile();
-
+  const { auth } = useAppContext();
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -169,7 +155,16 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-tr from-black via-black to-green-950 text-gray-100">
-      {/* Navigation */}
+    {
+      auth ? <>
+      <Header />
+      <br></br>
+      <br></br>
+      <br></br>
+      <br></br>
+      <br></br>
+      </> : 
+
       <motion.nav
         initial={{ y: -50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -188,7 +183,9 @@ export default function LandingPage() {
           </Link>
         </div>
       </motion.nav>
+    }
 
+      {/* Navigation */}
       {/* Hero Section */}
       <motion.section
         variants={containerVariants}

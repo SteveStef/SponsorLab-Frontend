@@ -21,6 +21,7 @@ export function AppWrapper({children}) {
     const url = `${process.env.NEXT_PUBLIC_API_URL}/users/account`;
     const response = await request(url, "GET", null);
     if(!response || !response.success) {
+      setAuth(false);
       return;
     }
 
@@ -56,13 +57,13 @@ export function AppWrapper({children}) {
   }
 
   useEffect(() => {
-  setName(localStorage.getItem("name") || "");
-  setRole(localStorage.getItem("role") || "");
-  setAccountType(localStorage.getItem("accountType") || "");
-  setProfilePic(localStorage.getItem("profilePic") || "");
-  setAuth(localStorage.getItem("accountType") !== null);
-  setOrganization(localStorage.getItem("organization") || "");
-  setDescription(localStorage.getItem("description") || "");
+    setName(localStorage.getItem("name") || "");
+    setRole(localStorage.getItem("role") || "");
+    setAccountType(localStorage.getItem("accountType") || "");
+    setProfilePic(localStorage.getItem("profilePic") || "");
+    //setAuth(localStorage.getItem("accountType") !== null);
+    setOrganization(localStorage.getItem("organization") || "");
+    setDescription(localStorage.getItem("description") || "");
     fetchUser();
   },[]);
 
