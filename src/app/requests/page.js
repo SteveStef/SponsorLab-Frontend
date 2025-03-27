@@ -1,7 +1,7 @@
 "use client";
 import Header from "../components/nav"
-import Request from "@/app/components/requests";
-import SponsorRequest from "@/app/components/sponsorRequest";
+import Request from "../components/requests";
+import SponsorRequest from "../components/sponsorRequest";
 import { useAppContext } from "@/context";
 
 export default function Listings() {
